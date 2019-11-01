@@ -2,6 +2,8 @@ package javamultithread1;
 
 
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -14,7 +16,8 @@ import java.util.Date;
  * @author gkalianan
  */
 public class SyncExample {
-    private static Date lastacc; 
+  private static Date lastacc; 
+  private static volatile boolean running = true;
   public static class Thingie {
 
     private Date lastAccess;
@@ -36,21 +39,32 @@ public class SyncExample {
     }
 
     @Override
+    
     public void run() {
-      thingie.setLastAccess(new Date(),name);
+        while (running) {            
+            
+            try {
+                thingie.setLastAccess(new Date(),name);
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(SyncExample.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        System.out.println(name + " : stopped");
+      
     }
   }
 
    public static void main(String[] args) throws InterruptedException {
     //Thingie thingie1 = new Thingie();
    // Thingie thingie2 = new Thingie();
-for (int i = 0; i < 100000; i++) {
-           new MyThread(new Thingie(),"T" + Integer.toString(i)).start();
-       }
- 
-    
-    new MyThread(new Thingie(),"T2").start();
-    Thread.sleep(1000);
+for (int i = 0; i < 1000; i++) {
+           new MyThread(new Thingie(),"T " + Integer.toString(i)).start();
+       }    
+    //new MyThread(new Thingie(),"T2").start();
+    Thread.sleep(20000);
+    running = false;
     System.out.println(lastacc.toString());
       //boolean lastAccess;
        //System.err.println(lastAccess);
