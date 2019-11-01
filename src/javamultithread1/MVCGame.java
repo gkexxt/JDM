@@ -39,7 +39,9 @@ public class MVCGame implements Runnable {
     public void run() {
         JFrame f = new JFrame();
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.add(new MainPanel());
+        MainPanel Window = new MainPanel();
+        Window.AddComp();
+        f.add(Window);
         f.pack();
         f.setLocationRelativeTo(null);
         f.setVisible(true);
@@ -47,13 +49,20 @@ public class MVCGame implements Runnable {
 }
 
 class MainPanel extends JPanel {
+        View view ;
+        Control control ;
+        JLabel label  ;
 
     public MainPanel() {
         super(new BorderLayout());
         Model model = new Model();
-        View view = new View(model);
-        Control control = new Control(model, view);
-        JLabel label = new JLabel("Guess what color!", JLabel.CENTER);
+        view = new View(model);
+        control = new Control(model, view);
+        label = new JLabel();
+        
+    }
+    
+    public void AddComp(){
         this.add(label, BorderLayout.NORTH);
         this.add(view, BorderLayout.CENTER);
         this.add(control, BorderLayout.SOUTH);
@@ -71,7 +80,7 @@ class Control extends JPanel {
 
     public Control(Model model, View view) {
         this.model = model;
-        this.view = view;
+        //this.view = view;
         this.add(reset);
         reset.addActionListener(new ButtonHandler());
     }
