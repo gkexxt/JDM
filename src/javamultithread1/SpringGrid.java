@@ -26,9 +26,9 @@ public class SpringGrid {
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 int anInt = (int) Math.pow(r, c);
-                JTextField textField =
-                        new JTextField(Integer.toString(anInt));
-                panel.add(textField);
+                JLabel label =
+                        new JLabel(Integer.toString(anInt));
+                panel.add(label);
             }
         }
 
