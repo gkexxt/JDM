@@ -21,23 +21,27 @@ import java.util.logging.Logger;
 public class MainGui extends JPanel
         implements ListSelectionListener {
 
-    private JLabel dowloadTable;
+    private JLabel dowloadTable = new JLabel();
     //private JList list;
-    private DataManager Manager = new DataManager();
+    private DataManager Manager;
     private JSplitPane splitPaneHortizontal;
     private JSplitPane splitPaneVertical;
-    private JList list;
-
+    private JList list = new JList();
+//private JLabel dowloadTable
     public MainGui(DataManager Manager) {
 
         //
+        
+                //list.setModel(listModel);
+ 
         this.Manager = Manager;
-        this.list = Manager.getDownloadList();
+        this.list.setModel(Manager.getDownloadList());
         list.addListSelectionListener(this);
-
+        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        list.setSelectedIndex(0);
         //Vertical panels - downloadpane+StatusPane
         TabbedPaneDemo StatusPane = new TabbedPaneDemo();
-        dowloadTable = new JLabel();
+        
         dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
         dowloadTable.setHorizontalAlignment(JLabel.CENTER);
 
@@ -63,7 +67,7 @@ public class MainGui extends JPanel
         //Provide a preferred size for the split pane.
         splitPaneHortizontal.setPreferredSize(new Dimension(600, 400));
 
-        updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
+        //updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
 
     }
 
@@ -74,13 +78,13 @@ public class MainGui extends JPanel
             return;
         }
         updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
-        Manager.addlist("tttttt");
-        list = Manager.getDownloadList();
+        //Manager.addlist("tttttt");
+        //list = Manager.getDownloadList();
     }
 
     //Renders the selected image
     private void updateLabel(String name) {
-
+        System.out.println(name);
         //System.out.println(name);
         dowloadTable.setText(name);
 
@@ -89,9 +93,12 @@ public class MainGui extends JPanel
     public JSplitPane getMainPane() {
         return splitPaneHortizontal;
     }
+    
+        public void loadlist() {
+        //return splitPaneHortizontal;
+    }
 
     public void setDiv() {
-        //System.out.println(splitPaneHortizontal.getHeight()*0.7);
         splitPaneVertical.setDividerLocation(0.4);
         splitPaneHortizontal.setDividerLocation(0.3);
 

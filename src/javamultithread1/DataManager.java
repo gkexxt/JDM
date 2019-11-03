@@ -14,7 +14,7 @@ import javax.swing.ListSelectionModel;
  * @author gk
  */
 public class DataManager {
-    private JList list = new JList();
+    //private JList list = new JList();
     private DefaultListModel listModel = new DefaultListModel();
     //test list
     private String[] imageNames = { "Bird", "Cat", "Dog", "Rabbit", "Pig", "dukeWaveRed",
@@ -27,13 +27,11 @@ public class DataManager {
             for (String item : imageNames ) {
                 listModel.addElement(item);
             }
-        list.setModel(listModel);
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setSelectedIndex(0); 
+
         }
         
-     public JList getDownloadList() {
-        return list;
+     public DefaultListModel getDownloadList() {
+        return listModel;
     }
      
     public void addlist(String item) {
