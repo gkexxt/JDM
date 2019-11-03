@@ -42,3 +42,40 @@ public class DataManager {
     }
 
 }
+
+class DowloadListEntry {
+    
+  private final String title;
+  private final String guid;
+  private Double completion;
+  private String url;
+  
+  public DowloadListEntry(String title, String guid,String url,Double completion) {
+    this.title = title;
+    this.guid = guid;
+    this.completion = completion;
+  }
+
+  public String getTitle() {
+    return title;
+  }
+
+  public String getGuid() {
+      return guid;
+  }
+  
+   public Double getCompletion() {
+      return completion;
+  }
+   
+   public String getUrl() {
+      return url;
+  }
+   
+   
+  // Override standard toString method to give a useful result
+  @Override
+  public String toString() {
+    return title;
+  }
+}
