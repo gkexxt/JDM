@@ -3,17 +3,19 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package javamultithread1;
+package JAVADM.GUI;
 
 /**
  *Java Download manager GUI class
  * @author gk
  */
+import JAVADM.Data.DataManager;
+import JAVADM.GUI.MenuBar;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
-public class GUI extends JPanel
+public class MainFrame extends JPanel
         implements ListSelectionListener {
 
     private JLabel dowloadTable = new JLabel();//will be a table later
@@ -22,7 +24,7 @@ public class GUI extends JPanel
     private JSplitPane splitPaneVertical;
     private JList list = new JList(); //hold downlad items data
 
-    public GUI() {
+    public MainFrame() {
 
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -92,7 +94,7 @@ public class GUI extends JPanel
     }
 
     /**
-     * Create the GUI and show it.
+     * Create the MainFrame and show it.
      */
     private static void createAndShowGUI() {
         //Create and set up the stage.
@@ -102,7 +104,7 @@ public class GUI extends JPanel
         MenuBar demo = new MenuBar();
         frame.setJMenuBar(demo.createMenuBar());
         //make panels
-        GUI mainUI = new GUI();
+        MainFrame mainUI = new MainFrame();
         //add to stage
         frame.getContentPane().add(mainUI.getMainPane());
         //Display stage.
@@ -140,7 +142,7 @@ public class GUI extends JPanel
 
         } catch (ClassNotFoundException | InstantiationException
                 | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            //Logger.getLogger(GUI.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
             System.out.println(ex.toString());
         }
 

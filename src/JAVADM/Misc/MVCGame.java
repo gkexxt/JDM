@@ -1,4 +1,4 @@
-package javamultithread1;
+package JAVADM.Misc;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

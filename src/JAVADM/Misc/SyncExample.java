@@ -1,4 +1,4 @@
-package javamultithread1;
+package JAVADM.Misc;
 
 
 import java.util.Date;
