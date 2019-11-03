@@ -6,8 +6,6 @@
 package javamultithread1;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JList;
-import javax.swing.ListSelectionModel;
 
 /**
  *

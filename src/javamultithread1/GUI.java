@@ -91,7 +91,6 @@ public class GUI extends JPanel
 
     }
 
-
     /**
      * Create the GUI and show it.
      */
