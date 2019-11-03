@@ -50,6 +50,8 @@ class DowloadListEntry {
   private Double completion;
   private String url;
   
+  //to read
+  //https://dzone.com/articles/building-simple-data-access-layer-using-jdbc
   public DowloadListEntry(String title, String guid,String url,Double completion) {
     this.title = title;
     this.guid = guid;
