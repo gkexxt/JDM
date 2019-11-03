@@ -65,7 +65,7 @@ public class GUI extends JPanel
         dm.addlist("tttttt");
     }
 
-    /**Renders the selected data on tablepane label
+    /**Renders the selected data on TablePane label
     */
     private void updateLabel(String data) {
         System.out.println(data);
