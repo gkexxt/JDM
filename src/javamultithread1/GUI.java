@@ -73,7 +73,7 @@ public class GUI extends JPanel
 
     }
     
-    /**return maingui nested panes to be add in Jframe
+    /**return MAinGUI nested panes to be add in JFrame
      * 
      * @return JSplitPane
      */
