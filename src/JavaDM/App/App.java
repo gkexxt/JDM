@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package JAVADM;
+package JavaDM.App;
 
 /**
  *
  * @author gk
  */
 
-import JAVADM.Misc.MainFrame;
+import JavaDM.Misc.MainFrame;
 import javax.swing.SwingUtilities;
 
 

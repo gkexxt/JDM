@@ -1,4 +1,4 @@
-package JAVADM.Misc;
+package JavaDM.Misc;
 
 
 import java.util.Date;

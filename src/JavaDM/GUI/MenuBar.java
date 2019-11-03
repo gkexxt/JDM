@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package JAVADM.GUI;
+package JavaDM.GUI;
 
 /**
  *Java Download manager MenuBar class add a MenuBar to GUI

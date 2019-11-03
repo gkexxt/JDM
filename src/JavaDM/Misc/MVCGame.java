@@ -1,4 +1,4 @@
-package JAVADM.Misc;
+package JavaDM.Misc;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

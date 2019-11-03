@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package JAVADM.GUI;
+package JavaDM.GUI;
 
 /**
  *Java Download manager GUI class
  * @author gk
  */
-import JAVADM.Data.DataManager;
-import JAVADM.GUI.MenuBar;
+import JavaDM.Data.DataManager;
+import JavaDM.GUI.MenuBar;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.*;
