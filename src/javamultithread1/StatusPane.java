@@ -6,7 +6,7 @@
 package javamultithread1;
 
 /**
- *
+ *Tabbed status pane for JavaDM
  * @author gk
  */
 import javax.swing.JTabbedPane;
@@ -22,8 +22,8 @@ import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 
-public class TabbedPaneDemo extends JPanel {
-    public TabbedPaneDemo() {
+public class StatusPane extends JPanel {
+    public StatusPane() {
         super(new GridLayout(1, 1));
         
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -69,7 +69,7 @@ public class TabbedPaneDemo extends JPanel {
     
     /** Returns an ImageIcon, or null if the path was invalid. */
     protected static ImageIcon createImageIcon(String path) {
-        java.net.URL imgURL = TabbedPaneDemo.class.getResource(path);
+        java.net.URL imgURL = StatusPane.class.getResource(path);
         if (imgURL != null) {
             return new ImageIcon(imgURL);
         } else {
@@ -89,7 +89,7 @@ public class TabbedPaneDemo extends JPanel {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         //Add content to the window.
-        frame.add(new TabbedPaneDemo(), BorderLayout.CENTER);
+        frame.add(new StatusPane(), BorderLayout.CENTER);
         
         //Display the window.
         frame.pack();

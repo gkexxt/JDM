@@ -6,7 +6,7 @@
 package javamultithread1;
 
 /**
- *
+ *Java Download manager MenuBar class add a MenuBar to GUI
  * @author gk
  */
 import java.awt.*;
