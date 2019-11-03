@@ -5,6 +5,7 @@
  */
 package javamultithread1;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 
@@ -13,8 +14,8 @@ import javax.swing.ListSelectionModel;
  * @author gk
  */
 public class DataManager {
-    private JList list;
-    
+    private JList list = new JList();
+    private DefaultListModel listModel = new DefaultListModel();
     //test list
     private String[] imageNames = { "Bird", "Cat", "Dog", "Rabbit", "Pig", "dukeWaveRed",
         "kathyCosmo", "lainesTongue", "left", "middle", "right", "stickerface"};
@@ -22,13 +23,26 @@ public class DataManager {
         public DataManager(){ 
         //todo
          //fetch list from db -
-        list = new JList(imageNames);
+        //list = new JList(imageNames);
+            for (String item : imageNames ) {
+                listModel.addElement(item);
+            }
+        list.setModel(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0); 
         }
         
      public JList getDownloadList() {
         return list;
+    }
+     
+    public void addlist(String item) {
+       // return list;
+        //System.out.println(list.getModel().getSize());
+               
+       listModel.addElement(item);
+        //System.out.println(list.getModel().getSize());
+        //list.repaint();
     }
 
 }

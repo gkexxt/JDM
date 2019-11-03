@@ -14,19 +14,23 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class SplitPaneDemo2 extends JFrame
         implements ListSelectionListener {
 
     private JLabel label;
+    private DataManager Manager;
+    private JList list;
 
     public SplitPaneDemo2() {
         super("SplitPaneDemo2");
 
         //Create an instance of SplitPaneDemo
-        DataManager Manager = new DataManager();
-        JList list = Manager.getDownloadList();
-        SplitPaneDemo splitPaneDemo = new SplitPaneDemo(list);
+        Manager = new DataManager();
+        list = Manager.getDownloadList();
+        SplitPaneDemo splitPaneDemo = new SplitPaneDemo(Manager);
         JSplitPane top = splitPaneDemo.getSplitPane();
         list.addListSelectionListener(this);
 
@@ -34,7 +38,6 @@ public class SplitPaneDemo2 extends JFrame
         //Workaround: Set the border on any split pane within
         //another split pane to null. Components within nested split
         //panes need to have their own border for this to work well.
-        
         top.setBorder(null);
 
         //Create a regular old label
@@ -56,17 +59,19 @@ public class SplitPaneDemo2 extends JFrame
         getContentPane().add(splitPane);
     }
 
+    @Override
     public void valueChanged(ListSelectionEvent e) {
         if (e.getValueIsAdjusting()) {
+
+            //System.out.println(e.toString());
             return;
         }
 
-        JList theList = (JList) e.getSource();
-        if (theList.isSelectionEmpty()) {
+        if (list.isSelectionEmpty()) {
             label.setText("Nothing selected.");
         } else {
-            int index = theList.getSelectedIndex();
-            label.setText("Selected image number " + index);
+            //int index = theList.getSelectedIndex();
+            label.setText("Selected image number ");//+ index);
         }
     }
 
@@ -77,24 +82,35 @@ public class SplitPaneDemo2 extends JFrame
     private static void createAndShowGUI() {
         //Create and set up the window.
 
-        MenuDemo demo = new MenuDemo();
-
+        MenuBar demo = new MenuBar();
         JFrame frame = new SplitPaneDemo2();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setJMenuBar(demo.createMenuBar());
-        //frame.setContentPane(demo.createContentPane());
-        //Display the window.
         frame.pack();
         frame.setVisible(true);
     }
 
     public static void main(String[] args) {
-        //Schedule a job for the event-dispatching thread:
-        //creating and showing this application's GUI.
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                createAndShowGUI();
+        try {
+
+            //get os and use proper laf
+            String osname = System.getProperty("os.name").toLowerCase();
+            if (osname.contains("linux")) {
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
+            } else if (System.getProperty("os.name").contains("window")) {
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+            } else {
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
             }
+
+        } catch (ClassNotFoundException | InstantiationException
+                | IllegalAccessException | UnsupportedLookAndFeelException ex) {
+            Logger.getLogger(SplitPaneDemo2.class.getName()).log(Level.SEVERE, null, ex);
+            System.out.println(ex.toString());
+        }
+        //run ui/app
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            createAndShowGUI();
         });
     }
 }

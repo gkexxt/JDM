@@ -20,23 +20,25 @@ public class SplitPaneDemo extends JPanel
                           implements ListSelectionListener {
     private JLabel picture;
     //private JList list;
+    private DataManager Manager = new DataManager();
     private JSplitPane splitPane;
-    private String[] imageNames = { "Bird", "Cat", "Dog", "Rabbit", "Pig", "dukeWaveRed",
-        "kathyCosmo", "lainesTongue", "left", "middle", "right", "stickerface"};
+    private JList list;
     
-    
-    public SplitPaneDemo(JList list) {
+    public SplitPaneDemo(DataManager Manager) {
  
         //Create the list of images and put it in a scroll pane.
          
         //list = new JList(imageNames);
         //DownloadList listx = new DataManager();
         //list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        //JList list = listx.getDownloadList();
+       // DataManager 
+       this.Manager = Manager;
+         this.list = Manager.getDownloadList();
+        //list = Manager.getDownloadList();
         list.addListSelectionListener(this);
         //list.addListSelectionListener(this);
         //list.setSelectedIndex(0);
-        
+        //list.   
         JScrollPane listScrollPane = new JScrollPane(list);
         picture = new JLabel();
         picture.setFont(picture.getFont().deriveFont(Font.ITALIC));
@@ -57,24 +59,24 @@ public class SplitPaneDemo extends JPanel
  
         //Provide a preferred size for the split pane.
         splitPane.setPreferredSize(new Dimension(400, 200));
-        updateLabel(imageNames[list.getSelectedIndex()]);
+        updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
     }
      
     //Listens to the list
     public void valueChanged(ListSelectionEvent e) {
-        JList list = (JList)e.getSource();
-        updateLabel(imageNames[list.getSelectedIndex()]);
+        if(e.getValueIsAdjusting()){return;}
+        updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
+        Manager.addlist("tttttt");
+        list = Manager.getDownloadList();
     }
      
     //Renders the selected image
     protected void updateLabel (String name) {
-        ImageIcon icon = createImageIcon("images/" + name + ".gif");
-        picture.setIcon(icon);
-        if  (icon != null) {
-            picture.setText(null);
-        } else {
-            picture.setText("Image not found");
-        }
+        
+        
+        System.out.println(name);
+       picture.setText(name);
+
     }
  
    /* //Used by SplitPaneDemo2
@@ -108,9 +110,9 @@ public class SplitPaneDemo extends JPanel
         //Create and set up the window.
         JFrame frame = new JFrame("SplitPaneDemo");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        DataManager listx = new DataManager();
-        JList list = listx.getDownloadList();
-        SplitPaneDemo splitPaneDemo = new SplitPaneDemo(list);
+        DataManager Manager = new DataManager();
+        //JList list = listx.getDownloadList();
+        SplitPaneDemo splitPaneDemo = new SplitPaneDemo(Manager);
         frame.getContentPane().add(splitPaneDemo.getSplitPane());
  
         //Display the window.

@@ -25,13 +25,13 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JFrame;
  
-/* MenuDemo.java requires images/middle.gif. */
+/* MenuBar.java requires images/middle.gif. */
  
 /*
  * This class is just like MenuLookDemo, except the menu items
  * actually do something, thanks to event listeners.
  */
-public class MenuDemo implements ActionListener, ItemListener {
+public class MenuBar implements ActionListener, ItemListener {
     JTextArea output;
     JScrollPane scrollPane;
     String newline = "\n";
@@ -47,14 +47,14 @@ public class MenuDemo implements ActionListener, ItemListener {
         menuBar = new JMenuBar();
  
         //Build the first menu.
-        menu = new JMenu("A Menu");
-        menu.setMnemonic(KeyEvent.VK_A);
+        menu = new JMenu("File");
+        menu.setMnemonic(KeyEvent.VK_F);
         menu.getAccessibleContext().setAccessibleDescription(
-                "The only menu in this program that has menu items");
+                "File bla bla");
         menuBar.add(menu);
  
         //a group of JMenuItems
-        menuItem = new JMenuItem("A text-only menu item",
+        menuItem = new JMenuItem("Settings",
                                  KeyEvent.VK_T);
         //menuItem.setMnemonic(KeyEvent.VK_T); //used constructor instead
         menuItem.setAccelerator(KeyStroke.getKeyStroke(
@@ -65,12 +65,12 @@ public class MenuDemo implements ActionListener, ItemListener {
         menu.add(menuItem);
  
         ImageIcon icon = createImageIcon("images/middle.gif");
-        menuItem = new JMenuItem("Both text and icon", icon);
+        menuItem = new JMenuItem("Both text and icon");
         menuItem.setMnemonic(KeyEvent.VK_B);
         menuItem.addActionListener(this);
         menu.add(menuItem);
  
-        menuItem = new JMenuItem(icon);
+        menuItem = new JMenuItem("bbbbb");
         menuItem.setMnemonic(KeyEvent.VK_D);
         menuItem.addActionListener(this);
         menu.add(menuItem);
@@ -179,7 +179,7 @@ public class MenuDemo implements ActionListener, ItemListener {
  
     /** Returns an ImageIcon, or null if the path was invalid. */
     protected static ImageIcon createImageIcon(String path) {
-        java.net.URL imgURL = MenuDemo.class.getResource(path);
+        java.net.URL imgURL = MenuBar.class.getResource(path);
         if (imgURL != null) {
             return new ImageIcon(imgURL);
         } else {
@@ -199,7 +199,7 @@ public class MenuDemo implements ActionListener, ItemListener {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
  
         //Create and set up the content pane.
-        MenuDemo demo = new MenuDemo();
+        MenuBar demo = new MenuBar();
         frame.setJMenuBar(demo.createMenuBar());
         frame.setContentPane(demo.createContentPane());
  
