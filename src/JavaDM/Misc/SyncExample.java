@@ -18,8 +18,8 @@ import java.util.logging.Logger;
 public class SyncExample {
   private static Date lastacc; 
   private static volatile boolean running = true;
+  
   public static class Thingie {
-
     private Date lastAccess;
     private String data;
     public synchronized void setLastAccess(Date date, String datain) {
