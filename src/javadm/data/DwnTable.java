@@ -32,7 +32,7 @@ public class DwnTable extends RowTableModel<Download> {
                 "Progress",
                 "filesize",
                 "donesize",
-                    "rowlocked"
+                "rowlocked"
 
             };
     private Integer disablerow = null;
@@ -51,12 +51,11 @@ public class DwnTable extends RowTableModel<Download> {
         setColumnEditable(6, false);
         //setColumnClass(6, JProgressBar.class);
 
-
     }
-    
-    public void setRenderer(JTable table){
+
+    public void setRenderer(JTable table) {
         table.getColumn("control").setCellRenderer(new LabelRenderer());
-        table.getColumn("Progress").setCellRenderer(new ProgresRenderer());  
+        table.getColumn("Progress").setCellRenderer(new ProgresRenderer());
     }
 
     @Override
@@ -94,15 +93,15 @@ public class DwnTable extends RowTableModel<Download> {
         if (column == 0 || column == 4 || column == 6) {
             return false;
         }
-        
-        if (column == 5 || column ==9){
+
+        if (column == 5 || column == 9) {
             return true;
         }
-        
-        if (this.modelData.get(row).getDownloadtableui().isRowlocked()){
-           return false; 
+
+        if (this.modelData.get(row).getDownloadtableui().isRowlocked()) {
+            return false;
         }
-     
+
         return true;
     }
 
@@ -125,7 +124,7 @@ public class DwnTable extends RowTableModel<Download> {
                 case 8:
                     download.getData().setDoneSize(Long.parseLong(value.toString()));
                 case 9:
-                     download.getDownloadtableui().setRowlocked(Boolean.parseBoolean(value.toString()));
+                    download.getDownloadtableui().setRowlocked(Boolean.parseBoolean(value.toString()));
                     break;
                 //break;
                 default:
@@ -139,18 +138,19 @@ public class DwnTable extends RowTableModel<Download> {
 
     }
 
-    private  class LabelRenderer implements TableCellRenderer {
+    private class LabelRenderer implements TableCellRenderer {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-                       
+
             return DwnTable.this.modelData.get(row).getDownloadtableui().getLblControl();
             //System.err.println(table.getModel().getValueAt(row, column).toString());
 
         }
     }
 
-    private  class ProgresRenderer implements TableCellRenderer {
+    private class ProgresRenderer implements TableCellRenderer {
+
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             //JProgressBar progress = (JProgressBar) table.getModel().getValueAt(row, column);
@@ -159,9 +159,9 @@ public class DwnTable extends RowTableModel<Download> {
             //String lower = table.getModel().getValueAt(row, 7)+"";
             //System.out.println("JavaDM.Data.DwnTable.ProgresRenderer.getTableCellRendererComponent()")
             //System.out.println(DwnTable.this.modelData.get(row).getData().getId());
-     
+
             return DwnTable.this.modelData.get(row).getDownloadtableui().getProgressbar();
-            
+
             //return progress;
         }
     }
@@ -172,7 +172,6 @@ public class DwnTable extends RowTableModel<Download> {
         JButton three = new JButton("Three");
 
         //  Use the custom model
-        
         DwnTable model = new DwnTable();
         //table.setModel(model);
 
@@ -194,7 +193,7 @@ public class DwnTable extends RowTableModel<Download> {
             Download download = new Download();
             download.setData(data);
             download.setDownloadtableui(new DownloadTableUI());
-  
+
             int value = (int) (double) ((100.0 * download.getData().getDoneSize())
                     / download.getData().getFileSize());
             download.getDownloadtableui().setProgressBar(value);
@@ -204,12 +203,12 @@ public class DwnTable extends RowTableModel<Download> {
             model.addRow(download);
 
         }
-        
+
         JTable table = new JTable(model);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         JScrollPane scrollPane = new JScrollPane(table);
         model.setRenderer(table);
-        
+
         //TableColumnModel tcm = table.getColumnModel();
         //tcm.removeColumn(tcm.getColumn(4));
         //table.removeColumn(aColumn);
