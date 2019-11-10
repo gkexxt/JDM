@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+The MIT License
+
+Copyright 2019 gk.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+-->
+
+<project name="Datamanager" default="default" basedir=".">
+    <description>Builds, tests, and runs the project Datamanager.</description>
+    <import file="nbproject/build-impl.xml"/>
+
+   <target name="package-for-store" depends="jar">
+    <property name="store.jar.name" value="${application.title}"/>
+    
+        <!-- don't edit below this line -->
+        <property name="store.dir" value="store"/>
+        <property name="temp.dir" value="temp"/>
+        <property name="store.jar" value="${store.dir}/${store.jar.name}.jar"/>
+
+        <echo message="Packaging ${application.title} into a single JAR at ${store.jar}"/>
+
+        <delete dir="${temp.dir}"/>
+        <mkdir dir="${temp.dir}"/>
+
+        <jar destfile="${temp.dir}/temp_final.jar" filesetmanifest="skip">
+            
+            <zipgroupfileset dir="dist" includes="*.jar"/>
+            <zipgroupfileset dir="lib" includes="*.jar"/>
+
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}"/>
+            </manifest>
+        </jar>
+
+        <zip destfile="${store.jar}">
+            <zipfileset src="${temp.dir}/temp_final.jar"
+            excludes="META-INF/*.SF, META-INF/*.DSA, META-INF/*.RSA"/>
+        </zip>
+
+        <delete dir="${temp.dir}"/>
+    </target>
+    
+</project>

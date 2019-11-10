@@ -10,7 +10,7 @@ package JavaDM.App;
  * @author gk
  */
 
-import JavaDM.Misc.MainFrame;
+import javadm.com.MainFrame;
 import javax.swing.SwingUtilities;
 
 

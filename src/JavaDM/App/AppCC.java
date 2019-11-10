@@ -10,7 +10,7 @@ package JavaDM.App;
  * @author gk
  */
 
-import JavaDM.Misc.ColorChoser;
+import javadm.com.ColorChoser;
 import javax.swing.SwingUtilities;
 
 
