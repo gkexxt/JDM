@@ -37,6 +37,15 @@ public class DownloadTableUI {
     private final ImageIcon startIcon;
     private final ImageIcon stopIcon;
     private final JProgressBar progressbar;
+    private boolean rowlocked;
+
+    public boolean isRowlocked() {
+        return rowlocked;
+    }
+
+    public void setRowlocked(boolean rowlocked) {
+        this.rowlocked = rowlocked;
+    }
 
     public DownloadTableUI() {
         lblControl = new JLabel();

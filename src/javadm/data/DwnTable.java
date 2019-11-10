@@ -31,7 +31,8 @@ public class DwnTable extends RowTableModel<Download> {
                 "control",
                 "Progress",
                 "filesize",
-                "donesize"
+                "donesize",
+                    "rowlocked"
 
             };
     private Integer disablerow = null;
@@ -45,6 +46,7 @@ public class DwnTable extends RowTableModel<Download> {
         setColumnClass(6, JProgressBar.class);
         setColumnClass(7, String.class);
         setColumnClass(8, String.class);
+        setColumnClass(9, Boolean.class);
         //setColumnEditable(0, false);
         setColumnEditable(6, false);
         //setColumnClass(6, JProgressBar.class);
@@ -80,6 +82,8 @@ public class DwnTable extends RowTableModel<Download> {
                 return downnload.getData().getFileSize();
             case 8:
                 return downnload.getData().getDoneSize();
+            case 9:
+                return downnload.getDownloadtableui().isRowlocked();
             default:
                 return null;
         }
@@ -90,11 +94,15 @@ public class DwnTable extends RowTableModel<Download> {
         if (column == 0 || column == 4 || column == 6) {
             return false;
         }
-        if (disablerow == null) {
+        
+        if (column == 5 || column ==9){
             return true;
-        } else if (disablerow == row) {
-            return false;
         }
+        
+        if (this.modelData.get(row).getDownloadtableui().isRowlocked()){
+           return false; 
+        }
+     
         return true;
     }
 
@@ -116,7 +124,8 @@ public class DwnTable extends RowTableModel<Download> {
                     break;
                 case 8:
                     download.getData().setDoneSize(Long.parseLong(value.toString()));
-
+                case 9:
+                     download.getDownloadtableui().setRowlocked(Boolean.parseBoolean(value.toString()));
                     break;
                 //break;
                 default:
