@@ -35,7 +35,7 @@ import java.util.List;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class DownloadDataDaoSqlite implements DownloadDataDaoInterface {
+public class DataDaoSqlite implements DaoAPI {
 
     private Data extractDownloadDataFromResultSet(ResultSet rs) throws SQLException {
         Data downloadData = new Data();

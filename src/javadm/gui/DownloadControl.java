@@ -26,28 +26,36 @@ package javadm.gui;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
+import javax.swing.JTable;
 
 /**
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class DownloadTableUI {
+public class DownloadControl {
 
     private final JLabel lblControl;
     private final ImageIcon startIcon;
     private final ImageIcon stopIcon;
     private final JProgressBar progressbar;
     private boolean rowlocked;
+    private JTable table;
 
     public boolean isRowlocked() {
         return rowlocked;
     }
 
+    public JTable getTable() {
+        return table;
+    }
+
     public void setRowlocked(boolean rowlocked) {
         this.rowlocked = rowlocked;
     }
+    
+    
 
-    public DownloadTableUI() {
+    public DownloadControl() {
         lblControl = new JLabel();
         lblControl.setHorizontalAlignment(JLabel.CENTER);
         startIcon = new ImageIcon(new ImageIcon("play.png")
@@ -81,7 +89,7 @@ public class DownloadTableUI {
     }
 
     public void setProgressBar(int value) {
-        //System.out.println("javadm.gui.DownloadTableUI.setProgressBar()");
+        //System.out.println("javadm.gui.DownloadControl.setProgressBar()");
         progressbar.setValue(value);
         //progressbar.setStringPainted(true);
     }

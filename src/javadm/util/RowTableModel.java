@@ -3,12 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package javadm.gui;
+package javadm.util;
 
 /**
  *
  * @author G.K #gkexxt@outlook.com
  */
+import javadm.data.*;
 import java.lang.reflect.*;
 import java.util.*;
 import javax.swing.table.*;
@@ -28,7 +29,7 @@ import javax.swing.table.*;
  *  by using the various constructors, or indirectly.
  *
  */
-abstract class RowTableModel1<T> extends AbstractTableModel
+abstract public class RowTableModel<T> extends AbstractTableModel
 {
 	protected List<T> modelData;
 	protected List<String> columnNames;
@@ -47,7 +48,7 @@ abstract class RowTableModel1<T> extends AbstractTableModel
 	 *
 	 * @param rowClass  the class of row data to be added to the model
 	 */
-	protected RowTableModel1(Class rowClass)
+	protected RowTableModel(Class rowClass)
 	{
 		setRowClass( rowClass );
 	}
@@ -65,7 +66,7 @@ abstract class RowTableModel1<T> extends AbstractTableModel
 	 * @param columnNames	   <code>List</code> containing the names
 	 *							of the new columns
 	 */
-	protected RowTableModel1(List<String> columnNames)
+	protected RowTableModel(List<String> columnNames)
 	{
 		this(new ArrayList<T>(), columnNames);
 	}
@@ -88,7 +89,7 @@ abstract class RowTableModel1<T> extends AbstractTableModel
 	 * @param columnNames	   <code>List</code> containing the names
 	 *							of the new columns
 	 */
-	protected RowTableModel1(List<T> modelData, List<String> columnNames)
+	protected RowTableModel(List<T> modelData, List<String> columnNames)
 	{
 		setDataAndColumnNames(modelData, columnNames);
 	}
@@ -108,7 +109,7 @@ abstract class RowTableModel1<T> extends AbstractTableModel
 	 *						of the new columns
 	 *  @param rowClass     the class of row data to be added to the model
 	 */
-	protected RowTableModel1(List<T> modelData, List<String> columnNames, Class rowClass)
+	protected RowTableModel(List<T> modelData, List<String> columnNames, Class rowClass)
 	{
 		setDataAndColumnNames(modelData, columnNames);
 		setRowClass( rowClass );

@@ -3,13 +3,13 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package javadm.com;
+package javadm.util;
 
 /**
  *
  * @author gk
  */
-import javadm.com.SpringUtilities;
+import javadm.util.SpringUtilities;
 import javax.swing.*;
 import java.awt.*;
 

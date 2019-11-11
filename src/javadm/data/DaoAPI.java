@@ -7,10 +7,10 @@ package javadm.data;
 
 import java.util.List;
 /**
- *
+ *interface providing DAO API
  * @author gkalianan
  */
-public interface DownloadDataDaoInterface {
+public interface DaoAPI {
 
     Data getDownloadData(int id);
     List<Data> getAllDownloadData();

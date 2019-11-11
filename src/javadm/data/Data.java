@@ -24,7 +24,7 @@
 package javadm.data;
 
 /**
- *
+ *Class to hold save able data and of its method
  * @author G.K #gkexxt@outlook.com
  */
 public class Data {

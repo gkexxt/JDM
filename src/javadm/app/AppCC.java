@@ -3,18 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package JavaDM.App;
+package javadm.app;
 
 /**
  *
  * @author gk
  */
 
-import javadm.com.MainFrame;
+import javadm.util.ColorChoser;
 import javax.swing.SwingUtilities;
 
 
-public class App {
+public class AppCC {
 
     /**
      * @param args
@@ -24,7 +24,7 @@ public class App {
             
             @Override
             public void run() {
-                new MainFrame("SwingWorker Demo");
+                new ColorChoser("ColorChoser Demo");
             }
         });
     }

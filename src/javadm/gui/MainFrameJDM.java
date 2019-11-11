@@ -9,7 +9,7 @@ package javadm.gui;
  *Java Download manager GUI class
  * @author gk
  */
-import javadm.data.DataManager;
+import javadm.misc.DataManager;
 //import JavaDM.GUI.MenuBar;
 import java.awt.*;
 import javax.swing.*;

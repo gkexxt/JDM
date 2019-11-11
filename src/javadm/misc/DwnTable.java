@@ -3,16 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package javadm.data;
+package javadm.misc;
 
 /**
  *
  * @author G.K #gkexxt@outlook.com
  */
+import javadm.misc.RowTableModel;
+import javadm.com.Download;
 import java.util.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import javadm.gui.DownloadTableUI;
+import javadm.data.Data;
+import javadm.data.DataDaoSqlite;
+import javadm.gui.DownloadControl;
 import javax.swing.*;
 import javax.swing.JProgressBar;
 import javax.swing.table.TableCellRenderer;
@@ -178,7 +182,7 @@ public class DwnTable extends RowTableModel<Download> {
         //  Use the BeanTableModel  
 //		BeanTableModel<JButton> model =
 //			new BeanTableModel<JButton>(JButton.class, java.awt.Component.class);
-        DownloadDataDaoSqlite db = new DownloadDataDaoSqlite();
+        DataDaoSqlite db = new DataDaoSqlite();
 
         //System.out.println();
         List<Data> datas = new ArrayList<>();
@@ -192,7 +196,7 @@ public class DwnTable extends RowTableModel<Download> {
             Data data = datas.get(i);
             Download download = new Download();
             download.setData(data);
-            download.setDownloadtableui(new DownloadTableUI());
+            download.setDownloadtableui(new DownloadControl());
 
             int value = (int) (double) ((100.0 * download.getData().getDoneSize())
                     / download.getData().getFileSize());
@@ -236,7 +240,7 @@ public class DwnTable extends RowTableModel<Download> {
                 downloadx = downloads.get(1);
                 downloadx.getData().setDoneSize(downloadx.getData().getDoneSize() + 1);
                 //model.fireTableRowsUpdated(0, table.getRowCount() - 1);
-                //downloadx.setDownloadtableui(new DownloadTableUI());
+                //downloadx.setDownloadtableui(new DownloadControl());
                 int value = (int) (double) ((100.0 * downloadx.getData().getDoneSize())
                         / downloadx.getData().getFileSize());
                 //System.out.println(value);

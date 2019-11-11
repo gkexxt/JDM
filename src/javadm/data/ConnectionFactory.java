@@ -6,7 +6,7 @@
 package javadm.data;
 
 /**
- *
+ *Class providing connection for db
  * @author gkalianan
  */
 import java.sql.Connection;

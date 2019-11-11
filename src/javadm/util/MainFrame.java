@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package javadm.com;
+package javadm.util;
 
 /**
  *
@@ -24,28 +24,28 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.SwingWorker;
 
-public class ColorChoser extends JFrame {
+public class MainFrame extends JFrame {
 
     private JLabel countLabel1 = new JLabel("0");
     private JLabel statusLabel = new JLabel("Task not completed.");
-    private JButton startButton = new JButton("Choose");
+    private JButton startButton = new JButton("Start");
+    private JButton stopButton = new JButton("Stop");
     private JPanel panel_l = new JPanel();
-    private JFrame parentx ;
+    
     private volatile boolean stop = false;
 
-    public ColorChoser(String title) {
-        parentx = this;
-        parentx.setUndecorated(true);
-        
+    public MainFrame(String title) {
+        super(title);
                addMouseListener(new java.awt.event.MouseAdapter() {
             public void mousePressed(java.awt.event.MouseEvent evt) {
                 formMousePressed(evt);
             }
 
-
+            private void formMousePressed(MouseEvent evt) {
+                //System.exit(0); //To change body of generated methods, choose Tools | Templates.
+            }
         });
         setLayout(new GridBagLayout());
 
@@ -69,40 +69,26 @@ public class ColorChoser extends JFrame {
         gc.gridx = 1;
         gc.gridy = 2;
         add(startButton, gc);
+        
+        gc.gridx = 2;
+        gc.gridy = 2;
+        add(stopButton, gc);
 
         startButton.addActionListener((ActionEvent arg0) -> {
             stop = false;
-            start(parentx);
+            start();
         });
 
-  
+        stopButton.addActionListener((ActionEvent arg0) -> {
+            stop = true;
+        });
 
         setSize(200, 400);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setVisible(true);
     }
-    
-                private void formMousePressed(MouseEvent evt) {
-                //System.exit(0); //To change body of generated methods, choose Tools | Templates.
-                if (stop){
-                    stop = false; start(parentx);//return;
-                    //ColorChoser.setDefaultLookAndFeelDecorated(true);
-                    parentx.setUndecorated(false);
-                    return;
-                    //getRootPane().setWindowDecorationStyle(JRootPane.NONE);
-                }
-                else{
-                //System.out.println(evt.getSource());
-                int x = MouseInfo.getPointerInfo().getLocation().x;
-                int y = MouseInfo.getPointerInfo().getLocation().y;
-                    System.out.println("X : "+x+" Y : "+y);
-                parentx.setLocation(x-parentx.getWidth()/2, y-parentx.getHeight()/2);
-                stop = true;
-                parentx.setUndecorated(true);
-                }
-            }
 
-    private void start(JFrame parentx) {
+    private void start() {
 
         // Use SwingWorker<Void, Void> and return null from doInBackground if
         // you don't want any final result and you don't want to update the GUI
@@ -142,9 +128,8 @@ public class ColorChoser extends JFrame {
             // Can safely update the GUI here.
             protected void process(List<Point> chunks) {
                 Point value = chunks.get(chunks.size() - 1);
-                parentx.setLocation(value.x-parentx.getWidth()/2,value.y-parentx.getHeight()/2);
-                
-                //countLabel1.setText("Current value: " + value);
+
+                countLabel1.setText("Current value: " + value);
             }
 
             @Override

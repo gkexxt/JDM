@@ -1,4 +1,4 @@
-package javadm.com;
+package javadm.util;
 
 /*
  * To change this license header, choose License Headers in Project Properties.

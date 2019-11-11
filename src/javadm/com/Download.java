@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.data;
+package javadm.com;
 
-import javadm.gui.DownloadTableUI;
+import javadm.data.Data;
+import javadm.gui.DownloadControl;
 
 /**
- *
+ *collection of data +  controls
  * @author G.K #gkexxt@outlook.com
  */
 public class Download {
@@ -34,14 +35,14 @@ public class Download {
     private Data data;
     private boolean start;
 
-    public DownloadTableUI getDownloadtableui() {
+    public DownloadControl getDownloadtableui() {
         return downloadtableui;
     }
 
-    public void setDownloadtableui(DownloadTableUI downloadtableui) {
+    public void setDownloadtableui(DownloadControl downloadtableui) {
         this.downloadtableui = downloadtableui;
     }
-    private  DownloadTableUI downloadtableui;
+    private  DownloadControl downloadtableui;
 
     public Data getData() {
         return data;
@@ -52,7 +53,7 @@ public class Download {
     }
 
     public Download() {
-        //downloadtableui = new DownloadTableUI();
+        //downloadtableui = new DownloadControl();
     }
 
     public boolean isStart() {
