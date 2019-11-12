@@ -10,7 +10,7 @@ package javadm.app;
  * @author gk
  */
 
-import javadm.gui.DownloadMainFrame;
+import javadm.gui.MainFrame;
 import javax.swing.SwingUtilities;
 
 
@@ -22,8 +22,8 @@ public class App {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
             //new ColorChoser("ColorChoser Demo");
-            DownloadMainFrame main;
-            main = new DownloadMainFrame();
+            MainFrame main;
+            main = new MainFrame();
             main.createAndShowGUI();
             main.refreshTable();
         });
