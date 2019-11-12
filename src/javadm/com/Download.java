@@ -57,7 +57,7 @@ public class Download {
         return start;
     }
 
-    public synchronized void setProgress(long donesize) {
+    public  void setProgress(long donesize) {
         try {
             data.setDoneSize(donesize);
             int value = (int) (double) ((100.0 * data.getDoneSize())
@@ -86,7 +86,7 @@ public class Download {
 
     private void StartDownload() {
        DownloadWorker t1 = new DownloadWorker("thread 1", this);
-       DownloadWorker t2 = new DownloadWorker("thread 2", this);
+       //DownloadWorker t2 = new DownloadWorker("thread 2", this);
         //DownloadWorker t3 = new DownloadWorker("thread 4", this);
         t1.start();
         //t2.start();

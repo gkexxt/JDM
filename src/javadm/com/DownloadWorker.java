@@ -23,9 +23,6 @@
  */
 package javadm.com;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  *
  * @author gkalianan
@@ -52,7 +49,7 @@ public class DownloadWorker implements Runnable {
         while(download.isStart()){
             try {
                 download.setProgress(download.getData().getDoneSize() + 1);
-                Thread.sleep(1);
+                Thread.sleep(0);
             } catch (InterruptedException ex) {
                 System.err.println(ex.toString()+"\n"+ex.toString());
             }
