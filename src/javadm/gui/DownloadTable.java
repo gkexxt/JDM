@@ -33,8 +33,8 @@ import javax.swing.table.TableCellRenderer;
  */
 public class DownloadTable extends JTable {
     
-    private  DownloadTableModel dm;
-    public DownloadTable(DownloadTableModel dm) {
+    private  TableModel dm;
+    public DownloadTable(TableModel dm) {
         super(dm);
         this.dm = dm;
         getColumn("control").setCellRenderer(new LabelRenderer());
@@ -45,7 +45,7 @@ public class DownloadTable extends JTable {
     }  
 
  
-    public void setModelxx(DownloadTableModel dataModelx) {
+    public void setModelxx(TableModel dataModelx) {
         super.setModel(dataModelx); //To change body of generated methods, choose Tools | Templates.
         this.dm = dataModelx;
         this.getModel().notifyAll();

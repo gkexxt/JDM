@@ -53,11 +53,11 @@ public class Download {
         this.data = data;
     }
 
-    public boolean isStart() {
+    public  boolean isStart() {
         return start;
     }
 
-    public void setProgress(long donesize) {
+    public synchronized void setProgress(long donesize) {
         try {
             data.setDoneSize(donesize);
             int value = (int) (double) ((100.0 * data.getDoneSize())
@@ -85,10 +85,11 @@ public class Download {
     }
 
     private void StartDownload() {
-        DownloadWorker t1 = new DownloadWorker("thread 1", this);
-       // DownloadWorker t2 = new DownloadWorker("thread 2", this);
+       DownloadWorker t1 = new DownloadWorker("thread 1", this);
+       DownloadWorker t2 = new DownloadWorker("thread 2", this);
         //DownloadWorker t3 = new DownloadWorker("thread 4", this);
         t1.start();
+        //t2.start();
     }
 
     private void StopDownload() {

@@ -33,7 +33,7 @@ import javax.swing.JProgressBar;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class DownloadTableModel extends RowTableModel<Download> {
+public class TableModel extends RowTableModel<Download> {
     //private static int  xxx = 0;
 
     private static String[] COLUMN_NAMES
@@ -50,7 +50,7 @@ public class DownloadTableModel extends RowTableModel<Download> {
 
             };
 
-    DownloadTableModel() {
+    TableModel() {
         super(Arrays.asList(COLUMN_NAMES));
         setRowClass(Download.class);
 

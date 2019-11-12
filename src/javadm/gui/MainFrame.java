@@ -6,35 +6,59 @@
 package javadm.gui;
 
 /**
- *Java Download manager GUI class
+ * Java Download manager GUI class
+ *
  * @author gk
  */
 import javadm.misc.DataManager;
-import javadm.gui.MenuBar;
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.TimerTask;
+import javadm.com.Download;
+import javadm.data.Data;
+import javadm.data.DataDaoSqlite;
 import javax.swing.*;
 import javax.swing.event.*;
 
-public class MainFrame extends JPanel
+public class MainFrame extends JFrame
         implements ListSelectionListener {
 
-    private JLabel dowloadTable = new JLabel();//will be a table later
-    private DataManager dm = new DataManager();//data manager handle items data
-    private JSplitPane splitPaneHortizontal;
-    private JSplitPane splitPaneVertical;
-    private JList list = new JList(); //hold downlad items data
+    //private JLabel dowloadTable = new JLabel();//will be a table later
+    private final DataManager dm = new DataManager();//data manager handle items data
+    private final JSplitPane splitPaneHortizontal;
+    private final JSplitPane splitPaneVertical;
+    private final JList list = new JList(); //hold downlad items data
+    private final DownloadTable table;
+    private static TableModel model;
 
     public MainFrame() {
-
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
 
+        model = new TableModel();
+        DataDaoSqlite db = new DataDaoSqlite();
+        java.util.List<Data> datas = new ArrayList<>();
+        datas.addAll(db.getAllDownloadData());
+        //List<Download> downloads = new ArrayList<>();
+
+        for (int i = 0; i < datas.size(); i++) {
+            Data data = datas.get(i);
+            Download download = new Download();
+            download.setData(data);
+            download.setDownloadControl(new DownloadControl());
+            download.setProgress(download.getData().getDoneSize());
+            model.addRow(download);
+        }
+
+        table = new DownloadTable(model);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        //frame.getContentPane().
         //Vertical panels - downloadpane+StatusPane
         StatusPane StatusPane = new StatusPane();
-        dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
-        dowloadTable.setHorizontalAlignment(JLabel.CENTER);
-        JScrollPane downloadPane = new JScrollPane(dowloadTable);
+        //dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
+        //dowloadTable.setHorizontalAlignment(JLabel.CENTER);
+        JScrollPane downloadPane = new JScrollPane(table);
         splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 downloadPane, StatusPane);
         splitPaneVertical.setBorder(null);//need for nesting panel - remove double border
@@ -53,6 +77,7 @@ public class MainFrame extends JPanel
         //Provide a preferred size for the split pane.
         splitPaneHortizontal.setPreferredSize(new Dimension(600, 400));
 
+        //createAndShowGUI();
         //updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
     }
 
@@ -62,31 +87,27 @@ public class MainFrame extends JPanel
         if (e.getValueIsAdjusting()) {
             return;
         }
-        updateLabel(this.list.getModel()
-                .getElementAt(list.getSelectedIndex()).toString());
+
         dm.addlist("tttttt");
     }
 
-    /**Renders the selected data on TablePane label
-    */
-    private void updateLabel(String data) {
-        System.out.println(data);
-        dowloadTable.setText(data);
-
-    }
-    
-    /**return MAinGUI nested panes to be add in JFrame
-     * 
+    /**
+     * Renders the selected data on TablePane label
+     */
+    /**
+     * return MAinGUI nested panes to be add in JFrame
+     *
      * @return JSplitPane
      */
     public JSplitPane getMainPane() {
         return splitPaneHortizontal;
     }
-    
-   /** set split panes division position by ratio call after panel/frame after 
-    * realized
-    * 
-    */
+
+    /**
+     * set split panes division position by ratio call after panel/frame after
+     * realized
+     *
+     */
     public void setDiv() { //set panes divisor position
         splitPaneVertical.setDividerLocation(0.4);
         splitPaneHortizontal.setDividerLocation(0.3);
@@ -96,7 +117,7 @@ public class MainFrame extends JPanel
     /**
      * Create the MainFrame and show it.
      */
-    private static void createAndShowGUI() {
+    public void createAndShowGUI() {
         //Create and set up the stage.
         JFrame frame = new JFrame("JAVA Download Manager");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -108,13 +129,26 @@ public class MainFrame extends JPanel
         //add to stage
         frame.getContentPane().add(mainUI.getMainPane());
         //Display stage.
+
         frame.pack();
         frame.setVisible(true);
         //add lisner for the selection list --ide compalining when doit in constructor why?
         mainUI.list.addListSelectionListener(mainUI);
         //set div for split panes -for artio 0-1 must be done after panes are realized?
         mainUI.setDiv();
-        
+
+    }
+
+    public void refreshTable() {
+        java.util.Timer t = new java.util.Timer();
+        TimerTask tt;
+        tt = new TimerTask() {
+            @Override
+            public void run() {
+                model.fireTableRowsUpdated(0, model.getRowCount() - 1);
+            }
+        };
+        t.scheduleAtFixedRate(tt, 0, 100);
     }
 
     public static void main(String[] args) {
@@ -137,7 +171,8 @@ public class MainFrame extends JPanel
 
             //run ui/app
             javax.swing.SwingUtilities.invokeLater(() -> {
-                createAndShowGUI();
+                //createAndShowGUI();
+
             });
 
         } catch (ClassNotFoundException | InstantiationException
