@@ -23,6 +23,9 @@
  */
 package javadm.com;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 /**
  *
  * @author gkalianan
@@ -47,16 +50,11 @@ public class DownloadWorker implements Runnable {
     @Override
     public void run() {        
         while(download.isStart()){
-            try {
-                download.setProgress(download.getData().getDoneSize() + 1);
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                System.err.println("Download thread interupted");
-            }
-            
-            System.err.println("Download thread exiting while");
+            download.setProgress(download.getData().getDoneSize() + 1);
+            //Thread.sleep(1);
         }
         
+        //System.err.println("Download thread exiting while");
     }
 
 }

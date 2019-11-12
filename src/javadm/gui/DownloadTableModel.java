@@ -21,10 +21,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.com;
+package javadm.gui;
 
 import javadm.util.RowTableModel;
 import java.util.*;
+import javadm.com.Download;
 import javax.swing.*;
 import javax.swing.JProgressBar;
 
@@ -46,7 +47,6 @@ public class DownloadTableModel extends RowTableModel<Download> {
                 "Progress",
                 "filesize",
                 "donesize",
-                "rowlocked"
 
             };
 

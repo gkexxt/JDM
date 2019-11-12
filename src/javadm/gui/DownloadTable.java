@@ -24,7 +24,6 @@
 package javadm.gui;
 
 import java.awt.Component;
-import javadm.com.DownloadTableModel;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 

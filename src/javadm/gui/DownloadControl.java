@@ -25,11 +25,11 @@ package javadm.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
-import javax.swing.UIManager;
 
 /**
  *
@@ -59,6 +59,7 @@ Dimension x = new Dimension(10,300);
     
 
     public DownloadControl() {
+        
         lblControl = new JLabel();
         lblControl.setHorizontalAlignment(JLabel.CENTER);
         startIcon = new ImageIcon(new ImageIcon("play.png")
@@ -73,6 +74,8 @@ Dimension x = new Dimension(10,300);
         //progressbar.setValue(0);
         progressbar.setBorderPainted(false);
         progressbar.setBackground(Color.WHITE);
+        //Font = new Font
+        lblControl.setFont(new Font(lblControl.getName(), Font.PLAIN, 18));
     }
 
     public JProgressBar getProgressbar() {

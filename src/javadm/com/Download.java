@@ -85,7 +85,10 @@ public class Download {
     }
 
     private void StartDownload() {
-        System.out.println("JavaDM.Data.DownloadData.StartDownload()");
+        DownloadWorker t1 = new DownloadWorker("thread 1", this);
+       // DownloadWorker t2 = new DownloadWorker("thread 2", this);
+        //DownloadWorker t3 = new DownloadWorker("thread 4", this);
+        t1.start();
     }
 
     private void StopDownload() {
