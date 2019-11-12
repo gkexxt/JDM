@@ -27,22 +27,23 @@ import javadm.data.Data;
 import javadm.gui.DownloadControl;
 
 /**
- *collection of data +  controls
+ * collection of data + controls
+ *
  * @author G.K #gkexxt@outlook.com
  */
 public class Download {
 
     private Data data;
     private boolean start;
+    private DownloadControl downloadControl;
 
-    public DownloadControl getDownloadtableui() {
-        return downloadtableui;
+    public DownloadControl getDownloadControl() {
+        return downloadControl;
     }
 
-    public void setDownloadtableui(DownloadControl downloadtableui) {
-        this.downloadtableui = downloadtableui;
+    public void setDownloadControl(DownloadControl downloadControl) {
+        this.downloadControl = downloadControl;
     }
-    private  DownloadControl downloadtableui;
 
     public Data getData() {
         return data;
@@ -52,24 +53,30 @@ public class Download {
         this.data = data;
     }
 
-    public Download() {
-        //downloadtableui = new DownloadControl();
-    }
-
     public boolean isStart() {
         return start;
+    }
+
+    public void setProgress(long donesize) {
+        try {
+            data.setDoneSize(donesize);
+            int value = (int) (double) ((100.0 * data.getDoneSize())
+                    / data.getFileSize());
+            this.downloadControl.getProgressbar().setValue(value);
+        } catch (Exception e) {
+        }
     }
 
     public void setStart(boolean startx) {
         this.start = startx;
         //System.out.println("javadm.data.Download.setStart()");
         //System.out.println(start);
-        this.downloadtableui.setLblControl(start);
-        this.downloadtableui.setRowlocked(start);
+        this.downloadControl.setLblControl(start);
+        this.downloadControl.setRowlocked(start);
         if (start) {
-            
+
             StartDownload();
-            
+
         } else {
 
             StopDownload();

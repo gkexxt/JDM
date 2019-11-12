@@ -81,9 +81,9 @@ public class DownloadTableModel extends RowTableModel<Download> {
             case 4:
                 return downnload.getData().getUrl();
             case 5:
-                return downnload.getDownloadtableui().getLblControl();
+                return downnload.getDownloadControl().getLblControl();
             case 6:
-                return downnload.getDownloadtableui().getProgressbar();
+                return downnload.getDownloadControl().getProgressbar();
             case 7:
                 return downnload.getData().getFileSize();
             case 8:
@@ -103,7 +103,7 @@ public class DownloadTableModel extends RowTableModel<Download> {
             return true;
         }
 
-        if (this.modelData.get(row).getDownloadtableui().isRowlocked()) {
+        if (this.modelData.get(row).getDownloadControl().isRowlocked()) {
             return false;
         }
 

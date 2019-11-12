@@ -78,15 +78,15 @@ public class DwnTable extends RowTableModel<Download> {
             case 4:
                 return downnload.getData().getUrl();
             case 5:
-                return downnload.getDownloadtableui().getLblControl();
+                return downnload.getDownloadControl().getLblControl();
             case 6:
-                return downnload.getDownloadtableui().getProgressbar();
+                return downnload.getDownloadControl().getProgressbar();
             case 7:
                 return downnload.getData().getFileSize();
             case 8:
                 return downnload.getData().getDoneSize();
             case 9:
-                return downnload.getDownloadtableui().isRowlocked();
+                return downnload.getDownloadControl().isRowlocked();
             default:
                 return null;
         }
@@ -102,7 +102,7 @@ public class DwnTable extends RowTableModel<Download> {
             return true;
         }
 
-        if (this.modelData.get(row).getDownloadtableui().isRowlocked()) {
+        if (this.modelData.get(row).getDownloadControl().isRowlocked()) {
             return false;
         }
 
@@ -128,7 +128,7 @@ public class DwnTable extends RowTableModel<Download> {
                 case 8:
                     download.getData().setDoneSize(Long.parseLong(value.toString()));
                 case 9:
-                    download.getDownloadtableui().setRowlocked(Boolean.parseBoolean(value.toString()));
+                    download.getDownloadControl().setRowlocked(Boolean.parseBoolean(value.toString()));
                     break;
                 //break;
                 default:
@@ -147,7 +147,7 @@ public class DwnTable extends RowTableModel<Download> {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-            return DwnTable.this.modelData.get(row).getDownloadtableui().getLblControl();
+            return DwnTable.this.modelData.get(row).getDownloadControl().getLblControl();
             //System.err.println(table.getModel().getValueAt(row, column).toString());
 
         }
@@ -164,7 +164,7 @@ public class DwnTable extends RowTableModel<Download> {
             //System.out.println("JavaDM.Data.DwnTable.ProgresRenderer.getTableCellRendererComponent()")
             //System.out.println(DwnTable.this.modelData.get(row).getData().getId());
 
-            return DwnTable.this.modelData.get(row).getDownloadtableui().getProgressbar();
+            return DwnTable.this.modelData.get(row).getDownloadControl().getProgressbar();
 
             //return progress;
         }
@@ -196,11 +196,11 @@ public class DwnTable extends RowTableModel<Download> {
             Data data = datas.get(i);
             Download download = new Download();
             download.setData(data);
-            download.setDownloadtableui(new DownloadControl());
+            download.setDownloadControl(new DownloadControl());
 
             int value = (int) (double) ((100.0 * download.getData().getDoneSize())
                     / download.getData().getFileSize());
-            download.getDownloadtableui().setProgressBar(value);
+            download.getDownloadControl().setProgressBar(value);
 
             downloads.add(download);
             //lstdtb.add(new Download().setDdata(datas.get(i)));
@@ -220,7 +220,7 @@ public class DwnTable extends RowTableModel<Download> {
         south.add(one);
         south.add(two);
         south.add(three);
-        south.add(downloads.get(0).getDownloadtableui().getProgressbar());
+        south.add(downloads.get(0).getDownloadControl().getProgressbar());
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(scrollPane);
@@ -244,7 +244,7 @@ public class DwnTable extends RowTableModel<Download> {
                 int value = (int) (double) ((100.0 * downloadx.getData().getDoneSize())
                         / downloadx.getData().getFileSize());
                 //System.out.println(value);
-                downloadx.getDownloadtableui().setProgressBar(value);
+                downloadx.getDownloadControl().setProgressBar(value);
                 model.fireTableRowsUpdated(0, model.getRowCount() - 1);
                 //frame.repaint();
             }

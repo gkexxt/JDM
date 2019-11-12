@@ -23,7 +23,6 @@
  */
 package javadm.com;
 
-import java.awt.BorderLayout;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TimerTask;
@@ -31,9 +30,7 @@ import javadm.data.Data;
 import javadm.data.DataDaoSqlite;
 import javadm.gui.DownloadControl;
 import javadm.gui.DownloadTable;
-import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
@@ -42,79 +39,35 @@ import javax.swing.JTable;
  * @author G.K #gkexxt@outlook.com
  */
 public class DownloadManager {
-
+    
     public static void main(String[] args) {
-        JButton one = new JButton("One");
-        JButton two = new JButton("Two");
-        JButton three = new JButton("Three");
         DownloadTableModel model = new DownloadTableModel();
-        DownloadTableModel model2 = new DownloadTableModel();
-        DownloadTableModel model3 = new DownloadTableModel();
-        //  Use the custom model
-        //table.setModel(model);
-
-        //  Use the BeanTableModel  
-//		BeanTableModel<JButton> model =
-//			new BeanTableModel<JButton>(JButton.class, java.awt.Component.class);
         DataDaoSqlite db = new DataDaoSqlite();
-
-        //System.out.println();
         List<Data> datas = new ArrayList<>();
         datas.addAll(db.getAllDownloadData());
-        List<Download> downloads = new ArrayList<>();
-        //DownloadTableData dtb = 
-        //dtb.a
-        //System.err.println(datas.get(0).getLblControl().toString());
+        //List<Download> downloads = new ArrayList<>();
+        
         for (int i = 0; i < datas.size(); i++) {
-            //String arg = args[i];
             Data data = datas.get(i);
             Download download = new Download();
             download.setData(data);
-            download.setDownloadtableui(new DownloadControl());
-
-            int value = (int) (double) ((100.0 * download.getData().getDoneSize())
-                    / download.getData().getFileSize());
-            download.getDownloadtableui().setProgressBar(value);
-
-            downloads.add(download);
-            //lstdtb.add(new Download().setDdata(datas.get(i)));
+            download.setDownloadControl(new DownloadControl());
+            download.setProgress(download.getData().getDoneSize());
+            //downloads.add(download);
             model.addRow(download);
-            model2.addRow(download);
-            model3.addRow(download);
-
         }
-
-        model2.removeRowRange(2, 3);
-        model3.removeRowRange(0, 1);
-
+        
         DownloadTable table = new DownloadTable(model);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         JScrollPane scrollPane = new JScrollPane(table);
-        //model.setRenderer(table);
-
-        //TableColumnModel tcm = table.getColumnModel();
-        //tcm.removeColumn(tcm.getColumn(4));
-        //table.removeColumn(aColumn);
-        JPanel south = new JPanel();
-        south.add(one);
-        south.add(two);
-        south.add(three);
-        //south.add(downloads.get(0).getDownloadtableui().getProgressbar());
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(scrollPane);
-        frame.getContentPane().add(south, BorderLayout.SOUTH);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-
-        DownloadWorker t1 = new DownloadWorker("thread 1", downloads.get(0));
-        DownloadWorker t2 = new DownloadWorker("thread 2", downloads.get(1));
-        DownloadWorker t3 = new DownloadWorker("thread 4", downloads.get(2));
-        t1.start();
-        t2.start();
-        t3.start();
-
+ 
+        
         java.util.Timer t = new java.util.Timer();
         TimerTask tt;
         tt = new TimerTask() {
@@ -124,7 +77,7 @@ public class DownloadManager {
             }
         };
         t.scheduleAtFixedRate(tt, 50, 50);
-
+        
     }
-
+    
 }

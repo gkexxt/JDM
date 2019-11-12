@@ -23,8 +23,6 @@
  */
 package javadm.com;
 
-import java.util.TimerTask;
-
 /**
  *
  * @author gkalianan
@@ -47,39 +45,18 @@ public class DownloadWorker implements Runnable {
     }
 
     @Override
-    public void run() {
-        java.util.Timer timer = new java.util.Timer();
-        TimerTask tt = new TimerTask() {
-            @Override
-            public void run() {
-
-                //studentSet.get(0).setDoneSize(datas.get(0).getDoneSize()+1);
-                //downloads.get(0).setProgressBar();
-                Download downloadx;
-                downloadx = download;
-                downloadx.getData().setDoneSize(downloadx.getData().getDoneSize() + 1);
-                //model.fireTableRowsUpdated(0, table.getRowCount() - 1);
-                //downloadx.setDownloadtableui(new DownloadControl());
-                int value = (int) (double) ((100.0 * downloadx.getData().getDoneSize())
-                        / downloadx.getData().getFileSize());
-                //System.out.println(value);
-
-//                if (value > 50 && value < 70){
-//                    table.setModel(model2);
-//                    table.repaint();
-//                }else if (value > 70){
-//                  table.setModel(model2);
-//                  table.repaint();
-//                }
-                downloadx.getDownloadtableui().setProgressBar(value);
-// model.fireTableRowsUpdated(0, model.getRowCount() - 1);
-//table.getModel().
-//frame.repaint();
+    public void run() {        
+        while(download.isStart()){
+            try {
+                download.setProgress(download.getData().getDoneSize() + 1);
+                Thread.sleep(1000);
+            } catch (InterruptedException ex) {
+                System.err.println("Download thread interupted");
             }
-
-        };
-        timer.scheduleAtFixedRate(tt, 50, 50);
-        System.out.println(name + " exiting.");
+            
+            System.err.println("Download thread exiting while");
+        }
+        
     }
 
 }
