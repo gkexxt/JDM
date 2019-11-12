@@ -23,17 +23,20 @@
  */
 package javadm.gui;
 
+import java.awt.Color;
+import java.awt.Dimension;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 
 /**
  *
  * @author G.K #gkexxt@outlook.com
  */
 public class DownloadControl {
-
+Dimension x = new Dimension(10,300);
     private final JLabel lblControl;
     private final ImageIcon startIcon;
     private final ImageIcon stopIcon;
@@ -62,10 +65,14 @@ public class DownloadControl {
                 .getImage().getScaledInstance(20, 20, java.awt.Image.SCALE_DEFAULT));
         stopIcon = new ImageIcon(new ImageIcon("stop.png")
                 .getImage().getScaledInstance(20, 20, java.awt.Image.SCALE_DEFAULT));
-        lblControl.setIcon(startIcon);
+        //lblControl.setIcon(startIcon);
+        lblControl.setText("\u25B6");
+        lblControl.setForeground(Color.GREEN);
         progressbar = new JProgressBar(0, 100);
         progressbar.setStringPainted(true);
-        progressbar.setValue(50);
+        //progressbar.setValue(0);
+        progressbar.setBorderPainted(false);
+        progressbar.setBackground(Color.WHITE);
     }
 
     public JProgressBar getProgressbar() {
@@ -81,10 +88,14 @@ public class DownloadControl {
         System.err.println(startx);
         if (startx) {
             System.out.println("start");
-            lblControl.setIcon(stopIcon);
+            lblControl.setForeground(Color.red);
+            lblControl.setText("\u25A0");
+            
         } else {
-            lblControl.setIcon(startIcon);
+            //lblControl.setIcon(startIcon);
             System.out.println("stop");
+            lblControl.setForeground(Color.GREEN);
+            lblControl.setText("\u25B6");
         }
     }
 

@@ -37,14 +37,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 
-
 /**
  *
  * @author G.K #gkexxt@outlook.com
  */
 public class DownloadManager {
-    
-       public static void main(String[] args) {
+
+    public static void main(String[] args) {
         JButton one = new JButton("One");
         JButton two = new JButton("Two");
         JButton three = new JButton("Three");
@@ -84,13 +83,12 @@ public class DownloadManager {
             model3.addRow(download);
 
         }
-        
-        
+
         model2.removeRowRange(2, 3);
         model3.removeRowRange(0, 1);
 
         DownloadTable table = new DownloadTable(model);
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);        
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         JScrollPane scrollPane = new JScrollPane(table);
         //model.setRenderer(table);
 
@@ -101,7 +99,7 @@ public class DownloadManager {
         south.add(one);
         south.add(two);
         south.add(three);
-        south.add(downloads.get(0).getDownloadtableui().getProgressbar());
+        //south.add(downloads.get(0).getDownloadtableui().getProgressbar());
         JFrame frame = new JFrame();
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.getContentPane().add(scrollPane);
@@ -110,38 +108,23 @@ public class DownloadManager {
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
 
+        DownloadWorker t1 = new DownloadWorker("thread 1", downloads.get(0));
+        DownloadWorker t2 = new DownloadWorker("thread 2", downloads.get(1));
+        DownloadWorker t3 = new DownloadWorker("thread 4", downloads.get(2));
+        t1.start();
+        t2.start();
+        t3.start();
+
         java.util.Timer t = new java.util.Timer();
-        TimerTask tt = new TimerTask() {
+        TimerTask tt;
+        tt = new TimerTask() {
             @Override
             public void run() {
-
-                //studentSet.get(0).setDoneSize(datas.get(0).getDoneSize()+1);
-                //downloads.get(0).setProgressBar();
-                Download downloadx;
-                downloadx = downloads.get(5);
-                downloadx.getData().setDoneSize(downloadx.getData().getDoneSize() + 1);
-                //model.fireTableRowsUpdated(0, table.getRowCount() - 1);
-                //downloadx.setDownloadtableui(new DownloadControl());
-                int value = (int) (double) ((100.0 * downloadx.getData().getDoneSize())
-                        / downloadx.getData().getFileSize());
-                //System.out.println(value);
-                
-//                if (value > 50 && value < 70){
-//                    table.setModel(model2);
-//                    table.repaint();
-//                }else if (value > 70){
-//                  table.setModel(model2);
-//                  table.repaint();
-//                }
-                downloadx.getDownloadtableui().setProgressBar(value);
                 model.fireTableRowsUpdated(0, model.getRowCount() - 1);
-                //table.getModel().
-                //frame.repaint();
             }
-
         };
-        t.scheduleAtFixedRate(tt, 5000, 5000);
+        t.scheduleAtFixedRate(tt, 50, 50);
 
     }
-    
+
 }

@@ -59,9 +59,8 @@ public class DownloadTableModel extends RowTableModel<Download> {
         setColumnClass(6, JProgressBar.class);
         setColumnClass(7, String.class);
         setColumnClass(8, String.class);
-        setColumnClass(9, Boolean.class);
         //setColumnEditable(0, false);
-        setColumnEditable(6, false);
+        //setColumnEditable(6, false);
         //setColumnClass(6, JProgressBar.class);
 
     }
@@ -89,8 +88,6 @@ public class DownloadTableModel extends RowTableModel<Download> {
                 return downnload.getData().getFileSize();
             case 8:
                 return downnload.getData().getDoneSize();
-            case 9:
-                return downnload.getDownloadtableui().isRowlocked();
             default:
                 return null;
         }
@@ -102,7 +99,7 @@ public class DownloadTableModel extends RowTableModel<Download> {
             return false;
         }
 
-        if (column == 5 || column == 9) {
+        if (column == 5 ) {
             return true;
         }
 
@@ -132,9 +129,7 @@ public class DownloadTableModel extends RowTableModel<Download> {
                     break;
                 case 8:
                     download.getData().setDoneSize(Long.parseLong(value.toString()));
-                case 9:
-                    download.getDownloadtableui().setRowlocked(Boolean.parseBoolean(value.toString()));
-                    break;
+                
                 //break;
                 default:
                     break;

@@ -65,9 +65,11 @@ public class Download {
         //System.out.println("javadm.data.Download.setStart()");
         //System.out.println(start);
         this.downloadtableui.setLblControl(start);
+        this.downloadtableui.setRowlocked(start);
         if (start) {
             
             StartDownload();
+            
         } else {
 
             StopDownload();

@@ -40,6 +40,8 @@ public class DownloadTable extends JTable {
         this.dm = dm;
         getColumn("control").setCellRenderer(new LabelRenderer());
         getColumn("Progress").setCellRenderer(new ProgresRenderer());
+        //System.err.println(rowHeight);
+        this.setRowHeight(20);
 
     }  
 
@@ -60,7 +62,7 @@ public class DownloadTable extends JTable {
 
             //return DwnTable.this.modelData.get(row).getDownloadtableui().getLblControl();
             //System.err.println(table.getModel().getValueAt(row, column).toString());
-            return dm.getRow(row).getDownloadtableui().getProgressbar();
+            return dm.getRow(row).getDownloadtableui().getLblControl();
         }
     }
 
@@ -77,7 +79,7 @@ public class DownloadTable extends JTable {
 
             //table.getModel().modelData.get(row).getDownloadtableui().getProgressbar();
             //return progress;
-            return dm.getRow(row).getDownloadtableui().getLblControl();
+            return dm.getRow(row).getDownloadtableui().getProgressbar();
         }
     }
 

@@ -59,11 +59,11 @@ public class SyncExample {
    public static void main(String[] args) throws InterruptedException {
     //Thingie thingie1 = new Thingie();
    // Thingie thingie2 = new Thingie();
-for (int i = 0; i < 10000; i++) {
+for (int i = 0; i < 100; i++) {
            new MyThread(new Thingie(),"T " + Integer.toString(i)).start();
        }    
     //new MyThread(new Thingie(),"T2").start();
-    Thread.sleep(120000);
+    Thread.sleep(100);
     running = false;
     System.out.println(lastacc.toString());
       //boolean lastAccess;
