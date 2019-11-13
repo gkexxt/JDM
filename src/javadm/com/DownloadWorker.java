@@ -45,15 +45,24 @@ public class DownloadWorker implements Runnable {
     }
 
     @Override
-    public void run() {        
-        while(download.isStart()){
-            try {
-                download.setProgress(download.getData().getDoneSize() + 1);
-                Thread.sleep(0);
-            } catch (InterruptedException ex) {
-                System.err.println(ex.toString()+"\n"+ex.toString());
-            }
+    public void run() {
+        try {
+                   Downloader2 downloader = new Downloader2(download);
+        downloader.run();
+        download.setStart(false); 
+        } catch (Exception e) {
+            download.setStart(false);
+            System.err.println(e.getMessage()+"\n" + e.toString());
         }
+
+//        while(download.isStart()){
+//            try {
+//                download.setProgress(download.getData().getDoneSize() + 1);
+//                Thread.sleep(0);
+//            } catch (InterruptedException ex) {
+//                System.err.println(ex.toString()+"\n"+ex.toString());
+//            }
+//        }
         
         //System.err.println("Download thread exiting while");
     }

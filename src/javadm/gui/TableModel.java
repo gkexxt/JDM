@@ -26,6 +26,7 @@ package javadm.gui;
 import javadm.util.RowTableModel;
 import java.util.*;
 import javadm.com.Download;
+import javadm.data.DataDaoSqlite;
 import javax.swing.*;
 import javax.swing.JProgressBar;
 
@@ -40,15 +41,13 @@ public class TableModel extends RowTableModel<Download> {
             = {
                 "ID",
                 "Name",
-                "Pass",
-                "Age",
-                "Status",
+                "Date",
+                "Path",
+                "url",
                 "control",
                 "Progress",
                 "filesize",
-                "donesize",
-
-            };
+                "donesize",};
 
     TableModel() {
         super(Arrays.asList(COLUMN_NAMES));
@@ -96,10 +95,10 @@ public class TableModel extends RowTableModel<Download> {
     @Override
     public boolean isCellEditable(int row, int column) {
         if (column == 0 || column == 4 || column == 6) {
-            return false;
+            return true;
         }
 
-        if (column == 5 ) {
+        if (column == 5) {
             return true;
         }
 
@@ -116,7 +115,18 @@ public class TableModel extends RowTableModel<Download> {
         try {
             switch (column) {
                 case 0:
-
+                    break;
+                case 1:
+                    download.getData().setName(value.toString());
+                    break;
+                case 2:
+                     download.getData().setCreatedDate(value.toString());
+                    break;
+                case 3:
+                     download.getData().setDirectory(value.toString());
+                    break;
+                case 4:
+                     download.getData().setUrl(value.toString());
                     break;
                 case 5:
                     download.setStart(!download.isStart());
@@ -129,11 +139,13 @@ public class TableModel extends RowTableModel<Download> {
                     break;
                 case 8:
                     download.getData().setDoneSize(Long.parseLong(value.toString()));
-                
+
                 //break;
                 default:
                     break;
             }
+            DataDaoSqlite db = new DataDaoSqlite();
+            db.updateDownloadData(download.getData());
             fireTableCellUpdated(row, column);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage() + "\n" + e.toString(), "InfoBox: "

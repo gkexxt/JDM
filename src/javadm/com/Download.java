@@ -57,9 +57,9 @@ public class Download {
         return start;
     }
 
-    public  void setProgress(long donesize) {
+    public void setProgress(long buffersize) {
         try {
-            data.setDoneSize(donesize);
+            data.setDoneSize(data.getDoneSize()+ buffersize);
             int value = (int) (double) ((100.0 * data.getDoneSize())
                     / data.getFileSize());
             this.downloadControl.getProgressbar().setValue(value);
