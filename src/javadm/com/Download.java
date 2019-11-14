@@ -23,6 +23,8 @@
  */
 package javadm.com;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import javadm.data.Data;
 import javadm.gui.DownloadControl;
 
@@ -36,6 +38,19 @@ public class Download {
     private Data data;
     private boolean start;
     private DownloadControl downloadControl;
+      private PropertyChangeSupport propChangeSupport = 
+       new PropertyChangeSupport(this);
+
+  public void addPropertyChangeListener(PropertyChangeListener listener) {
+    propChangeSupport.addPropertyChangeListener(listener);
+  }
+
+  public void removePropertyChangeListener(PropertyChangeListener listener) {
+    propChangeSupport.removePropertyChangeListener(listener);
+  }
+
+
+ 
 
     public DownloadControl getDownloadControl() {
         return downloadControl;
@@ -55,6 +70,7 @@ public class Download {
 
     public  boolean isStart() {
         return start;
+        
     }
 
     public void setProgress(long buffersize) {
@@ -65,6 +81,7 @@ public class Download {
             this.downloadControl.getProgressbar().setValue(value);
         } catch (Exception e) {
         }
+         
     }
 
     public void setStart(boolean startx) {
@@ -81,6 +98,7 @@ public class Download {
 
             StopDownload();
         }
+        propChangeSupport.firePropertyChange("Start",start,startx);
 
     }
 
@@ -90,6 +108,7 @@ public class Download {
         //DownloadWorker t3 = new DownloadWorker("thread 4", this);
         t1.start();
         //t2.start();
+        
     }
 
     private void StopDownload() {

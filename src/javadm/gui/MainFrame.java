@@ -30,8 +30,10 @@ public class MainFrame extends JFrame
     private final JList list = new JList(); //hold downlad items data
     private final DownloadTable table;
     private static TableModel model;
-
+    private final JSplitPane mainsplitpane;
     public MainFrame() {
+        ToolBar toolbar = new ToolBar();
+        Download selectedDownload = new Download();
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
@@ -49,13 +51,21 @@ public class MainFrame extends JFrame
             download.setDownloadControl(new DownloadControl());
             download.setProgress(download.getData().getDoneSize());
             model.addRow(download);
+            download.addPropertyChangeListener(toolbar);
         }
+        
+       
+        
+        //default selected download from download list
+        selectedDownload = model.getRow(0);
 
         table = new DownloadTable(model);
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         //frame.getContentPane().
         //Vertical panels - downloadpane+StatusPane
         StatusPane StatusPane = new StatusPane();
+        table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        table.setRowSelectionInterval(0, 0);
         //dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
         //dowloadTable.setHorizontalAlignment(JLabel.CENTER);
         JScrollPane downloadPane = new JScrollPane(table);
@@ -68,6 +78,10 @@ public class MainFrame extends JFrame
         splitPaneHortizontal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 categoryPane, splitPaneVertical);
         //splitPaneHortizontal.setOneTouchExpandable(true);
+        
+         mainsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,toolbar,splitPaneHortizontal);
+         mainsplitpane.setEnabled(false);
+         mainsplitpane.setDividerSize(1);
 
         //Provide minimum sizes for components in the split pane.
         Dimension minimumSize = new Dimension(100, 100);
@@ -100,7 +114,7 @@ public class MainFrame extends JFrame
      * @return JSplitPane
      */
     public JSplitPane getMainPane() {
-        return splitPaneHortizontal;
+        return mainsplitpane;
     }
 
     /**
@@ -124,6 +138,7 @@ public class MainFrame extends JFrame
         //menubar
         MenuBar demo = new MenuBar();
         frame.setJMenuBar(demo.createMenuBar());
+        //frame.getContentPane().add(new ToolBar());
         //make panels
         MainFrame mainUI = new MainFrame();
         //add to stage

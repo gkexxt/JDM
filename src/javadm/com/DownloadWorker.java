@@ -47,7 +47,7 @@ public class DownloadWorker implements Runnable {
     @Override
     public void run() {
         try {
-                   Downloader2 downloader = new Downloader2(download);
+                   Downloader downloader = new Downloader(download);
         downloader.run();
         download.setStart(false); 
         } catch (Exception e) {

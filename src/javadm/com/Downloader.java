@@ -1,36 +1,15 @@
 /*
- * The MIT License
- *
- * Copyright 2019 G.K #gkexxt@outlook.com.
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package javadm.com;
 
-import java.io.FileOutputStream;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 /**
  *
@@ -38,60 +17,74 @@ import java.nio.file.Paths;
  */
 public class Downloader {
 
-    // File Location
-    private static String filePath = "/home/gk/Downloads/test/test";
+    private String fname;
+    int BUFFER_SIZE = 4092;
+    private Download download;
 
-    //url
-    private static String url = "http://192.168.1.10";
+    public Downloader(Download download) {
+        this.download = download;
 
-    public static void setFilePath(String directory, String filename) {
-
-        Downloader.filePath = directory + "/" + filename;
     }
 
-    public static void setUrl(String url) {
-        Downloader.url = url;
-    }
+    public void run() {
 
-    // This Method Is Used To Download A Sample File From The Url
-    public static void downloadFileFromUrlUsingNio() {
+        BufferedInputStream in = null;
+        RandomAccessFile raf = null;
 
-        URL urlObj = null;
-        ReadableByteChannel rbcObj = null;
-        FileOutputStream fOutStream = null;
+        try {
+            // open Http connection to URL
+            URL url = new URL(download.getData().getUrl());
+            download.getData().setName(url.getFile().substring(1));
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U;"
+                    + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
+            // connect to server
+            conn.connect();
+            long contentlength = conn.getContentLengthLong();
+            download.getData().setFileSize(conn.getContentLengthLong());
+            int responsecode = conn.getResponseCode();
 
-        // Checking If The File Exists At The Specified Location Or Not
-        Path filePathObj = Paths.get(filePath);
-        boolean fileExists = Files.exists(filePathObj);
-        if (fileExists) {
-            try {
-                urlObj = new URL(url);
-                java.net.URLConnection urncon = new java.net.URLConnection();
-                rbcObj = Channels.newChannel(urlObj.openStream().);
-                fOutStream = new FileOutputStream(filePath);
+            // Make sure the response code is in the 200 range.
+            if (responsecode / 100 == 2) {
 
-                fOutStream.getChannel().transferFrom(rbcObj, 0, Long.MAX_VALUE);
-                System.out.println("! File Successfully Downloaded From The Url !");
-            } catch (IOException ioExObj) {
-                System.out.println("Problem Occured While Downloading The File= " + ioExObj.getMessage());
-            } finally {
+                // get the input stream
+                in = new BufferedInputStream(conn.getInputStream());
+
+                // open the output file and seek to the start location
+                fname = download.getData().getDirectory() + "/" + download.getData().getName();
+                raf = new RandomAccessFile(fname, "rw");
+                
+                byte data[] = new byte[BUFFER_SIZE];
+                int numRead;
+                while (download.isStart() && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
+                    // write to buffer
+                    System.err.println(data.length);
+                    raf.write(data, 0, numRead);
+                    download.setProgress(numRead);
+                    contentlength = conn.getContentLengthLong();
+                    System.out.println(contentlength);
+
+                }
+            } else {
+                System.err.println(" http Response error - code : " + responsecode);
+            }
+        } catch (IOException e) {
+            System.err.println("Error : " + e.getMessage() + "\n" + e.toString());
+        } finally {
+            if (raf != null) {
                 try {
-                    if (fOutStream != null) {
-                        fOutStream.close();
-                    }
-                    if (rbcObj != null) {
-                        rbcObj.close();
-                    }
-                } catch (IOException ioExObj) {
-                    System.out.println("Problem Occured While Closing The Object= " + ioExObj.getMessage());
+                    raf.close();
+                } catch (IOException e) {
                 }
             }
-        } else {
-            System.out.println("File Not Present! Please Check!");
+
+            if (in != null) {
+                try {
+                    in.close();
+                } catch (IOException e) {
+                }
+            }
         }
     }
 
-    public static void main(String[] args) {
-        downloadFileFromUrlUsingNio();
-    }
 }
