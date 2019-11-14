@@ -12,6 +12,8 @@ package javadm.gui;
  */
 import javadm.misc.DataManager;
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import javadm.com.Download;
@@ -19,9 +21,10 @@ import javadm.data.Data;
 import javadm.data.DataDaoSqlite;
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class MainFrame extends JFrame
-        implements ListSelectionListener {
+        implements ListSelectionListener, PropertyChangeListener{
 
     //private JLabel dowloadTable = new JLabel();//will be a table later
     private final DataManager dm = new DataManager();//data manager handle items data
@@ -31,14 +34,16 @@ public class MainFrame extends JFrame
     private final DownloadTable table;
     private static TableModel model;
     private final JSplitPane mainsplitpane;
+    private Download selectedDownload ;
     public MainFrame() {
         ToolBar toolbar = new ToolBar();
-        Download selectedDownload = new Download();
+        
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
 
         model = new TableModel();
+        //model.add
         DataDaoSqlite db = new DataDaoSqlite();
         java.util.List<Data> datas = new ArrayList<>();
         datas.addAll(db.getAllDownloadData());
@@ -51,7 +56,7 @@ public class MainFrame extends JFrame
             download.setDownloadControl(new DownloadControl());
             download.setProgress(download.getData().getDoneSize());
             model.addRow(download);
-            download.addPropertyChangeListener(toolbar);
+            download.addPropertyChangeListener(model);
         }
         
        
@@ -60,12 +65,24 @@ public class MainFrame extends JFrame
         selectedDownload = model.getRow(0);
 
         table = new DownloadTable(model);
+        //table.setLayout(new BorderLayout());
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
+            // do some actions here, for example
+            // print first column value from selected row
+            selectedDownload = model.getRow(table.getSelectedRow());
+            //System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
+        });
+        
+        
         //frame.getContentPane().
         //Vertical panels - downloadpane+StatusPane
         StatusPane StatusPane = new StatusPane();
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        table.setRowSelectionInterval(0, 0);
+       // table.setRowSelectionInterval(0, 0);
+        //table.setOpaque(false);
+        table.setBackground(Color.WHITE);
+        ((DefaultTableCellRenderer)table.getDefaultRenderer(Object.class)).setBackground(Color.white);
         //dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
         //dowloadTable.setHorizontalAlignment(JLabel.CENTER);
         JScrollPane downloadPane = new JScrollPane(table);
@@ -82,15 +99,24 @@ public class MainFrame extends JFrame
          mainsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,toolbar,splitPaneHortizontal);
          mainsplitpane.setEnabled(false);
          mainsplitpane.setDividerSize(1);
-
+         mainsplitpane.setBackground(Color.WHITE);
         //Provide minimum sizes for components in the split pane.
         Dimension minimumSize = new Dimension(100, 100);
         categoryPane.setMinimumSize(minimumSize);
-        downloadPane.setMinimumSize(minimumSize);
+        downloadPane.setPreferredSize(new Dimension(300, 500));
+        downloadPane.setBackground(Color.white);
+        downloadPane.setForeground(Color.white);
+        //downloadPane.setSize(new Dimension(100, 800));
         StatusPane.setMinimumSize(minimumSize);
         //Provide a preferred size for the split pane.
         splitPaneHortizontal.setPreferredSize(new Dimension(600, 400));
-
+        splitPaneHortizontal.setDividerSize(6);
+        splitPaneVertical.setDividerSize(6);
+        splitPaneVertical.setDividerLocation(400);
+        splitPaneVertical.setBackground(Color.white);
+        splitPaneHortizontal.setBackground(Color.red);
+        StatusPane.setBackground(Color.WHITE);
+        //splitPaneVertical.setd
         //createAndShowGUI();
         //updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
     }
@@ -104,6 +130,8 @@ public class MainFrame extends JFrame
 
         dm.addlist("tttttt");
     }
+    
+    
 
     /**
      * Renders the selected data on TablePane label
@@ -123,7 +151,7 @@ public class MainFrame extends JFrame
      *
      */
     public void setDiv() { //set panes divisor position
-        splitPaneVertical.setDividerLocation(0.4);
+        splitPaneVertical.setDividerLocation(0.6);
         splitPaneHortizontal.setDividerLocation(0.3);
 
     }
@@ -136,15 +164,15 @@ public class MainFrame extends JFrame
         JFrame frame = new JFrame("JAVA Download Manager");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //menubar
-        MenuBar demo = new MenuBar();
-        frame.setJMenuBar(demo.createMenuBar());
+        //MenuBar demo = new MenuBar();
+        //frame.setJMenuBar(demo.createMenuBar());
         //frame.getContentPane().add(new ToolBar());
         //make panels
         MainFrame mainUI = new MainFrame();
         //add to stage
         frame.getContentPane().add(mainUI.getMainPane());
         //Display stage.
-
+//frame.setBackground(Color.yellow);
         frame.pack();
         frame.setVisible(true);
         //add lisner for the selection list --ide compalining when doit in constructor why?
@@ -163,7 +191,7 @@ public class MainFrame extends JFrame
                 model.fireTableRowsUpdated(0, model.getRowCount() - 1);
             }
         };
-        t.scheduleAtFixedRate(tt, 0, 100);
+        t.scheduleAtFixedRate(tt, 0, 500);
     }
 
     public static void main(String[] args) {
@@ -196,6 +224,13 @@ public class MainFrame extends JFrame
             System.out.println(ex.toString());
         }
 
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    model.fireTableRowsUpdated(0, model.getRowCount() - 1);
+        System.out.println("javadm.gui.MainFrame.propertyChange()");
     }
 
 }

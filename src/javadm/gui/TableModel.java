@@ -23,6 +23,8 @@
  */
 package javadm.gui;
 
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javadm.util.RowTableModel;
 import java.util.*;
 import javadm.com.Download;
@@ -34,7 +36,7 @@ import javax.swing.JProgressBar;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class TableModel extends RowTableModel<Download> {
+public class TableModel extends RowTableModel<Download> implements PropertyChangeListener{
     //private static int  xxx = 0;
 
     private static String[] COLUMN_NAMES
@@ -131,7 +133,7 @@ public class TableModel extends RowTableModel<Download> {
                 case 5:
                     download.setStart(!download.isStart());
                     //download.getDownloadtableui().setLblControl(download.isStart());
-                    System.out.println("javadm.com.DownloadTableModel.setValueAt()");
+                    //System.out.println("javadm.com.DownloadTableModel.setValueAt()");
                     break;
                 case 7:
 
@@ -152,6 +154,13 @@ public class TableModel extends RowTableModel<Download> {
                     + "error update db", JOptionPane.INFORMATION_MESSAGE);
         }
 
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        fireTableRowsUpdated(0, this.getRowCount()-1);
+        System.out.println("javadm.gui.TableModel.propertyChange()");
     }
 
 }

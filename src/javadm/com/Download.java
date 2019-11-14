@@ -38,19 +38,16 @@ public class Download {
     private Data data;
     private boolean start;
     private DownloadControl downloadControl;
-      private PropertyChangeSupport propChangeSupport = 
-       new PropertyChangeSupport(this);
+    private PropertyChangeSupport propChangeSupport
+            = new PropertyChangeSupport(this);
 
-  public void addPropertyChangeListener(PropertyChangeListener listener) {
-    propChangeSupport.addPropertyChangeListener(listener);
-  }
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
+        propChangeSupport.addPropertyChangeListener(listener);
+    }
 
-  public void removePropertyChangeListener(PropertyChangeListener listener) {
-    propChangeSupport.removePropertyChangeListener(listener);
-  }
-
-
- 
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        propChangeSupport.removePropertyChangeListener(listener);
+    }
 
     public DownloadControl getDownloadControl() {
         return downloadControl;
@@ -68,23 +65,24 @@ public class Download {
         this.data = data;
     }
 
-    public  boolean isStart() {
+    public boolean isStart() {
         return start;
-        
+
     }
 
     public void setProgress(long buffersize) {
         try {
-            data.setDoneSize(data.getDoneSize()+ buffersize);
+            data.setDoneSize(data.getDoneSize() + buffersize);
             int value = (int) (double) ((100.0 * data.getDoneSize())
                     / data.getFileSize());
             this.downloadControl.getProgressbar().setValue(value);
         } catch (Exception e) {
         }
-         
+        propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
     }
 
     public void setStart(boolean startx) {
+        propChangeSupport.firePropertyChange("Startxxxxxxxxxx", start, startx);
         this.start = startx;
         //System.out.println("javadm.data.Download.setStart()");
         //System.out.println(start);
@@ -98,17 +96,16 @@ public class Download {
 
             StopDownload();
         }
-        propChangeSupport.firePropertyChange("Start",start,startx);
 
     }
 
     private void StartDownload() {
-       DownloadWorker t1 = new DownloadWorker("thread 1", this);
-       //DownloadWorker t2 = new DownloadWorker("thread 2", this);
+        DownloadWorker t1 = new DownloadWorker("thread 1", this);
+        //DownloadWorker t2 = new DownloadWorker("thread 2", this);
         //DownloadWorker t3 = new DownloadWorker("thread 4", this);
         t1.start();
         //t2.start();
-        
+
     }
 
     private void StopDownload() {

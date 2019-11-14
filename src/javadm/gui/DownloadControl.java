@@ -73,7 +73,8 @@ Dimension x = new Dimension(10,300);
         progressbar.setStringPainted(true);
         //progressbar.setValue(0);
         progressbar.setBorderPainted(false);
-        progressbar.setBackground(Color.WHITE);
+        //progressbar.setBackground(Color.WHITE);
+        progressbar.setOpaque(false);
         //Font = new Font
         lblControl.setFont(new Font(lblControl.getName(), Font.PLAIN, 18));
     }

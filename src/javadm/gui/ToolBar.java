@@ -42,15 +42,19 @@ import javax.swing.SwingUtilities;
 import java.net.URL;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javadm.com.Download;
+import javax.swing.JLabel;
+//import javax.swing.border.EmptyBorder;
 
 public class ToolBar extends JPanel
-        implements ActionListener, PropertyChangeListener{
+        implements ActionListener, PropertyChangeListener {
 
     protected JTextArea textArea;
     protected String newline = "\n";
@@ -60,15 +64,21 @@ public class ToolBar extends JPanel
     static final private String SOMETHING_ELSE = "other";
     static final private String TEXT_ENTERED = "text";
     private Download download;
+    private JToolBar toolBar;
 
     public ToolBar() {
         super(new BorderLayout());
 
         //Create the toolbar.
-        JToolBar toolBar = new JToolBar("Still draggable");
+        toolBar = new JToolBar("Still draggable");
         addButtons(toolBar);
         toolBar.setFloatable(false);
-        toolBar.setRollover(true);
+        toolBar.setRollover(false);
+        toolBar.setBorderPainted(false);
+        toolBar.setOpaque(false);
+        //toolBar.setBorder();
+        //toolBar.setBackground(Color.white);
+        
 
         //Create the text area used for output.  Request
         //enough space for 5 rows and 30 columns.
@@ -89,20 +99,39 @@ public class ToolBar extends JPanel
     protected void addButtons(JToolBar toolBar) {
         JButton button = null;
 
-        //first button
-        button = makeNavigationButton("Back24", PREVIOUS,
-                "Back to previous something-or-other",
-                "Previous");
+     
+        
+                button = makeNavigationButton("menu", PREVIOUS,
+                "menu",
+                "+");
+        button.setForeground(Color.green);
+        toolBar.add(button);
+        
+        button = makeNavigationButton("add", PREVIOUS,
+                "Add new download",
+                "+");
+        button.setForeground(Color.green);
         toolBar.add(button);
 
         //second button
-        button = makeNavigationButton("Up24", UP,
-                "Up to something-or-other",
-                "Up");
+        button = makeNavigationButton("remove", UP,
+                "Remove this download",
+                "x");
+        button.setForeground(Color.red);
         toolBar.add(button);
 
         //third button
-        button = makeNavigationButton("Forward24", NEXT,
+        button = makeNavigationButton("setting", NEXT,
+                "Forward to something-or-other",
+                "Next");
+        toolBar.add(button);
+
+        button = makeNavigationButton("start", NEXT,
+                "Forward to something-or-other",
+                "Next");
+        toolBar.add(button);
+
+        button = makeNavigationButton("stop", NEXT,
                 "Forward to something-or-other",
                 "Next");
         toolBar.add(button);
@@ -110,19 +139,8 @@ public class ToolBar extends JPanel
         //separator
         toolBar.addSeparator();
 
-        //fourth button
-        button = new JButton("Another button");
-        button.setActionCommand(SOMETHING_ELSE);
-        button.setToolTipText("Something else");
-        button.addActionListener(this);
-        toolBar.add(button);
 
-        //fifth component is NOT a button!
-        JTextField textField = new JTextField("A text field");
-        textField.setColumns(10);
-        textField.addActionListener(this);
-        textField.setActionCommand(TEXT_ENTERED);
-        toolBar.add(textField);
+
     }
 
     protected JButton makeNavigationButton(String imageName,
@@ -130,21 +148,27 @@ public class ToolBar extends JPanel
             String toolTipText,
             String altText) {
         //Look for the image.
-        String imgLocation = "images/"
+        String imgLocation = "/"
                 + imageName
-                + ".gif";
-        URL imageURL = ToolBar.class.getResource(imgLocation);
+                + ".png";
+        URL imageURL = getClass().getResource(imgLocation);
 
         //Create and initialize the button.
         JButton button = new JButton();
         button.setActionCommand(actionCommand);
         button.setToolTipText(toolTipText);
         button.addActionListener(this);
-
+        button.setBorderPainted(false);
+        button.setFocusPainted(false);
+        //Color xxx = button.getBackground();
+        //toolBar.setBackground(xxx);
         if (imageURL != null) {                      //image found
             button.setIcon(new ImageIcon(imageURL, altText));
-        } else {                                     //no image found
+        } else {
+            Font font = new Font(button.getFont().toString(), Font.BOLD, 20);
+            button.setFont(font);                                   //no image found
             button.setText(altText);
+
             System.err.println("Resource not found: "
                     + imgLocation);
         }

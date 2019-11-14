@@ -37,7 +37,7 @@ public class DownloadWorker implements Runnable {
         this.download = download;
         name = threadname;
         t = new Thread(this, name);
-        System.out.println("New thread: " + t);
+        //System.out.println("New thread: " + t);
     }
 
     public void start() {

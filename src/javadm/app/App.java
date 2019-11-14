@@ -25,7 +25,7 @@ public class App {
             MainFrame main;
             main = new MainFrame();
             main.createAndShowGUI();
-            main.refreshTable();
+            //main.refreshTable();
         });
     }
 
