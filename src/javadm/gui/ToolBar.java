@@ -51,7 +51,6 @@ public class ToolBar extends JPanel
 
     protected JTextArea textArea;
     protected String newline = "\n";
-
     static final private String MENU = "menu";
     static final private String ADD = "add";
     static final private String REMOVE = "remove";
@@ -59,7 +58,7 @@ public class ToolBar extends JPanel
     static final private String STOP = "stop";
     static final private String SETTING = "setting";
 
-    private Download download;
+    private Download currentDownload;
     private JToolBar toolBar;
 
     public ToolBar() {
@@ -73,8 +72,8 @@ public class ToolBar extends JPanel
         add(toolBar, BorderLayout.PAGE_START);
     }
 
-    public void setDownload(Download download) {
-        this.download = download;
+    public void setCurrentDownload(Download currentDownload) {
+        this.currentDownload = currentDownload;
     }
 
     protected void addButtons(JToolBar toolBar) {
@@ -145,7 +144,7 @@ public class ToolBar extends JPanel
                     break;
                 case ADD:
                     // second button clicked
-                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this), this.download);
+                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this), this.currentDownload);
                     break;
                 case REMOVE:
 
@@ -157,7 +156,7 @@ public class ToolBar extends JPanel
 
                     break;
                 case SETTING:
-                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this), download);
+                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this), this.currentDownload);
                     break;
                 default:
                     break;

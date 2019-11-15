@@ -23,23 +23,60 @@
  */
 package javadm.gui;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javadm.com.Download;
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+import javax.swing.JPanel;
 
 /**
  *
  * @author gkalianan
  */
-public class ModalDialog {
-    
+public class ModalDialog  {
+    private Download selectedDownload;
     
 
-    public ModalDialog(JFrame frame) {
+    public ModalDialog(JFrame frame, Download selecteddownload) {
         JDialog d = new JDialog(frame, "dialog Box");
-        d.add((new JLabel("bla bla bla")));
+        this.selectedDownload = selecteddownload;
+        System.err.println(this.selectedDownload.toString());
+        //d.add((new JLabel("bla bla bla")));
+        d.add(new AddOptionPanel(selectedDownload));
         d.setModal(true);
+        d.setSize(200, 200);
         d.setVisible(true);
+    }
+
+  
+    
+}
+
+class AddOptionPanel extends JPanel implements ActionListener{
+    //JPanel optionpanelx = new JPanel(new BorderLayout());
+    JButton btn = new JButton("bla bla");
+    private Download selecteddownload;
+
+    public AddOptionPanel(Download selectedDownload) {
+        
+        //System.err.println(selecteddownload.getData().getId()+ " : "+ selecteddownload.getData().getName());
+        this.selecteddownload = selectedDownload;
+        System.err.println(this.selecteddownload.toString());
+        this.add(btn);
+        btn.setSize(40, 25);
+        //ActionEvent event = new ActionEvent(btn, 1, "bbb");
+                
+        btn.addActionListener(this);
+    }
+
+    //@Override
+    public void actionPerformed(ActionEvent e) {
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        System.err.println(selecteddownload.getData().getId()+ " : "+ selecteddownload.getData().getName());
+        
     }
     
 }
+

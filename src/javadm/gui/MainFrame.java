@@ -59,29 +59,30 @@ public class MainFrame extends JFrame
             download.addPropertyChangeListener(model);
         }
         
-       ToolBar toolbar = new ToolBar(selectedDownload);
+       
         
         //default selected download from download list
         selectedDownload = model.getRow(0);
-
+        ToolBar toolbar = new ToolBar();
         table = new DownloadTable(model);
         //table.setLayout(new BorderLayout());
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
             // do some actions here, for example
             // print first column value from selected row
-            selectedDownload = model.getRow(table.getSelectedRow());
+            toolbar.setCurrentDownload(model.getRow(table.getSelectedRow()));
+            System.err.println(selectedDownload.toString());
             //System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
         });
-        
+        System.err.println(selectedDownload.toString());
         
         //frame.getContentPane().
         //Vertical panels - downloadpane+StatusPane
         StatusPane StatusPane = new StatusPane();
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-       // table.setRowSelectionInterval(0, 0);
+        table.setRowSelectionInterval(0, 0);
         //table.setOpaque(false);
-        table.setBackground(Color.WHITE);
+        //table.setBackground(Color.WHITE);
         ((DefaultTableCellRenderer)table.getDefaultRenderer(Object.class)).setBackground(Color.white);
         //dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
         //dowloadTable.setHorizontalAlignment(JLabel.CENTER);
