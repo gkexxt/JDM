@@ -34,7 +34,6 @@ import javax.swing.JTextField;
 
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
@@ -43,14 +42,13 @@ import java.net.URL;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javadm.com.Download;
-import javax.swing.JLabel;
+import javax.swing.JFileChooser;
 //import javax.swing.border.EmptyBorder;
 
 public class ToolBar extends JPanel
@@ -58,19 +56,22 @@ public class ToolBar extends JPanel
 
     protected JTextArea textArea;
     protected String newline = "\n";
-    static final private String PREVIOUS = "previous";
-    static final private String UP = "up";
-    static final private String NEXT = "next";
-    static final private String SOMETHING_ELSE = "other";
-    static final private String TEXT_ENTERED = "text";
+    static final private String MENU = "menu";
+    static final private String ADD = "add";
+    static final private String REMOVE = "remove";
+    static final private String START = "start";
+    static final private String STOP = "stop";
+    static final private String SETTING = "setting";
+
     private Download download;
     private JToolBar toolBar;
 
-    public ToolBar() {
+    public ToolBar(Download download) {
         super(new BorderLayout());
+        this.download = download;
 
         //Create the toolbar.
-        toolBar = new JToolBar("Still draggable");
+        toolBar = new JToolBar();
         addButtons(toolBar);
         toolBar.setFloatable(false);
         toolBar.setRollover(false);
@@ -78,7 +79,6 @@ public class ToolBar extends JPanel
         toolBar.setOpaque(false);
         //toolBar.setBorder();
         //toolBar.setBackground(Color.white);
-        
 
         //Create the text area used for output.  Request
         //enough space for 5 rows and 30 columns.
@@ -99,75 +99,52 @@ public class ToolBar extends JPanel
     protected void addButtons(JToolBar toolBar) {
         JButton button = null;
 
-     
-        
-                button = makeNavigationButton("menu", PREVIOUS,
-                "menu",
-                "+");
-        button.setForeground(Color.green);
+        button = formatButton(MENU, "JDM Menu");
         toolBar.add(button);
-        
-        button = makeNavigationButton("add", PREVIOUS,
-                "Add new download",
-                "+");
-        button.setForeground(Color.green);
+
+        button = formatButton(ADD, "Add new download");
         toolBar.add(button);
 
         //second button
-        button = makeNavigationButton("remove", UP,
-                "Remove this download",
-                "x");
-        button.setForeground(Color.red);
+        button = formatButton(REMOVE, "Remove this download");
         toolBar.add(button);
 
         //third button
-        button = makeNavigationButton("setting", NEXT,
-                "Forward to something-or-other",
-                "Next");
+        button = formatButton(START, "Start selected download");
         toolBar.add(button);
 
-        button = makeNavigationButton("start", NEXT,
-                "Forward to something-or-other",
-                "Next");
+        button = formatButton(STOP, "Stop selected download");
         toolBar.add(button);
 
-        button = makeNavigationButton("stop", NEXT,
-                "Forward to something-or-other",
-                "Next");
+        button = formatButton(SETTING, "Selected download option");
         toolBar.add(button);
 
         //separator
         toolBar.addSeparator();
 
-
-
     }
 
-    protected JButton makeNavigationButton(String imageName,
-            String actionCommand,
-            String toolTipText,
-            String altText) {
+    protected JButton formatButton(String name, String toolTipText) {
         //Look for the image.
         String imgLocation = "/"
-                + imageName
+                + name
                 + ".png";
         URL imageURL = getClass().getResource(imgLocation);
 
         //Create and initialize the button.
         JButton button = new JButton();
-        button.setActionCommand(actionCommand);
+        button.setActionCommand(name);
         button.setToolTipText(toolTipText);
         button.addActionListener(this);
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        //Color xxx = button.getBackground();
-        //toolBar.setBackground(xxx);
+
         if (imageURL != null) {                      //image found
-            button.setIcon(new ImageIcon(imageURL, altText));
+            button.setIcon(new ImageIcon(imageURL, name));
         } else {
             Font font = new Font(button.getFont().toString(), Font.BOLD, 20);
             button.setFont(font);                                   //no image found
-            button.setText(altText);
+            button.setText(name);
 
             System.err.println("Resource not found: "
                     + imgLocation);
@@ -179,74 +156,55 @@ public class ToolBar extends JPanel
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
-        String description = null;
 
         if (null != cmd) // Handle each button.
         {
             switch (cmd) {
-                case PREVIOUS:
+                case MENU:
                     //first button clicked
-                    description = "taken you to the previous <something>.";
+                    chooseFolder();
                     break;
-                case UP:
+                case ADD:
                     // second button clicked
-                    description = "taken you up one level to <something>.";
+                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this));
                     break;
-                case NEXT:
-                    // third button clicked
-                    description = "taken you to the next <something>.";
+                case REMOVE:
+
                     break;
-                case SOMETHING_ELSE:
-                    // fourth button clicked
-                    description = "done something else.";
+                case START:
+
                     break;
-                case TEXT_ENTERED:
-                    // text field
-                    JTextField tf = (JTextField) e.getSource();
-                    String text = tf.getText();
-                    tf.setText("");
-                    description = "done something with this text: "
-                            + newline + "  \""
-                            + text + "\"";
+                case STOP:
+
+                    break;
+                case SETTING:
+
                     break;
                 default:
                     break;
             }
         }
 
-        displayResult("If this were a real app, it would have "
-                + description);
     }
 
-    protected void displayResult(String actionDescription) {
-        textArea.append(actionDescription + newline);
-        textArea.setCaretPosition(textArea.getDocument().getLength());
+    public void chooseFolder() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new java.io.File("."));
+        chooser.setDialogTitle("Save to");
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        //
+        // disable the "All files" option.
+        //
+        chooser.setAcceptAllFileFilterUsed(false);
+        //    
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+            System.out.println("getCurrentDirectory(): "
+                    + chooser.getCurrentDirectory());
+            System.out.println("getSelectedFile() : "
+                    + chooser.getSelectedFile());
+        } else {
+            System.out.println("No Selection ");
+        }
     }
 
-    /**
-     * Create the GUI and show it. For thread safety, this method should be
-     * invoked from the event dispatch thread.
-     */
-    private static void createAndShowGUI() {
-        //Create and set up the window.
-        JFrame frame = new JFrame("ToolBarDemo2");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        //Add content to the window.
-        frame.add(new ToolBar());
-
-        //Display the window.
-        frame.pack();
-        frame.setVisible(true);
-    }
-
-    public static void main(String[] args) {
-        //Schedule a job for the event dispatch thread:
-        //creating and showing this application's GUI.
-        SwingUtilities.invokeLater(() -> {
-            //Turn off metal's use of bold fonts
-            UIManager.put("swing.boldMetal", Boolean.FALSE);
-            createAndShowGUI();
-        });
-    }
 }

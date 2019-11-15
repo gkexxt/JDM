@@ -36,7 +36,7 @@ public class MainFrame extends JFrame
     private final JSplitPane mainsplitpane;
     private Download selectedDownload ;
     public MainFrame() {
-        ToolBar toolbar = new ToolBar();
+        
         
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -59,7 +59,7 @@ public class MainFrame extends JFrame
             download.addPropertyChangeListener(model);
         }
         
-       
+       ToolBar toolbar = new ToolBar(selectedDownload);
         
         //default selected download from download list
         selectedDownload = model.getRow(0);
