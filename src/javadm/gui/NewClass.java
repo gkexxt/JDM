@@ -23,61 +23,36 @@
  */
 package javadm.gui;
 
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import javadm.com.Download;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerModel;
-import javax.swing.SpinnerNumberModel;
-
 /**
  *
  * @author gkalianan
  */
-public class ModalDialog implements ActionListener{
-    private Download selectedDownload;
+import javax.swing.*;
 
-  
-    
+public class NewClass {
 
-    public ModalDialog(JFrame frame, Download selecteddownload) {
-        JDialog d = new JDialog(frame, "dialog Box");
-        this.selectedDownload = selecteddownload;
-        
-        d.setModal(true);
-        d.setSize(200, 200);
-        d.setVisible(true);
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+
+            public void run() {
+                new NewClass().makeUI();
+            }
+        });
     }
-    
-    public void showOption(){
-        JButton btn = new JButton("bla bla");
-        btn.setSize(40, 25);               
-        btn.addActionListener(this);        
+
+    public void makeUI() {
         SpinnerModel modeltau = new SpinnerNumberModel(1, 1, 10, 1);
         JSpinner spinner = new JSpinner(modeltau);
-        Font ff = new Font(spinner.getFont().toString(),Font.PLAIN,18);
-        spinner.setFont(ff);
+        //((JSpinner.NumberEditor) spinner.getEditor()).getFormat().setMaximumFractionDigits();
+        JFrame frame = new JFrame();
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.add(spinner);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
-    @Override
-      public void actionPerformed(ActionEvent e) {
-       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        //System.err.println(selecteddownload.getData().getId()+ " : "+ selecteddownload.getData().getName());
-        
-    }
     
+  
 }
-
-
-    
- 
-
-
-    
-
 
