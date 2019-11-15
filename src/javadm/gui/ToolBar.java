@@ -30,32 +30,28 @@ package javadm.gui;
 import javax.swing.JToolBar;
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
-import javax.swing.JTextField;
 
 import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
 
 import java.net.URL;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import javadm.com.Download;
 import javax.swing.JFileChooser;
 //import javax.swing.border.EmptyBorder;
 
 public class ToolBar extends JPanel
-        implements ActionListener, PropertyChangeListener {
+        implements ActionListener {
 
     protected JTextArea textArea;
     protected String newline = "\n";
+
     static final private String MENU = "menu";
     static final private String ADD = "add";
     static final private String REMOVE = "remove";
@@ -66,34 +62,19 @@ public class ToolBar extends JPanel
     private Download download;
     private JToolBar toolBar;
 
-    public ToolBar(Download download) {
+    public ToolBar() {
         super(new BorderLayout());
-        this.download = download;
-
-        //Create the toolbar.
         toolBar = new JToolBar();
         addButtons(toolBar);
         toolBar.setFloatable(false);
         toolBar.setRollover(false);
         toolBar.setBorderPainted(false);
         toolBar.setOpaque(false);
-        //toolBar.setBorder();
-        //toolBar.setBackground(Color.white);
-
-        //Create the text area used for output.  Request
-        //enough space for 5 rows and 30 columns.
-        //Lay out the main panel.
-        //setPreferredSize(new Dimension(450, 130));
         add(toolBar, BorderLayout.PAGE_START);
-        //add(scrollPane, BorderLayout.CENTER);
-
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        System.out.println("Name      = " + evt.getPropertyName());
-        System.out.println("Old Value = " + evt.getOldValue());
-        System.out.println("New Value = " + evt.getNewValue());
+    public void setDownload(Download download) {
+        this.download = download;
     }
 
     protected void addButtons(JToolBar toolBar) {
@@ -126,9 +107,7 @@ public class ToolBar extends JPanel
 
     protected JButton formatButton(String name, String toolTipText) {
         //Look for the image.
-        String imgLocation = "/"
-                + name
-                + ".png";
+        String imgLocation = "/" + name + ".png";
         URL imageURL = getClass().getResource(imgLocation);
 
         //Create and initialize the button.
@@ -166,7 +145,7 @@ public class ToolBar extends JPanel
                     break;
                 case ADD:
                     // second button clicked
-                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this));
+                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this), this.download);
                     break;
                 case REMOVE:
 
@@ -178,7 +157,7 @@ public class ToolBar extends JPanel
 
                     break;
                 case SETTING:
-
+                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this), download);
                     break;
                 default:
                     break;
