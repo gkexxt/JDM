@@ -23,61 +23,50 @@
  */
 package javadm.gui;
 
-import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javadm.com.Download;
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerModel;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingUtilities;
 
 /**
  *
  * @author gkalianan
  */
-public class ModalDialog implements ActionListener{
-    private Download selectedDownload;
+public class ModalDialog implements ActionListener {
 
-  
-    
+    private JDialog d;
+    JFrame frame;
 
-    public ModalDialog(JFrame frame, Download selecteddownload) {
-        JDialog d = new JDialog(frame, "dialog Box");
-        this.selectedDownload = selecteddownload;
-        
+    public ModalDialog(JFrame frame) {
+        this.frame = frame;
+        d = new JDialog(frame, true);
         d.setModal(true);
-        d.setSize(200, 200);
-        d.setVisible(true);
+        //System.err.println(frame.getLocation());
+        //d.setLocationRelativeTo(frame);
     }
-    
-    public void showOption(){
-        JButton btn = new JButton("bla bla");
-        btn.setSize(40, 25);               
-        btn.addActionListener(this);        
-        SpinnerModel modeltau = new SpinnerNumberModel(1, 1, 10, 1);
-        JSpinner spinner = new JSpinner(modeltau);
-        Font ff = new Font(spinner.getFont().toString(),Font.PLAIN,18);
-        spinner.setFont(ff);
+
+    public void showOption(Download selectedDownload) {
+        OptionPanel panel = new OptionPanel();
+        panel.setNamex(selectedDownload.getData().getName());
+        panel.setDirectory(selectedDownload.getData().getDirectory());
+        panel.setUrl(selectedDownload.getData().getUrl());
+
+        d.setSize(panel.getPreferredSize());
+        //d.setLocation((JFrame)SwingUtilities.getWindowAncestor(this).getLocation());
+        d.add(panel);
+        //d.pack();
+        
+        d.setVisible(true);
+
     }
 
     @Override
-      public void actionPerformed(ActionEvent e) {
-       throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public void actionPerformed(ActionEvent e) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         //System.err.println(selecteddownload.getData().getId()+ " : "+ selecteddownload.getData().getName());
-        
+
     }
-    
+
 }
-
-
-    
- 
-
-
-    
-
-

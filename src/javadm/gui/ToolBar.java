@@ -60,7 +60,7 @@ public class ToolBar extends JPanel
 
     private Download currentDownload;
     private JToolBar toolBar;
-
+    private ModalDialog mDialog = new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this));
     public ToolBar() {
         super(new BorderLayout());
         toolBar = new JToolBar();
@@ -70,6 +70,9 @@ public class ToolBar extends JPanel
         toolBar.setBorderPainted(false);
         toolBar.setOpaque(false);
         add(toolBar, BorderLayout.PAGE_START);
+        //System.err.println( SwingUtilities.getWindowAncestor(this).toString());
+        //System.err.println(xxx.toString());
+        //System.err.println(xxx.getLocation());
     }
 
     public void setCurrentDownload(Download currentDownload) {
@@ -144,7 +147,8 @@ public class ToolBar extends JPanel
                     break;
                 case ADD:
                     // second button clicked
-                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this), this.currentDownload);
+                    NewJDialog xxx = new NewJDialog((JFrame) SwingUtilities.getWindowAncestor(this), true);
+                    xxx.setVisible(true);
                     break;
                 case REMOVE:
 
@@ -156,7 +160,7 @@ public class ToolBar extends JPanel
 
                     break;
                 case SETTING:
-                    new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this), this.currentDownload);
+                    mDialog.showOption(currentDownload);
                     break;
                 default:
                     break;

@@ -25,6 +25,8 @@ public class App {
             MainFrame main;
             main = new MainFrame();
             main.createAndShowGUI();
+            //main.pack();
+            //System.err.println(main.getLocation());
             //main.refreshTable();
         });
     }

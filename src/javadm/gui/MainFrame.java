@@ -162,24 +162,24 @@ public class MainFrame extends JFrame
      */
     public void createAndShowGUI() {
         //Create and set up the stage.
-        JFrame frame = new JFrame("JAVA Download Manager");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //JFrame frame = new JFrame("JAVA Download Manager");
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //menubar
         //MenuBar demo = new MenuBar();
         //frame.setJMenuBar(demo.createMenuBar());
         //frame.getContentPane().add(new ToolBar());
         //make panels
-        MainFrame mainUI = new MainFrame();
+        //MainFrame mainUI = new MainFrame();
         //add to stage
-        frame.getContentPane().add(mainUI.getMainPane());
+        this.getContentPane().add(this.getMainPane());
         //Display stage.
 //frame.setBackground(Color.yellow);
-        frame.pack();
-        frame.setVisible(true);
+        this.pack();
+        this.setVisible(true);
         //add lisner for the selection list --ide compalining when doit in constructor why?
-        mainUI.list.addListSelectionListener(mainUI);
+        this.list.addListSelectionListener(this);
         //set div for split panes -for artio 0-1 must be done after panes are realized?
-        mainUI.setDiv();
+        this.setDiv();
 
     }
 
