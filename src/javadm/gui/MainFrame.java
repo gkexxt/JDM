@@ -63,7 +63,7 @@ public class MainFrame extends JFrame
         
         //default selected download from download list
         selectedDownload = model.getRow(0);
-        ToolBar toolbar = new ToolBar();
+        ToolBar toolbar = new ToolBar(this);
         table = new DownloadTable(model);
         //table.setLayout(new BorderLayout());
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -174,6 +174,7 @@ public class MainFrame extends JFrame
         this.getContentPane().add(this.getMainPane());
         //Display stage.
 //frame.setBackground(Color.yellow);
+        this.setLocationByPlatform(true);
         this.pack();
         this.setVisible(true);
         //add lisner for the selection list --ide compalining when doit in constructor why?

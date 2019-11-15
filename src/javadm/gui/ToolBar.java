@@ -57,12 +57,13 @@ public class ToolBar extends JPanel
     static final private String START = "start";
     static final private String STOP = "stop";
     static final private String SETTING = "setting";
-
+private MainFrame mframe; 
     private Download currentDownload;
     private JToolBar toolBar;
-    private ModalDialog mDialog = new ModalDialog((JFrame) SwingUtilities.getWindowAncestor(this));
-    public ToolBar() {
+    //private ModalDialog mDialog; 
+    public ToolBar(MainFrame frm) {
         super(new BorderLayout());
+        this.mframe = frm;
         toolBar = new JToolBar();
         addButtons(toolBar);
         toolBar.setFloatable(false);
@@ -70,9 +71,7 @@ public class ToolBar extends JPanel
         toolBar.setBorderPainted(false);
         toolBar.setOpaque(false);
         add(toolBar, BorderLayout.PAGE_START);
-        //System.err.println( SwingUtilities.getWindowAncestor(this).toString());
-        //System.err.println(xxx.toString());
-        //System.err.println(xxx.getLocation());
+        //mDialog = new ModalDialog(frm);
     }
 
     public void setCurrentDownload(Download currentDownload) {
@@ -143,11 +142,11 @@ public class ToolBar extends JPanel
             switch (cmd) {
                 case MENU:
                     //first button clicked
-                    chooseFolder();
+                    //chooseFolder();
                     break;
                 case ADD:
                     // second button clicked
-                    NewJDialog xxx = new NewJDialog((JFrame) SwingUtilities.getWindowAncestor(this), true);
+                    OptionDialog xxx = new OptionDialog(mframe,true);
                     xxx.setVisible(true);
                     break;
                 case REMOVE:
@@ -160,7 +159,7 @@ public class ToolBar extends JPanel
 
                     break;
                 case SETTING:
-                    mDialog.showOption(currentDownload);
+                   // mDialog.showOption(currentDownload);
                     break;
                 default:
                     break;
@@ -169,24 +168,6 @@ public class ToolBar extends JPanel
 
     }
 
-    public void chooseFolder() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new java.io.File("."));
-        chooser.setDialogTitle("Save to");
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        //
-        // disable the "All files" option.
-        //
-        chooser.setAcceptAllFileFilterUsed(false);
-        //    
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-            System.out.println("getCurrentDirectory(): "
-                    + chooser.getCurrentDirectory());
-            System.out.println("getSelectedFile() : "
-                    + chooser.getSelectedFile());
-        } else {
-            System.out.println("No Selection ");
-        }
-    }
+
 
 }
