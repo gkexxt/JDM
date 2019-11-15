@@ -1,4 +1,4 @@
-/*
+/* 
  * The MIT License
  *
  * Copyright 2019 G.K #gkexxt@outlook.com.
@@ -56,10 +56,20 @@ public class ToolBar extends JPanel
     static final private String REMOVE = "remove";
     static final private String START = "start";
     static final private String STOP = "stop";
+    static final private String RESTART = "restart";
     static final private String SETTING = "setting";
-private MainFrame mframe; 
+    private MainFrame mframe;
     private Download currentDownload;
     private JToolBar toolBar;
+    private JButton btnMenu;
+    private JButton btnAdd;
+    private JButton btnRemove;
+    private JButton btnStart;
+    private JButton btnStop;
+    private JButton btnSetting;
+    private JButton btnCtrl;
+    private JButton btnRestart;
+
     //private ModalDialog mDialog; 
     public ToolBar(MainFrame frm) {
         super(new BorderLayout());
@@ -76,34 +86,60 @@ private MainFrame mframe;
 
     public void setCurrentDownload(Download currentDownload) {
         this.currentDownload = currentDownload;
+        updateToolBarState();
+        toolBar.repaint();
     }
 
     protected void addButtons(JToolBar toolBar) {
-        JButton button = null;
+        btnCtrl = new JButton();
 
-        button = formatButton(MENU, "JDM Menu");
-        toolBar.add(button);
+        btnMenu = formatButton(MENU, "JDM Menu");
+        toolBar.add(btnMenu);
 
-        button = formatButton(ADD, "Add new download");
-        toolBar.add(button);
+        btnAdd = formatButton(ADD, "Add new download");
+        toolBar.add(btnAdd);
 
         //second button
-        button = formatButton(REMOVE, "Remove this download");
-        toolBar.add(button);
+        btnRemove = formatButton(REMOVE, "Remove this download");
+        toolBar.add(btnRemove);
 
         //third button
-        button = formatButton(START, "Start selected download");
-        toolBar.add(button);
+        btnStart = formatButton(START, "Start selected download");
+        toolBar.add(btnStart);
 
-        button = formatButton(STOP, "Stop selected download");
-        toolBar.add(button);
+        btnStop = formatButton(STOP, "Stop selected download");
+        toolBar.add(btnStop);
 
-        button = formatButton(SETTING, "Selected download option");
-        toolBar.add(button);
+        btnRestart = formatButton(RESTART, "Restart selected download");
+        toolBar.add(btnRestart);
+
+        btnSetting = formatButton(SETTING, "Selected download option");
+        toolBar.add(btnSetting);
 
         //separator
         toolBar.addSeparator();
 
+    }
+
+    public void updateToolBarState() {
+        System.err.println(currentDownload.getData().isComplete());
+        if (currentDownload.getData().isComplete()) {
+            System.err.println("blb");
+            btnRestart.setVisible(true);
+            btnStop.setVisible(false);
+            btnStart.setVisible(false);
+
+        } else if (currentDownload.isStart()) {
+            btnRestart.setVisible(false);
+            btnStop.setVisible(true);
+            btnStart.setVisible(false);
+        } else {
+            btnRestart.setVisible(false);
+            btnStop.setVisible(false);
+            btnStart.setVisible(true);
+        }
+
+        //btn
     }
 
     protected JButton formatButton(String name, String toolTipText) {
@@ -146,20 +182,22 @@ private MainFrame mframe;
                     break;
                 case ADD:
                     // second button clicked
-                    OptionDialog xxx = new OptionDialog(mframe,true);
-                    xxx.setVisible(true);
+
                     break;
                 case REMOVE:
 
                     break;
                 case START:
-
+                    System.out.println("javadm.gui.ToolBar.actionPerformed() start");
                     break;
                 case STOP:
 
                     break;
                 case SETTING:
-                   // mDialog.showOption(currentDownload);
+                    OptionDialog xxx = new OptionDialog(mframe, true, currentDownload);
+                    xxx.setTitle("Download Options- " + currentDownload.getData().getName());
+                    xxx.setLocation(mframe.getLocation().x - (xxx.getWidth() - mframe.getWidth()) / 2, mframe.getLocation().y - (xxx.getHeight() - mframe.getHeight()) / 2);
+                    xxx.setVisible(true);
                     break;
                 default:
                     break;
@@ -167,7 +205,5 @@ private MainFrame mframe;
         }
 
     }
-
-
 
 }
