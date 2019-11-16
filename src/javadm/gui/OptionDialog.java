@@ -56,7 +56,7 @@ public class OptionDialog extends javax.swing.JDialog {
         this.model = model;
         initComponents();
         btnRemove.setVisible(!newDownload);
-        btnOK.setVisible(!newDownload);
+        btnSave.setVisible(!newDownload);
         if (selectedDownload.getData().getDoneSize()>0){
             //txtDirectory.setText("Download already started");
             txtDirectory.setEnabled(false);

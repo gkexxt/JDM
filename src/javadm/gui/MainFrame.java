@@ -30,6 +30,8 @@ package javadm.gui;
  */
 import javadm.misc.DataManager;
 import java.awt.*;
+import java.awt.datatransfer.FlavorEvent;
+import java.awt.datatransfer.FlavorListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -42,7 +44,7 @@ import javax.swing.event.*;
 import javax.swing.table.DefaultTableCellRenderer;
 
 public class MainFrame extends JFrame
-        implements ListSelectionListener, PropertyChangeListener{
+        implements ListSelectionListener, PropertyChangeListener {
 
     //private JLabel dowloadTable = new JLabel();//will be a table later
     private final DataManager dm = new DataManager();//data manager handle items data
@@ -52,21 +54,20 @@ public class MainFrame extends JFrame
     private final DownloadTable table;
     private static TableModel model;
     private final JSplitPane mainsplitpane;
-    private Download selectedDownload ;
+    private Download selectedDownload;
     private ToolBar toolbar;
+    private StatusPane statusPane;
+
     public MainFrame() {
-        
-        
+
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
 
         model = new TableModel();
-        //model.add
         DataDaoSqlite db = new DataDaoSqlite();
         java.util.List<Data> datas = new ArrayList<>();
         datas.addAll(db.getAllDownloadData());
-        //List<Download> downloads = new ArrayList<>();
 
         for (int i = 0; i < datas.size(); i++) {
             Data data = datas.get(i);
@@ -77,57 +78,51 @@ public class MainFrame extends JFrame
             model.addRow(download);
             download.addPropertyChangeListener(model);
         }
-        
-       
-        
+
         //default selected download from download list
         selectedDownload = model.getRow(0);
-         toolbar = new ToolBar(this,model);
+
         table = new DownloadTable(model);
         //table.setLayout(new BorderLayout());
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
             // do some actions here, for example
             // print first column value from selected row
-            toolbar.setCurrentDownload(model.getRow(table.getSelectedRow()));
+            toolbar.refreshToolBar();
             System.err.println(selectedDownload.toString());
             //System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
         });
         System.err.println(selectedDownload.toString());
-        
+        toolbar = new ToolBar(this, model, table);
         //frame.getContentPane().
         //Vertical panels - downloadpane+StatusPane
-        StatusPane StatusPane = new StatusPane();
+        statusPane = new StatusPane();
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setRowSelectionInterval(0, 0);
         //table.setOpaque(false);
         //table.setBackground(Color.WHITE);
-        ((DefaultTableCellRenderer)table.getDefaultRenderer(Object.class)).setBackground(Color.white);
-        //dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
-        //dowloadTable.setHorizontalAlignment(JLabel.CENTER);
+        ((DefaultTableCellRenderer) table.getDefaultRenderer(Object.class)).setBackground(Color.white);
         JScrollPane downloadPane = new JScrollPane(table);
         splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                downloadPane, StatusPane);
+                downloadPane, statusPane);
         splitPaneVertical.setBorder(null);//need for nesting panel - remove double border
 
         //HORIZONTAL_SPLIT panels - categorypane+splitPaneVertical(nested)
         JScrollPane categoryPane = new JScrollPane(list);
         splitPaneHortizontal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 categoryPane, splitPaneVertical);
-        //splitPaneHortizontal.setOneTouchExpandable(true);
-        
-         mainsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT,toolbar,splitPaneHortizontal);
-         mainsplitpane.setEnabled(false);
-         mainsplitpane.setDividerSize(1);
-         mainsplitpane.setBackground(Color.WHITE);
+
+        mainsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, toolbar, splitPaneHortizontal);
+        mainsplitpane.setEnabled(false);
+        mainsplitpane.setDividerSize(1);
+        mainsplitpane.setBackground(Color.WHITE);
         //Provide minimum sizes for components in the split pane.
         Dimension minimumSize = new Dimension(100, 100);
         categoryPane.setMinimumSize(minimumSize);
         downloadPane.setPreferredSize(new Dimension(300, 500));
         downloadPane.setBackground(Color.white);
         downloadPane.setForeground(Color.white);
-        //downloadPane.setSize(new Dimension(100, 800));
-        StatusPane.setMinimumSize(minimumSize);
+        statusPane.setMinimumSize(minimumSize);
         //Provide a preferred size for the split pane.
         splitPaneHortizontal.setPreferredSize(new Dimension(600, 400));
         splitPaneHortizontal.setDividerSize(6);
@@ -135,10 +130,7 @@ public class MainFrame extends JFrame
         splitPaneVertical.setDividerLocation(400);
         splitPaneVertical.setBackground(Color.white);
         splitPaneHortizontal.setBackground(Color.red);
-        StatusPane.setBackground(Color.WHITE);
-        //splitPaneVertical.setd
-        //createAndShowGUI();
-        //updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
+        statusPane.setBackground(Color.WHITE);
     }
 
     //Listens to the list
@@ -149,20 +141,6 @@ public class MainFrame extends JFrame
         }
 
         dm.addlist("tttttt");
-    }
-    
-    
-
-    /**
-     * Renders the selected data on TablePane label
-     */
-    /**
-     * return MAinGUI nested panes to be add in JFrame
-     *
-     * @return JSplitPane
-     */
-    public JSplitPane getMainPane() {
-        return mainsplitpane;
     }
 
     /**
@@ -181,18 +159,10 @@ public class MainFrame extends JFrame
      */
     public void createAndShowGUI() {
         //Create and set up the stage.
-        //JFrame frame = new JFrame("JAVA Download Manager");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //menubar
-        //MenuBar demo = new MenuBar();
-        //frame.setJMenuBar(demo.createMenuBar());
-        //frame.getContentPane().add(new ToolBar());
-        //make panels
-        //MainFrame mainUI = new MainFrame();
-        //add to stage
-        this.getContentPane().add(this.getMainPane());
+
+        this.getContentPane().add(mainsplitpane);
         //Display stage.
-//frame.setBackground(Color.yellow);
         this.setLocationByPlatform(true);
         this.pack();
         this.setVisible(true);
@@ -200,6 +170,7 @@ public class MainFrame extends JFrame
         this.list.addListSelectionListener(this);
         //set div for split panes -for artio 0-1 must be done after panes are realized?
         this.setDiv();
+        statusPane.setVisible(false);
 
     }
 
@@ -209,16 +180,57 @@ public class MainFrame extends JFrame
         tt = new TimerTask() {
             @Override
             public void run() {
-                //model.fireTableRowsUpdated(0, model.getRowCount() - 1);
-                toolbar.updateToolBarState();
+                model.fireTableRowsUpdated(0, model.getRowCount() - 1);
+                toolbar.refreshToolBar();
             }
         };
-        t.scheduleAtFixedRate(tt, 0, 500);
+        t.scheduleAtFixedRate(tt, 0, 100);
     }
+
+    /**
+     *
+     * @param message
+     * @param title
+     * @return
+     */
+    public int showOptionPane(String message, String title) {
+        int result = JOptionPane.showConfirmDialog(this, message,
+                title, JOptionPane.OK_CANCEL_OPTION);
+        return result;
+    }
+
+    public void removeDownload() {
+        if (showOptionPane("Remove this download?", "Removing") > 0) {
+            return;
+        }
+        try {
+            DataDaoSqlite db = new DataDaoSqlite();
+            //currentDownload = getselectedDownload();
+            for (int i = 0; i < model.getRowCount(); i++) {
+                System.err.println(i);
+                if (model.getRow(i).getData().getId() == selectedDownload.getData().getId()) {
+                    model.removeTableModelListener(table);//remove table listner before delete from model
+                    model.removeRows(i);
+                    model.addTableModelListener(table);//add it back
+                    model.fireTableRowsUpdated(0, model.getColumnCount() - 1);
+                    db.deleteDownloadData(selectedDownload.getData().getId());
+                }
+            }
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, ex.getMessage(), "JavaDM: "
+                    + "error remove download", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+    
+     
 
     public static void main(String[] args) {
         try {
+            //listen to clipboard
 
+            Toolkit.getDefaultToolkit().getSystemClipboard().addFlavorListener((FlavorEvent e) -> {
+                System.out.println("ClipBoard UPDATED: " + e.getSource() + " " + e.toString());
+            });
             /* 
             -get os name and use proper laf               
             -getSystemLookAndFeelClassName return nothing in kde               \
@@ -236,7 +248,9 @@ public class MainFrame extends JFrame
 
             //run ui/app
             javax.swing.SwingUtilities.invokeLater(() -> {
-                //createAndShowGUI();
+                MainFrame frame = new MainFrame();
+                frame.createAndShowGUI();
+                frame.refreshTable();
 
             });
 
@@ -247,19 +261,20 @@ public class MainFrame extends JFrame
         }
 
     }
-    
-    public void removeTblelistner(){
-        model.removeTableModelListener(table);
-    }
-    
-    public void addtbleListner(){
-        model.addTableModelListener(table);
+
+
+
+    public void showDetails() {
+        statusPane.setVisible(!statusPane.isVisible());
+        if (statusPane.isVisible()) {
+            setDiv();
+        }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    model.fireTableRowsUpdated(0, model.getRowCount() - 1);
+        model.fireTableRowsUpdated(0, model.getRowCount() - 1);
         System.out.println("javadm.gui.MainFrame.propertyChange()");
     }
 

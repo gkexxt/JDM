@@ -71,19 +71,18 @@ public class Downloader {
                 // open the output file and seek to the start location
                 fname = download.getData().getDirectory() + "/" + download.getData().getName();
                 raf = new RandomAccessFile(fname, "rw");
-                
+
                 byte data[] = new byte[BUFFER_SIZE];
                 int numRead;
                 while (download.isStart() && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
                     // write to buffer
-                    //System.err.println(data.length);
                     raf.write(data, 0, numRead);
                     download.setProgress(numRead);
-                    //contentlength = conn.getContentLengthLong();
-                    //System.out.println(contentlength);
 
                 }
-                download.getData().setComplete(true);
+                //if download is still instart mode and loop ended set complete
+                download.getData().setComplete(download.isStart());
+
             } else {
                 System.err.println(" http Response error - code : " + responsecode);
             }

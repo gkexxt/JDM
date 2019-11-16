@@ -31,10 +31,8 @@ import javax.swing.JToolBar;
 import javax.swing.JButton;
 import javax.swing.ImageIcon;
 
-import javax.swing.JFrame;
 import javax.swing.JTextArea;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 import java.net.URL;
 
@@ -44,7 +42,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javadm.com.Download;
 import javadm.data.Data;
-import javax.swing.JFileChooser;
+import javadm.data.DataDaoSqlite;
+import javax.swing.AbstractAction;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
 //import javax.swing.border.EmptyBorder;
 
 public class ToolBar extends JPanel
@@ -59,24 +62,26 @@ public class ToolBar extends JPanel
     static final private String STOP = "stop";
     static final private String RESTART = "restart";
     static final private String SETTING = "setting";
-    private MainFrame mframe;
-    private Download currentDownload;
-    private JToolBar toolBar;
+    static final private String SCHEDULE = "schedule";
+    static final private String GRAPH = "graph";
+    private final MainFrame mainframe;
+    private Download selectedDownload;
+    private final JToolBar toolBar;
     private JButton btnMenu;
     private JButton btnAdd;
     private JButton btnRemove;
     private JButton btnStart;
     private JButton btnStop;
     private JButton btnSetting;
-    private JButton btnCtrl;
     private JButton btnRestart;
-    private TableModel model;
+    private JButton btnSchedule;
+    private JButton btnGraph;
+    private JPopupMenu popup;
 
     //private ModalDialog mDialog; 
-    public ToolBar(MainFrame frm,TableModel model) {
+    public ToolBar(MainFrame mainframe) {
         super(new BorderLayout());
-        this.mframe = frm;
-        this.model = model;
+        this.mainframe = mainframe;
         toolBar = new JToolBar();
         addButtons(toolBar);
         toolBar.setFloatable(false);
@@ -87,14 +92,7 @@ public class ToolBar extends JPanel
         //mDialog = new ModalDialog(frm);
     }
 
-    public void setCurrentDownload(Download currentDownload) {
-        this.currentDownload = currentDownload;
-        updateToolBarState();
-        toolBar.repaint();
-    }
-
     protected void addButtons(JToolBar toolBar) {
-        btnCtrl = new JButton();
 
         btnMenu = formatButton(MENU, "JDM Menu");
         toolBar.add(btnMenu);
@@ -119,29 +117,66 @@ public class ToolBar extends JPanel
         btnSetting = formatButton(SETTING, "Selected download option");
         toolBar.add(btnSetting);
 
+        btnSchedule = formatButton(SCHEDULE, "Schedule download");
+        toolBar.add(btnSchedule);
+
+        btnGraph = formatButton(GRAPH, "Show download details");
+        toolBar.add(btnGraph);
+
+        popup = new JPopupMenu();
+        popup.add(new JMenuItem(new AbstractAction("Option 1") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(mainframe, "Option 1 selected");
+            }
+        }));
+        popup.add(new JMenuItem(new AbstractAction("Option 2") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(mainframe, "Option 2 selected");
+            }
+        }));
+
         //separator
         toolBar.addSeparator();
 
     }
 
-    public void updateToolBarState() {
-        //System.err.println(currentDownload.getData().isComplete());
-        if (currentDownload.getData().isComplete()) {
-            System.err.println("blb");
-            btnRestart.setVisible(true);
-            btnStop.setVisible(false);
-            btnStart.setVisible(false);
+    public void refreshToolBar() {
+        //System.err.println(selectedDownload.getData().isComplete());
+        try {
 
-        } else if (currentDownload.isStart()) {
-            btnRestart.setVisible(false);
-            btnStop.setVisible(true);
-            btnStart.setVisible(false);
-        } else {
+            selectedDownload = model.getRow(table.getSelectedRow());
+            btnRemove.setVisible(true);
+            btnSetting.setVisible(true);
+            if (selectedDownload.getData().isComplete()) {
+                System.err.println("blb");
+                btnRestart.setVisible(true);
+                btnStop.setVisible(false);
+                btnStart.setVisible(false);
+
+            } else if (selectedDownload.isStart()) {
+                btnRestart.setVisible(false);
+                btnStop.setVisible(true);
+                btnStart.setVisible(false);
+            } else {
+                btnRestart.setVisible(false);
+                btnStop.setVisible(false);
+                btnStart.setVisible(true);
+            }
+            //toolBar.repaint();
+
+        } catch (Exception e) {
+            selectedDownload = null;
             btnRestart.setVisible(false);
             btnStop.setVisible(false);
-            btnStart.setVisible(true);
+            btnStart.setVisible(false);
+            btnRemove.setVisible(false);
+            btnSetting.setVisible(false);
+
         }
 
+        //btn
         //btn
     }
 
@@ -172,6 +207,8 @@ public class ToolBar extends JPanel
         return button;
     }
 
+
+
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
@@ -182,31 +219,45 @@ public class ToolBar extends JPanel
                 case MENU:
                     //first button clicked
                     //chooseFolder();
+                    popup.show(btnMenu, btnMenu.getLocation().x, btnMenu.getLocation().y + btnMenu.getHeight());
                     break;
                 case ADD:
                     // second button clicked
                     Download newDownload = new Download();
                     newDownload.setData(new Data());
                     newDownload.setDownloadControl(new DownloadControl());
-                    OptionDialog newDwn = new OptionDialog(mframe,model, true, newDownload,true);
+                    OptionDialog newDwn = new OptionDialog(mainframe, model, true, newDownload, true);
                     newDwn.setTitle("Add New download");
-                    newDwn.setLocation(mframe.getLocation().x - (newDwn.getWidth() - mframe.getWidth()) / 2, mframe.getLocation().y - (newDwn.getHeight() - mframe.getHeight()) / 2);
+                    newDwn.setLocation(mainframe.getLocation().x - (newDwn.getWidth() - mainframe.getWidth()) / 2, mainframe.getLocation().y - (newDwn.getHeight() - mainframe.getHeight()) / 2);
                     newDwn.setVisible(true);
                     break;
                 case REMOVE:
 
-                    break;
-                case START:
-                    System.out.println("javadm.gui.ToolBar.actionPerformed() start");
-                    break;
-                case STOP:
+                        mainframe.removeDownload();
 
                     break;
+                case START:
+                    selectedDownload.setStart(true);
+                    break;
+                case STOP:
+                    selectedDownload.setStart(false);
+                    break;
+                case RESTART:
+                    selectedDownload.getData().setComplete(false);
+                    selectedDownload.getData().setDoneSize(0);
+                    selectedDownload.setStart(true);
+                    break;
                 case SETTING:
-                    OptionDialog xxx = new OptionDialog(mframe,model, true, currentDownload,false);
-                    xxx.setTitle("Download Options- " + currentDownload.getData().getName());
-                    xxx.setLocation(mframe.getLocation().x - (xxx.getWidth() - mframe.getWidth()) / 2, mframe.getLocation().y - (xxx.getHeight() - mframe.getHeight()) / 2);
+                    OptionDialog xxx = new OptionDialog(mainframe, model, true, selectedDownload, false);
+                    xxx.setTitle("Download Options- " + selectedDownload.getData().getName());
+                    xxx.setLocation(mainframe.getLocation().x - (xxx.getWidth() - mainframe.getWidth()) / 2, mainframe.getLocation().y - (xxx.getHeight() - mainframe.getHeight()) / 2);
                     xxx.setVisible(true);
+                    break;
+                case SCHEDULE:
+                    System.err.println(showOptionPane("wannaa bla bla", SCHEDULE));
+                    break;
+                case GRAPH:
+                    mainframe.showDetails();
                     break;
                 default:
                     break;
