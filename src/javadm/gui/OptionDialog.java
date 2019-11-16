@@ -40,7 +40,7 @@ public class OptionDialog extends javax.swing.JDialog {
     private final MainFrame mainframe;
 
     /**
-     * Creates new form NewJDialog
+     * Creates new OptionDialog
      *
      * @param parent
      * @param model
@@ -57,6 +57,13 @@ public class OptionDialog extends javax.swing.JDialog {
         initComponents();
         btnRemove.setVisible(!newDownload);
         btnOK.setVisible(!newDownload);
+        if (selectedDownload.getData().getDoneSize()>0){
+            //txtDirectory.setText("Download already started");
+            txtDirectory.setEnabled(false);
+            btnDirectory.setEnabled(false);
+            txtName.setEnabled(false);
+            
+        }
 
         SpinConnNCount.setValue(selectedDownload.getData().getConnections());
     }
@@ -130,6 +137,7 @@ public class OptionDialog extends javax.swing.JDialog {
 
         btnRemove.setFont(btnRemove.getFont().deriveFont((float)14));
         btnRemove.setText("Remove");
+        btnRemove.setFocusPainted(false);
         btnRemove.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnRemoveActionPerformed(evt);
@@ -234,7 +242,7 @@ public class OptionDialog extends javax.swing.JDialog {
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         // TODO add your handling code here:
 
-        // try {
+         try {
         DataDaoSqlite db = new DataDaoSqlite();
 
         for (int i = 0; i < model.getRowCount(); i++) {
@@ -249,12 +257,12 @@ public class OptionDialog extends javax.swing.JDialog {
 
             }
         }
-        //} 
-//        catch (Exception e) {
-//                       JOptionPane.showMessageDialog(null, e.getMessage(), "JavaDM: "
-//                    + "error remove download", JOptionPane.INFORMATION_MESSAGE);
-//            
-//        }
+        } 
+        catch (Exception e) {
+                       JOptionPane.showMessageDialog(null, e.getMessage(), "JavaDM: "
+                    + "error remove download", JOptionPane.INFORMATION_MESSAGE);
+            
+        }
 
 
     }//GEN-LAST:event_btnRemoveActionPerformed
@@ -265,10 +273,10 @@ public class OptionDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
-        // TODO add your handling code here:
-        if (updateData()) {
-            this.dispose();
-        }
+                    // TODO add your handling code here:
+                    if(updateData()){
+                        this.dispose();
+                    }
     }//GEN-LAST:event_btnOKActionPerformed
 
     private void chooseFolder() {
