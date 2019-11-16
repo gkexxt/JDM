@@ -1,4 +1,4 @@
-/*
+/* 
  * The MIT License
  *
  * Copyright 2019 G.K #gkexxt@outlook.com.
@@ -149,8 +149,10 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
             DataDaoSqlite db = new DataDaoSqlite();
             db.updateDownloadData(download.getData());
             fireTableCellUpdated(row, column);
+            this.fireTableRowsUpdated(0, this.getRowCount()-1);
+            //fireTableRowsDeleted();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage() + "\n" + e.toString(), "InfoBox: "
+            JOptionPane.showMessageDialog(null,e.getMessage() + "\n" + e.toString(), "InfoBox: "
                     + "error update db", JOptionPane.INFORMATION_MESSAGE);
         }
 
@@ -160,7 +162,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
     public void propertyChange(PropertyChangeEvent evt) {
         //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         fireTableRowsUpdated(0, this.getRowCount()-1);
-        System.out.println("javadm.gui.TableModel.propertyChange()");
+        //System.out.println("javadm.gui.TableModel.propertyChange()");
     }
 
 }

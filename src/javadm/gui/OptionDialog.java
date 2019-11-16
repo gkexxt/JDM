@@ -1,7 +1,7 @@
-/*
+/* 
  * The MIT License
  *
- * Copyright 2019 gkalianan.
+ * Copyright 2019 G.K #gkexxt@outlook.com.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,7 +23,10 @@
  */
 package javadm.gui;
 
+import javadm.com.Download;
+import javadm.data.DataDaoSqlite;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -31,13 +34,31 @@ import javax.swing.JFileChooser;
  */
 public class OptionDialog extends javax.swing.JDialog {
 
+    private final Download selectedDownload;
+    private final boolean newDownload;
+    private final TableModel model;
+    private final MainFrame mainframe;
+
     /**
      * Creates new form NewJDialog
+     *
+     * @param parent
+     * @param model
+     * @param modal
+     * @param selDownload
+     * @param newdownload
      */
-    public OptionDialog(java.awt.Frame parent, boolean modal) {
+    public OptionDialog(MainFrame parent, TableModel model, boolean modal, Download selDownload, boolean newdownload) {
         super(parent, modal);
+        this.mainframe = parent;
+        this.selectedDownload = selDownload;
+        this.newDownload = newdownload;
+        this.model = model;
         initComponents();
-        
+        btnRemove.setVisible(!newDownload);
+        btnOK.setVisible(!newDownload);
+
+        SpinConnNCount.setValue(selectedDownload.getData().getConnections());
     }
 
     /**
@@ -57,21 +78,18 @@ public class OptionDialog extends javax.swing.JDialog {
         txtDirectory = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        jSpinner1 = new javax.swing.JSpinner();
-        jButton1 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
-        jButton5 = new javax.swing.JButton();
+        SpinConnNCount = new javax.swing.JSpinner();
+        btnSave = new javax.swing.JButton();
+        btnRemove = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        btnOK = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setModal(true);
+        setResizable(false);
 
         txtName.setFont(txtName.getFont().deriveFont((float)14));
-        txtName.setText("txtName");
-        txtName.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtNameActionPerformed(evt);
-            }
-        });
+        txtName.setText(selectedDownload.getData().getName());
 
         jLabel1.setFont(jLabel1.getFont().deriveFont((float)14));
         jLabel1.setText("Name");
@@ -80,16 +98,10 @@ public class OptionDialog extends javax.swing.JDialog {
         jLabel2.setText("Url");
 
         txtUrl.setFont(txtUrl.getFont().deriveFont((float)14));
-        txtUrl.setText("txtUrl");
-        txtUrl.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtUrlActionPerformed(evt);
-            }
-        });
+        txtUrl.setText(selectedDownload.getData().getUrl());
 
         btnDirectory.setFont(btnDirectory.getFont().deriveFont((float)14));
         btnDirectory.setText("Select");
-        btnDirectory.setOpaque(false);
         btnDirectory.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDirectoryActionPerformed(evt);
@@ -97,12 +109,7 @@ public class OptionDialog extends javax.swing.JDialog {
         });
 
         txtDirectory.setFont(txtDirectory.getFont().deriveFont((float)14));
-        txtDirectory.setText("txtDirectory");
-        txtDirectory.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                txtDirectoryActionPerformed(evt);
-            }
-        });
+        txtDirectory.setText(selectedDownload.getData().getDirectory());
 
         jLabel3.setFont(jLabel3.getFont().deriveFont((float)14));
         jLabel3.setText("Directory");
@@ -110,24 +117,40 @@ public class OptionDialog extends javax.swing.JDialog {
         jLabel4.setFont(jLabel4.getFont().deriveFont((float)14));
         jLabel4.setText("No. of Connections");
 
-        jSpinner1.setFont(jSpinner1.getFont().deriveFont((float)14));
-        jSpinner1.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
+        SpinConnNCount.setFont(SpinConnNCount.getFont().deriveFont((float)14));
+        SpinConnNCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
 
-        jButton1.setFont(jButton1.getFont().deriveFont((float)14));
-        jButton1.setText("Save");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnSave.setFont(btnSave.getFont().deriveFont((float)14));
+        btnSave.setText("Save");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnSaveActionPerformed(evt);
             }
         });
 
-        jButton4.setFont(jButton4.getFont().deriveFont((float)14));
-        jButton4.setText("Remove");
-        jButton4.setOpaque(false);
+        btnRemove.setFont(btnRemove.getFont().deriveFont((float)14));
+        btnRemove.setText("Remove");
+        btnRemove.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnRemoveActionPerformed(evt);
+            }
+        });
 
-        jButton5.setFont(jButton5.getFont().deriveFont((float)14));
-        jButton5.setText("Cancel");
-        jButton5.setOpaque(false);
+        btnCancel.setFont(btnCancel.getFont().deriveFont((float)14));
+        btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCancelActionPerformed(evt);
+            }
+        });
+
+        btnOK.setText("OK");
+        btnOK.setMinimumSize(new java.awt.Dimension(40, 33));
+        btnOK.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOKActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -139,13 +162,16 @@ public class OptionDialog extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 50, Short.MAX_VALUE)
-                        .addComponent(jButton1)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton5))
+                        .addComponent(btnRemove)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(12, 12, 12)
+                        .addComponent(btnCancel)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -183,86 +209,73 @@ public class OptionDialog extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jSpinner1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton4)
-                    .addComponent(jButton5))
+                    .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnSave)
+                    .addComponent(btnRemove)
+                    .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(btnCancel))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void txtUrlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtUrlActionPerformed
+    private void btnSaveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveActionPerformed
         // TODO add your handling code here:
-    }//GEN-LAST:event_txtUrlActionPerformed
+        updateData();
 
-    private void txtDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtDirectoryActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtDirectoryActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void txtNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_txtNameActionPerformed
+    }//GEN-LAST:event_btnSaveActionPerformed
 
     private void btnDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDirectoryActionPerformed
         // TODO add your handling code here:
         chooseFolder();
     }//GEN-LAST:event_btnDirectoryActionPerformed
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String args[]) {
-        /* Set the Nimbus look and feel */
-        //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
-        /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
-         * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
-         */
-        try {
-            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
-                if ("Nimbus".equals(info.getName())) {
-                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
-                    break;
-                }
-            }
-        } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(OptionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(OptionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(OptionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(OptionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
-        }
-        //</editor-fold>
-        //</editor-fold>
+    private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
+        // TODO add your handling code here:
 
-        /* Create and display the dialog */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                OptionDialog dialog = new OptionDialog(new javax.swing.JFrame(), true);
-                dialog.addWindowListener(new java.awt.event.WindowAdapter() {
-                    @Override
-                    public void windowClosing(java.awt.event.WindowEvent e) {
-                        System.exit(0);
-                    }
-                });
-                dialog.setVisible(true);
+        // try {
+        DataDaoSqlite db = new DataDaoSqlite();
+
+        for (int i = 0; i < model.getRowCount(); i++) {
+            System.err.println(i);
+            if (model.getRow(i).getData().getId() == selectedDownload.getData().getId()) {
+                mainframe.removeTblelistner();//remove table listner before delete from model
+                model.removeRows(i);
+                mainframe.addtbleListner();//add it back
+                model.fireTableRowsUpdated(0, model.getColumnCount() - 1);
+                db.deleteDownloadData(selectedDownload.getData().getId());
+                this.dispose();
+
             }
-        });
-    }
-    
-    
-        public void chooseFolder() {
+        }
+        //} 
+//        catch (Exception e) {
+//                       JOptionPane.showMessageDialog(null, e.getMessage(), "JavaDM: "
+//                    + "error remove download", JOptionPane.INFORMATION_MESSAGE);
+//            
+//        }
+
+
+    }//GEN-LAST:event_btnRemoveActionPerformed
+
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
+        // TODO add your handling code here:
+        if (updateData()) {
+            this.dispose();
+        }
+    }//GEN-LAST:event_btnOKActionPerformed
+
+    private void chooseFolder() {
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new java.io.File("."));
         chooser.setDialogTitle("Save to");
-        
+
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setFileHidingEnabled(true);
         //
@@ -272,22 +285,52 @@ public class OptionDialog extends javax.swing.JDialog {
         //    
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
-            txtDirectory.setText( chooser.getSelectedFile().toString());
+            txtDirectory.setText(chooser.getSelectedFile().toString());
             //System.out.println("getSelectedFile() : "
-                  //  + chooser.getSelectedFile());
-        } 
+            //  + chooser.getSelectedFile());
+        }
+    }
+
+    private boolean updateData() {
+        try {
+            if (txtDirectory.getText().isBlank() || txtName.getText().isBlank()
+                    || txtUrl.getText().isBlank()) {
+                throw new IllegalArgumentException("fields cant be left empthy");
+            } else {
+                selectedDownload.getData().setConnections((int) SpinConnNCount.getValue());
+                selectedDownload.getData().setName(txtName.getText());
+                selectedDownload.getData().setUrl(txtUrl.getText());
+                selectedDownload.getData().setDirectory(txtDirectory.getText());
+                DataDaoSqlite db = new DataDaoSqlite();
+                if (newDownload) {
+                    db.insertDownloadData(selectedDownload.getData());
+                    model.addRow(selectedDownload);
+                    model.fireTableRowsUpdated(0, model.getColumnCount());
+                } else {
+                    db.updateDownloadData(selectedDownload.getData());
+                    model.fireTableRowsUpdated(0, model.getColumnCount());
+                }
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(mainframe, e.getMessage(), "JavaDM: "
+                    + "error update download", JOptionPane.INFORMATION_MESSAGE);
+            return false;
+        }
+        return true;
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JSpinner SpinConnNCount;
+    private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnDirectory;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton4;
-    private javax.swing.JButton jButton5;
+    private javax.swing.JButton btnOK;
+    private javax.swing.JButton btnRemove;
+    private javax.swing.JButton btnSave;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JSpinner jSpinner1;
     private javax.swing.JTextField txtDirectory;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtUrl;

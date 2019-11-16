@@ -1,4 +1,4 @@
-/*
+/* 
  * The MIT License
  *
  * Copyright 2019 G.K #gkexxt@outlook.com.
@@ -140,7 +140,7 @@ public class DataDaoSqlite implements DaoAPI {
         Connection connection = ConnectionFactory.getConnection();
         try {
             Statement stmt = connection.createStatement();
-            int i = stmt.executeUpdate("DELETE FROM downloaddate WHERE id=" + id);
+            int i = stmt.executeUpdate("DELETE FROM downloaddata WHERE id=" + id);
             if (i == 1) {
                 return true;
             }

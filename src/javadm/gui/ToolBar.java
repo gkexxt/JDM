@@ -43,6 +43,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javadm.com.Download;
+import javadm.data.Data;
 import javax.swing.JFileChooser;
 //import javax.swing.border.EmptyBorder;
 
@@ -69,11 +70,13 @@ public class ToolBar extends JPanel
     private JButton btnSetting;
     private JButton btnCtrl;
     private JButton btnRestart;
+    private TableModel model;
 
     //private ModalDialog mDialog; 
-    public ToolBar(MainFrame frm) {
+    public ToolBar(MainFrame frm,TableModel model) {
         super(new BorderLayout());
         this.mframe = frm;
+        this.model = model;
         toolBar = new JToolBar();
         addButtons(toolBar);
         toolBar.setFloatable(false);
@@ -122,7 +125,7 @@ public class ToolBar extends JPanel
     }
 
     public void updateToolBarState() {
-        System.err.println(currentDownload.getData().isComplete());
+        //System.err.println(currentDownload.getData().isComplete());
         if (currentDownload.getData().isComplete()) {
             System.err.println("blb");
             btnRestart.setVisible(true);
@@ -182,7 +185,13 @@ public class ToolBar extends JPanel
                     break;
                 case ADD:
                     // second button clicked
-
+                    Download newDownload = new Download();
+                    newDownload.setData(new Data());
+                    newDownload.setDownloadControl(new DownloadControl());
+                    OptionDialog newDwn = new OptionDialog(mframe,model, true, newDownload,true);
+                    newDwn.setTitle("Add New download");
+                    newDwn.setLocation(mframe.getLocation().x - (newDwn.getWidth() - mframe.getWidth()) / 2, mframe.getLocation().y - (newDwn.getHeight() - mframe.getHeight()) / 2);
+                    newDwn.setVisible(true);
                     break;
                 case REMOVE:
 
@@ -194,7 +203,7 @@ public class ToolBar extends JPanel
 
                     break;
                 case SETTING:
-                    OptionDialog xxx = new OptionDialog(mframe, true, currentDownload);
+                    OptionDialog xxx = new OptionDialog(mframe,model, true, currentDownload,false);
                     xxx.setTitle("Download Options- " + currentDownload.getData().getName());
                     xxx.setLocation(mframe.getLocation().x - (xxx.getWidth() - mframe.getWidth()) / 2, mframe.getLocation().y - (xxx.getHeight() - mframe.getHeight()) / 2);
                     xxx.setVisible(true);

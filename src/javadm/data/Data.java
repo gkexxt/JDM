@@ -1,4 +1,4 @@
-/*
+/* 
  * The MIT License
  *
  * Copyright 2019 G.K #gkexxt@outlook.com.
@@ -23,34 +23,35 @@
  */
 package javadm.data;
 
+import static java.time.LocalDateTime.now;
+
 /**
- *Class to hold save able data and of its method
+ * Class to hold save able data and of its method
+ *
  * @author G.K #gkexxt@outlook.com
  */
 public class Data {
 
     private int id;
-    private String name;
-    private String url;
-    private String directory;
+
+    private String name ="";
+    private String url="";
+    private String directory="";
     private long fileSize;
     private long doneSize;
-    private String createdDate;
+    private String createdDate = now().toString();
     private String lastDate;
     private String completeDate;
+    private int connections = 1; //min
+    private boolean complete;
 
-
-
-
-
+ 
 
     public Data() {
-
+    
+        
         //setProgress();
     }
-    
-
-
 
     public int getId() {
         return id;
@@ -124,8 +125,22 @@ public class Data {
         this.completeDate = completeDate;
     }
 
-  
+    public int getConnections() {
+        return connections;
+    }
 
+    public void setConnections(int connections) {
+        this.connections = connections;
+    }
+    
+       public boolean isComplete() {
+        return complete;
+    }
+
+    public synchronized  void setComplete(boolean complete) {
+        this.complete = complete;
+        System.out.println("javadm.data.Data.setComplete()");
+    }
 
     @Override
     public String toString() {
