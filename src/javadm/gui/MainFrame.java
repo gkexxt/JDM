@@ -242,7 +242,7 @@ public class MainFrame extends JFrame
             model.removeTableModelListener(table);//remove table listner before delete from model
             model.removeRows(table.getSelectedRow());
             model.addTableModelListener(table);//add it back
-            model.fireTableRowsUpdated(0, model.getColumnCount() - 1);
+            model.fireTableRowsUpdated(0, model.getColumnCount());
             DataDaoSqlite db = new DataDaoSqlite();
             db.deleteDownloadData(rmDownload.getData().getId());
             toolbar.refreshToolBar();
@@ -300,6 +300,7 @@ public class MainFrame extends JFrame
         model.getRow(table.getSelectedRow()).setData(download.getData());
         DataDaoSqlite db = new DataDaoSqlite();
         db.updateDownloadData(download.getData());
+        model.fireTableRowsUpdated(0, model.getRowCount());
     }
 
     /**
