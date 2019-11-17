@@ -38,8 +38,7 @@ import javax.swing.JProgressBar;
  */
 public class TableModel extends RowTableModel<Download> implements PropertyChangeListener{
     //private static int  xxx = 0;
-
-    private static String[] COLUMN_NAMES
+    private static final String[] COLUMN_NAMES
             = {
                 "ID",
                 "Name",
@@ -51,7 +50,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                 "filesize",
                 "donesize",};
 
-    TableModel() {
+    TableModel(MainFrame mainframe) {
         super(Arrays.asList(COLUMN_NAMES));
         setRowClass(Download.class);
 

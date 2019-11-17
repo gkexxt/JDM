@@ -37,17 +37,17 @@ import javax.swing.JPanel;
 import java.net.URL;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
 import javadm.com.Download;
-import javadm.data.Data;
-import javadm.data.DataDaoSqlite;
 import javax.swing.AbstractAction;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
-import javax.swing.JTable;
 //import javax.swing.border.EmptyBorder;
 
 public class ToolBar extends JPanel
@@ -90,6 +90,7 @@ public class ToolBar extends JPanel
         toolBar.setOpaque(false);
         add(toolBar, BorderLayout.PAGE_START);
         //mDialog = new ModalDialog(frm);
+        refreshToolBar();
     }
 
     protected void addButtons(JToolBar toolBar) {
@@ -124,21 +125,47 @@ public class ToolBar extends JPanel
         toolBar.add(btnGraph);
 
         popup = new JPopupMenu();
-        popup.add(new JMenuItem(new AbstractAction("Option 1") {
+        popup.add(new JMenuItem(new AbstractAction("Settings") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(mainframe, "Option 1 selected");
+                //JOptionPane.showMessageDialog(mainframe, "Option 1 selected");
+                SystemSetting syssetting = new SystemSetting(mainframe, enabled);
+                syssetting.setVisible(true);
+                syssetting.setLocationRelativeTo(mainframe);
+
             }
         }));
-        popup.add(new JMenuItem(new AbstractAction("Option 2") {
+
+        JMenu submenu = new JMenu("Help");
+
+        submenu.add(new JMenuItem(new AbstractAction("Online Help") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Desktop.getDesktop().browse(new URI("http://www.example.com"));
+                } catch (Exception ex) {
+                    mainframe.showOptionPaneOK(ex.getMessage() + "\n" + "Please vist : http://www.example.com", "Online Help", JOptionPane.INFORMATION_MESSAGE);
+                }
+
+            }
+        }));
+
+        submenu.add(new JMenuItem(new AbstractAction("About") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JOptionPane.showMessageDialog(mainframe, "Option 2 selected");
             }
         }));
+        popup.add(submenu);
 
+        popup.add(new JMenuItem(new AbstractAction("Exit") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                System.exit(0);
+            }
+        }));
         //separator
-        toolBar.addSeparator();
+        //toolBar.addSeparator();
 
     }
 
@@ -146,9 +173,11 @@ public class ToolBar extends JPanel
         //System.err.println(selectedDownload.getData().isComplete());
         try {
 
-            selectedDownload = model.getRow(table.getSelectedRow());
+            selectedDownload = mainframe.getSelectedDownload();
             btnRemove.setVisible(true);
             btnSetting.setVisible(true);
+            btnGraph.setVisible(true);
+            btnSchedule.setVisible(true);
             if (selectedDownload.getData().isComplete()) {
                 System.err.println("blb");
                 btnRestart.setVisible(true);
@@ -173,6 +202,8 @@ public class ToolBar extends JPanel
             btnStart.setVisible(false);
             btnRemove.setVisible(false);
             btnSetting.setVisible(false);
+            btnGraph.setVisible(false);
+            btnSchedule.setVisible(false);
 
         }
 
@@ -207,8 +238,6 @@ public class ToolBar extends JPanel
         return button;
     }
 
-
-
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
@@ -222,39 +251,29 @@ public class ToolBar extends JPanel
                     popup.show(btnMenu, btnMenu.getLocation().x, btnMenu.getLocation().y + btnMenu.getHeight());
                     break;
                 case ADD:
-                    // second button clicked
-                    Download newDownload = new Download();
-                    newDownload.setData(new Data());
-                    newDownload.setDownloadControl(new DownloadControl());
-                    OptionDialog newDwn = new OptionDialog(mainframe, model, true, newDownload, true);
+                    // second button clicked                  
+                    OptionDialog newDwn = new OptionDialog(mainframe, true, true);
                     newDwn.setTitle("Add New download");
-                    newDwn.setLocation(mainframe.getLocation().x - (newDwn.getWidth() - mainframe.getWidth()) / 2, mainframe.getLocation().y - (newDwn.getHeight() - mainframe.getHeight()) / 2);
-                    newDwn.setVisible(true);
+                    
                     break;
                 case REMOVE:
-
-                        mainframe.removeDownload();
-
+                    mainframe.removeDownload();
                     break;
                 case START:
-                    selectedDownload.setStart(true);
+                    mainframe.startDownload();
                     break;
                 case STOP:
-                    selectedDownload.setStart(false);
+                    mainframe.stopDownload();
                     break;
                 case RESTART:
-                    selectedDownload.getData().setComplete(false);
-                    selectedDownload.getData().setDoneSize(0);
-                    selectedDownload.setStart(true);
+                    mainframe.restartDownload();
                     break;
                 case SETTING:
-                    OptionDialog xxx = new OptionDialog(mainframe, model, true, selectedDownload, false);
+                    OptionDialog xxx = new OptionDialog(mainframe, true, false);
                     xxx.setTitle("Download Options- " + selectedDownload.getData().getName());
-                    xxx.setLocation(mainframe.getLocation().x - (xxx.getWidth() - mainframe.getWidth()) / 2, mainframe.getLocation().y - (xxx.getHeight() - mainframe.getHeight()) / 2);
-                    xxx.setVisible(true);
                     break;
                 case SCHEDULE:
-                    System.err.println(showOptionPane("wannaa bla bla", SCHEDULE));
+                    //System.err.println(showOptionPaneOKCancel("wannaa bla bla", SCHEDULE));
                     break;
                 case GRAPH:
                     mainframe.showDetails();

@@ -24,6 +24,7 @@
 package javadm.data;
 
 import static java.time.LocalDateTime.now;
+import java.util.List;
 
 /**
  * Class to hold save able data and of its method
@@ -44,7 +45,7 @@ public class Data {
     private String completeDate;
     private int connections = 1; //min
     private boolean complete;
-
+    
  
 
     public Data() {

@@ -24,7 +24,7 @@
 package javadm.gui;
 
 import javadm.com.Download;
-import javadm.data.DataDaoSqlite;
+import javadm.data.Data;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
@@ -36,36 +36,40 @@ public class OptionDialog extends javax.swing.JDialog {
 
     private final Download selectedDownload;
     private final boolean newDownload;
-    private final TableModel model;
     private final MainFrame mainframe;
 
     /**
      * Creates new OptionDialog
      *
      * @param parent
-     * @param model
      * @param modal
-     * @param selDownload
      * @param newdownload
      */
-    public OptionDialog(MainFrame parent, TableModel model, boolean modal, Download selDownload, boolean newdownload) {
+    public OptionDialog(MainFrame parent, boolean modal, boolean newdownload) {
         super(parent, modal);
         this.mainframe = parent;
-        this.selectedDownload = selDownload;
         this.newDownload = newdownload;
-        this.model = model;
-        initComponents();
-        btnRemove.setVisible(!newDownload);
-        btnSave.setVisible(!newDownload);
-        if (selectedDownload.getData().getDoneSize()>0){
-            //txtDirectory.setText("Download already started");
-            txtDirectory.setEnabled(false);
-            btnDirectory.setEnabled(false);
-            txtName.setEnabled(false);
-            
+
+        if (newDownload) {
+            this.selectedDownload = new Download();
+            selectedDownload.setData(new Data());
+            initComponents();
+            btnRemove.setVisible(false);
+            btnSave.setVisible(false);
+
+        } else {
+            this.selectedDownload = mainframe.getSelectedDownload();
+            initComponents();
+            if (selectedDownload.getData().getDoneSize() > 0) {
+                txtDirectory.setEnabled(false);
+                btnDirectory.setEnabled(false);
+                txtName.setEnabled(false);
+            }
         }
 
         SpinConnNCount.setValue(selectedDownload.getData().getConnections());
+        this.setLocation(mainframe.getLocation().x - (this.getWidth() - mainframe.getWidth()) / 2, mainframe.getLocation().y - (this.getHeight() - mainframe.getHeight()) / 2);
+        this.setVisible(true);
     }
 
     /**
@@ -241,28 +245,8 @@ public class OptionDialog extends javax.swing.JDialog {
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         // TODO add your handling code here:
-
-         try {
-        DataDaoSqlite db = new DataDaoSqlite();
-
-        for (int i = 0; i < model.getRowCount(); i++) {
-            System.err.println(i);
-            if (model.getRow(i).getData().getId() == selectedDownload.getData().getId()) {
-                mainframe.removeTblelistner();//remove table listner before delete from model
-                model.removeRows(i);
-                mainframe.addtbleListner();//add it back
-                model.fireTableRowsUpdated(0, model.getColumnCount() - 1);
-                db.deleteDownloadData(selectedDownload.getData().getId());
-                this.dispose();
-
-            }
-        }
-        } 
-        catch (Exception e) {
-                       JOptionPane.showMessageDialog(null, e.getMessage(), "JavaDM: "
-                    + "error remove download", JOptionPane.INFORMATION_MESSAGE);
-            
-        }
+        mainframe.removeDownload();
+        this.dispose();
 
 
     }//GEN-LAST:event_btnRemoveActionPerformed
@@ -273,10 +257,10 @@ public class OptionDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_btnCancelActionPerformed
 
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
-                    // TODO add your handling code here:
-                    if(updateData()){
-                        this.dispose();
-                    }
+        // TODO add your handling code here:
+        if (updateData()) {
+            this.dispose();
+        }
     }//GEN-LAST:event_btnOKActionPerformed
 
     private void chooseFolder() {
@@ -301,27 +285,24 @@ public class OptionDialog extends javax.swing.JDialog {
 
     private boolean updateData() {
         try {
-            if (txtDirectory.getText().isBlank() || txtName.getText().isBlank()
-                    || txtUrl.getText().isBlank()) {
+            if (txtDirectory.getText().isBlank() || txtUrl.getText().isBlank()) {
                 throw new IllegalArgumentException("fields cant be left empthy");
             } else {
                 selectedDownload.getData().setConnections((int) SpinConnNCount.getValue());
                 selectedDownload.getData().setName(txtName.getText());
                 selectedDownload.getData().setUrl(txtUrl.getText());
                 selectedDownload.getData().setDirectory(txtDirectory.getText());
-                DataDaoSqlite db = new DataDaoSqlite();
                 if (newDownload) {
-                    db.insertDownloadData(selectedDownload.getData());
-                    model.addRow(selectedDownload);
-                    model.fireTableRowsUpdated(0, model.getColumnCount());
+
+                    mainframe.addDownload(selectedDownload);
                 } else {
-                    db.updateDownloadData(selectedDownload.getData());
-                    model.fireTableRowsUpdated(0, model.getColumnCount());
+                    mainframe.updateDownload(selectedDownload);
+
                 }
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(mainframe, e.getMessage(), "JavaDM: "
-                    + "error update download", JOptionPane.INFORMATION_MESSAGE);
+            mainframe.showOptionPaneOK("Error update download \n" + e.getMessage(), "JavaDM",
+                     JOptionPane.ERROR_MESSAGE);
             return false;
         }
         return true;

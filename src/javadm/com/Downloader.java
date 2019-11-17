@@ -48,11 +48,12 @@ public class Downloader {
 
         BufferedInputStream in = null;
         RandomAccessFile raf = null;
-
         try {
             // open Http connection to URL
             URL url = new URL(download.getData().getUrl());
-            download.getData().setName(url.getFile().substring(1));
+            String[] urlSplit = url.getFile().split("/");
+            download.getData().setName(urlSplit[urlSplit.length-1]);
+            
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U;"
                     + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");

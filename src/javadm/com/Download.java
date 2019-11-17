@@ -25,6 +25,11 @@ package javadm.com;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javadm.data.Data;
 import javadm.gui.DownloadControl;
 
@@ -37,6 +42,10 @@ public class Download {
 
     private Data data;
     private boolean start;
+
+    public Download() {
+        this.downloadControl = new DownloadControl();//ad instace of control
+    }
     private DownloadControl downloadControl;
     private PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
@@ -68,6 +77,21 @@ public class Download {
     public boolean isStart() {
         return start;
 
+    }
+    
+    public boolean setDownloadName(String strUrl){
+            URL url;
+        try {
+            url = new URL(strUrl);
+            String[] urlSplit = url.getFile().split("/");
+            this.getData().setName(urlSplit[urlSplit.length-1]);
+            return true;
+        } catch (MalformedURLException ex) {
+            return false;
+        }
+            
+            
+        
     }
 
     public void setProgress(long buffersize) {
