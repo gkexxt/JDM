@@ -97,10 +97,10 @@ public class OptionDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setModal(true);
-        setResizable(false);
 
         txtName.setFont(txtName.getFont().deriveFont((float)14));
         txtName.setText(selectedDownload.getData().getName());
+        txtName.setMinimumSize(null);
 
         jLabel1.setFont(jLabel1.getFont().deriveFont((float)14));
         jLabel1.setText("Name");
@@ -199,7 +199,7 @@ public class OptionDialog extends javax.swing.JDialog {
                                 .addGap(18, 18, 18)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(txtUrl, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(txtName))))))
+                                    .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
