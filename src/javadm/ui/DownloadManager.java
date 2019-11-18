@@ -244,12 +244,10 @@ public class DownloadManager extends JFrame
         model.removeTableModelListener(table);//remove table listner before delete from model
         model.removeRows(table.getSelectedRow());
         model.addTableModelListener(table);//add it back
-        model.fireTableRowsUpdated(0, model.getColumnCount() - 1);
         DataDaoSqlite db = new DataDaoSqlite();
         db.deleteDownloadData(rmDownload.getData().getId());
         toolbar.refreshToolBar();
         statusPane.setVisible(false);
-
         model.fireTableDataChanged();
     }
 
@@ -362,7 +360,7 @@ public class DownloadManager extends JFrame
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        model.fireTableRowsUpdated(0, model.getRowCount() - 1);
+        model.fireTableRowsUpdated(0, model.getRowCount());
         toolbar.refreshToolBar();
         if (evt.getPropertyName().equals("setErrorMessage")) {
             statusPane.updateErrorView();
