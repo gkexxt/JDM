@@ -47,24 +47,25 @@ public class StatusPane extends JPanel {
     private JLabel progressView = new JLabel();
     private int line = 0;
     private Download currentSelected = new Download();
+    private String downloadInstance = "";
 
     public StatusPane(MainFrame mainframe) {
+        
         super(new GridLayout(1, 1));
         this.mainframe = mainframe;
         currentSelected.setData(new Data());
-
-        JTabbedPane tabbedPane = new JTabbedPane();
-        JScrollPane scroll = new JScrollPane(errorView);
-        tabbedPane.addTab("Info", scroll);
-        tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
         errorView.setForeground(Color.RED);
+        
+        //create tabbedpane
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Info", new JScrollPane(errorView));
+        tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
 
-        JScrollPane scroll2 = new JScrollPane(progressView);
-        tabbedPane.addTab("Progress", scroll2);
+        tabbedPane.addTab("Progress", new JScrollPane(progressView));
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
 
         //Add the tabbed pane to this panel.
-        add(tabbedPane);
+        this.add(tabbedPane);
 
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -72,20 +73,18 @@ public class StatusPane extends JPanel {
     }
 
     public void updateErrorView() {
-        line++;
-        int i = 0;
+        
         try {
-
             if (mainframe.getSelectedDownload() == null) {
                 return;
-            } else if (mainframe.getSelectedDownload().getData().getId() != currentSelected.getData().getId()) {
+            } else if (!mainframe.getSelectedDownload().toString().equals(downloadInstance)) {
                 currentSelected = mainframe.getSelectedDownload();
                 errorView.setText("Error Log : " + currentSelected.getData().getName() + "\n\n");
                 line = 0;
-            }
-
-            currentSelected = mainframe.getSelectedDownload();//          
+            }            
+            downloadInstance = mainframe.getSelectedDownload().toString();//          
             List<String[]> errolog = mainframe.getSelectedDownload().getErrorLog();
+            line++;
             errorView.setText(errorView.getText() + line + " : " + errolog.get(errolog.size() - 1)[0] + "\n"
                     + errolog.get(errolog.size() - 1)[1] + "\n");
         } catch (Exception ex) {
