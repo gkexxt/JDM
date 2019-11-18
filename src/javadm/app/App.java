@@ -43,13 +43,11 @@ public class App {
         SwingUtilities.invokeLater(() -> {
 
             if (lockInstance("lock")) {
+                
+            
                 MainFrame main;
                 main = new MainFrame();
-                main.setTitle("JavaDM");
                 main.createAndShowGUI();
-                //main.pack();
-                //System.err.println(main.getLocation());
-                main.refreshTable();
             }else{
                 System.err.println("app instance is already running");
                 MsgAlreadyRunning msg = new MsgAlreadyRunning();

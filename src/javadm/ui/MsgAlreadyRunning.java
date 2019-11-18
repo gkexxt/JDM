@@ -23,6 +23,9 @@
  */
 package javadm.ui;
 
+import java.net.URL;
+import javax.swing.ImageIcon;
+
 /**
  *
  * @author G.K #gkexxt@outlook.com
@@ -50,6 +53,7 @@ public class MsgAlreadyRunning extends javax.swing.JFrame {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("JDM - already running");
+        setLocationByPlatform(true);
         setResizable(false);
 
         jButton1.setText("OK");
@@ -118,15 +122,17 @@ public class MsgAlreadyRunning extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new MsgAlreadyRunning().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+           new MsgAlreadyRunning().setVisible(true);
         });
     }
-    
-    public void showMe(){
-      new MsgAlreadyRunning().setVisible(true);  
+
+    public void showMe() {
+        MsgAlreadyRunning msg = new MsgAlreadyRunning();
+        msg.setVisible(true);
+        URL imageURL = getClass().getResource("/jdm24.png");
+        ImageIcon img = new ImageIcon(imageURL);
+        msg.setIconImage(img.getImage());
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

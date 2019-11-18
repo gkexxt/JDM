@@ -31,9 +31,9 @@ package javadm.ui;
 import javadm.misc.DataManager;
 import java.awt.*;
 import java.awt.datatransfer.FlavorEvent;
-import java.awt.datatransfer.FlavorListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import javadm.com.Download;
@@ -41,7 +41,6 @@ import javadm.data.Data;
 import javadm.data.DataDaoSqlite;
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.table.DefaultTableCellRenderer;
 
 public class MainFrame extends JFrame
         implements ListSelectionListener, PropertyChangeListener {
@@ -96,8 +95,7 @@ public class MainFrame extends JFrame
                 toolbar.refreshToolBar(); //update toolbar state depending on selected
             }
         });
-        
-        
+
         JScrollPane downloadPane = new JScrollPane(table);
         splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 downloadPane, statusPane);
@@ -160,7 +158,7 @@ public class MainFrame extends JFrame
         //Create and set up the stage.
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //Display stage.
-        this.getContentPane().add(mainsplitpane);        
+        this.getContentPane().add(mainsplitpane);
         this.setLocationByPlatform(true);
         this.pack();
         this.setVisible(true);
@@ -171,7 +169,10 @@ public class MainFrame extends JFrame
         splitPaneVertical.setDividerLocation(0.6);
         splitPaneHortizontal.setDividerLocation(0.3);
         //((DefaultTableCellRenderer) table.getDefaultRenderer(Object.class)).setBackground(Color.white);
-        
+        URL imageURL = getClass().getResource("/jdm24.png");
+        ImageIcon img = new ImageIcon(imageURL);
+        this.setIconImage(img.getImage());
+        this.setTitle("JDM");
     }
 
     /**
@@ -341,7 +342,7 @@ public class MainFrame extends JFrame
             javax.swing.SwingUtilities.invokeLater(() -> {
                 MainFrame frame = new MainFrame();
                 frame.createAndShowGUI();
-                frame.refreshTable();
+                //frame.refreshTable();
 
             });
 
