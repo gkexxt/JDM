@@ -224,11 +224,12 @@ public class DownloadManager extends JFrame
      * @return Download
      */
     public Download getSelectedDownload() {
-        if (table.getSelectedRow() < 0) {
-            return null;
-        } else {
-            return model.getRow(table.getSelectedRow());
+        try {
+            Download seldwn = model.getRow(table.getSelectedRow());
+            return seldwn;
+        } catch (Exception e) {
         }
+        return null;
     }
 
     /**
@@ -238,20 +239,17 @@ public class DownloadManager extends JFrame
         if (showChoice("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
             return;
         }
-        try {
-            Download rmDownload = getSelectedDownload();
-            model.removeTableModelListener(table);//remove table listner before delete from model
-            model.removeRows(table.getSelectedRow());
-            model.addTableModelListener(table);//add it back
-            model.fireTableRowsUpdated(0, model.getColumnCount());
-            DataDaoSqlite db = new DataDaoSqlite();
-            db.deleteDownloadData(rmDownload.getData().getId());
-            toolbar.refreshToolBar();
-            statusPane.setVisible(false);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, ex.getMessage(), "JavaDM: "
-                    + "error removing download", JOptionPane.ERROR_MESSAGE);
-        }
+
+        Download rmDownload = getSelectedDownload();
+        model.removeTableModelListener(table);//remove table listner before delete from model
+        model.removeRows(table.getSelectedRow());
+        model.addTableModelListener(table);//add it back
+        model.fireTableRowsUpdated(0, model.getColumnCount() - 1);
+        DataDaoSqlite db = new DataDaoSqlite();
+        db.deleteDownloadData(rmDownload.getData().getId());
+        toolbar.refreshToolBar();
+        statusPane.setVisible(false);
+
         model.fireTableDataChanged();
     }
 
