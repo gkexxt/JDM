@@ -42,7 +42,7 @@ import javadm.data.DataDaoSqlite;
 import javax.swing.*;
 import javax.swing.event.*;
 
-public class MainFrame extends JFrame
+public class DownloadManager extends JFrame
         implements ListSelectionListener, PropertyChangeListener {
 
     private final DataManager dm = new DataManager();//data manager handle items data
@@ -56,7 +56,7 @@ public class MainFrame extends JFrame
     private ToolBar toolbar;
     private StatusPane statusPane;
 
-    public MainFrame() {
+    public DownloadManager() {
 
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -130,10 +130,6 @@ public class MainFrame extends JFrame
         table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
             toolbar.refreshToolBar();
             statusPane.updateErrorView();
-
-            // do some actions here, for example
-            // print first column value from selected row
-            //System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
         });
     }
 
@@ -152,7 +148,7 @@ public class MainFrame extends JFrame
     }
 
     /**
-     * Create the MainFrame and show it.
+     * Create the DownloadManager and show it.
      */
     public void createAndShowGUI() {
         //Create and set up the stage.
@@ -173,6 +169,7 @@ public class MainFrame extends JFrame
         ImageIcon img = new ImageIcon(imageURL);
         this.setIconImage(img.getImage());
         this.setTitle("JDM");
+        //this.refreshTable();
     }
 
     /**
@@ -185,8 +182,9 @@ public class MainFrame extends JFrame
             @Override
             public void run() {
                 //updateUI();
-                model.fireTableRowsUpdated(0, model.getRowCount() - 1);
-                toolbar.refreshToolBar();
+                //model.fireTableRowsUpdated(0, model.getRowCount() - 1);
+                //toolbar.refreshToolBar();
+                getSelectedDownload();
             }
         };
         t.scheduleAtFixedRate(tt, 0, 100);
@@ -226,8 +224,11 @@ public class MainFrame extends JFrame
      * @return Download
      */
     public Download getSelectedDownload() {
-        return model.getRow(table.getSelectedRow());
-
+        if (table.getSelectedRow() < 0) {
+            return null;
+        } else {
+            return model.getRow(table.getSelectedRow());
+        }
     }
 
     /**
@@ -340,7 +341,7 @@ public class MainFrame extends JFrame
 
             //run ui/app
             javax.swing.SwingUtilities.invokeLater(() -> {
-                MainFrame frame = new MainFrame();
+                DownloadManager frame = new DownloadManager();
                 frame.createAndShowGUI();
                 //frame.refreshTable();
 

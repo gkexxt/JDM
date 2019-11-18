@@ -29,18 +29,18 @@ package javadm.ui;
  */
 public class SystemSetting extends javax.swing.JDialog {
 
-    private MainFrame mainframe;
+    private DownloadManager dm;
 
     /**
      * Creates new form SystemSetting
-     * @param parent
+     * @param downloadManager
      * @param modal
      */
-    public SystemSetting(MainFrame parent, boolean modal) {
-        super(parent, modal);
-        this.mainframe = parent;
+    public SystemSetting(DownloadManager downloadManager, boolean modal) {
+        super(downloadManager, modal);
+        this.dm = downloadManager;
         initComponents();
-        this.setLocation(mainframe.getLocation().x + (mainframe.getWidth() - this.getWidth()) / 2, mainframe.getLocation().y + (mainframe.getHeight() - this.getHeight()) / 2);
+        this.setLocation(downloadManager.getLocation().x + (downloadManager.getWidth() - this.getWidth()) / 2, downloadManager.getLocation().y + (downloadManager.getHeight() - this.getHeight()) / 2);
 
     }
 

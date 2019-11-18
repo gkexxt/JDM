@@ -50,7 +50,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                 "filesize",
                 "donesize",};
 
-    TableModel(MainFrame mainframe) {
+    TableModel(DownloadManager mainframe) {
         super(Arrays.asList(COLUMN_NAMES));
         setRowClass(Download.class);
 
@@ -145,11 +145,8 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                 default:
                     break;
             }
-            //DataDaoSqlite db = new DataDaoSqlite();
-            //db.updateDownloadData(download.getData());
-            fireTableCellUpdated(row, column);
+            //fireTableCellUpdated(row, column);
             this.fireTableRowsUpdated(0, this.getRowCount()-1);
-            //fireTableRowsDeleted();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null,e.getMessage() + "\n" + e.toString(), "InfoBox: "
                     + "error update db", JOptionPane.INFORMATION_MESSAGE);
@@ -159,9 +156,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        fireTableRowsUpdated(0, this.getRowCount()-1);
-        //System.out.println("javadm.gui.TableModel.propertyChange()");
+        fireTableRowsUpdated(0, this.getRowCount());
     }
 
 }

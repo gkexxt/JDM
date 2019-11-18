@@ -38,8 +38,6 @@ import javax.swing.JTable;
 public class DownloadControl {
 Dimension x = new Dimension(10,300);
     private final JLabel lblControl;
-    private final ImageIcon startIcon;
-    private final ImageIcon stopIcon;
     private final JProgressBar progressbar;
     private boolean rowlocked;
     private JTable table;
@@ -62,10 +60,6 @@ Dimension x = new Dimension(10,300);
         
         lblControl = new JLabel();
         lblControl.setHorizontalAlignment(JLabel.CENTER);
-        startIcon = new ImageIcon(new ImageIcon("play.png")
-                .getImage().getScaledInstance(20, 20, java.awt.Image.SCALE_DEFAULT));
-        stopIcon = new ImageIcon(new ImageIcon("stop.png")
-                .getImage().getScaledInstance(20, 20, java.awt.Image.SCALE_DEFAULT));
         //lblControl.setIcon(startIcon);
         lblControl.setText("\u25B6");
         lblControl.setForeground(Color.GREEN);

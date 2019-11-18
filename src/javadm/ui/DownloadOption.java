@@ -36,18 +36,18 @@ public class DownloadOption extends javax.swing.JDialog {
 
     private final Download selectedDownload;
     private final boolean newDownload;
-    private final MainFrame mainframe;
+    private final DownloadManager dm;
 
     /**
      * Creates new OptionDialog
      *
-     * @param parent
+     * @param downloadManager
      * @param modal
      * @param newdownload
      */
-    public DownloadOption(MainFrame parent, boolean modal, boolean newdownload) {
-        super(parent, modal);
-        this.mainframe = parent;
+    public DownloadOption(DownloadManager downloadManager, boolean modal, boolean newdownload) {
+        super(downloadManager, modal);
+        this.dm = downloadManager;
         this.newDownload = newdownload;
 
         if (newDownload) {
@@ -58,7 +58,7 @@ public class DownloadOption extends javax.swing.JDialog {
             btnSave.setVisible(false);
 
         } else {
-            this.selectedDownload = mainframe.getSelectedDownload();
+            this.selectedDownload = dm.getSelectedDownload();
             initComponents();
             if (selectedDownload.getData().getDoneSize() > 0) {
                 txtDirectory.setEnabled(false);
@@ -68,7 +68,7 @@ public class DownloadOption extends javax.swing.JDialog {
         }
 
         SpinConnNCount.setValue(selectedDownload.getData().getConnections());
-        this.setLocation(mainframe.getLocation().x - (this.getWidth() - mainframe.getWidth()) / 2, mainframe.getLocation().y - (this.getHeight() - mainframe.getHeight()) / 2);
+        this.setLocation(dm.getLocation().x - (this.getWidth() - dm.getWidth()) / 2, dm.getLocation().y - (this.getHeight() - dm.getHeight()) / 2);
         this.setVisible(true);
     }
 
@@ -245,7 +245,7 @@ public class DownloadOption extends javax.swing.JDialog {
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         // TODO add your handling code here:
-        mainframe.removeDownload();
+        dm.removeDownload();
         this.dispose();
 
 
@@ -294,14 +294,14 @@ public class DownloadOption extends javax.swing.JDialog {
                 selectedDownload.getData().setDirectory(txtDirectory.getText());
                 if (newDownload) {
 
-                    mainframe.addDownload(selectedDownload);
+                    dm.addDownload(selectedDownload);
                 } else {
-                    mainframe.updateDownload(selectedDownload);
+                    dm.updateDownload(selectedDownload);
 
                 }
             }
         } catch (Exception e) {
-            mainframe.showInfo("Error update download \n" + e.getMessage(), "JavaDM",
+            dm.showInfo("Error update download \n" + e.getMessage(), "JavaDM",
                      JOptionPane.ERROR_MESSAGE);
             return false;
         }

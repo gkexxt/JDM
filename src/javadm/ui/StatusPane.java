@@ -42,22 +42,21 @@ import javax.swing.JTextArea;
 
 public class StatusPane extends JPanel {
 
-    private final MainFrame mainframe;
+    private final DownloadManager dm;
     private final JTextArea errorView = new JTextArea();
     private JLabel progressView = new JLabel();
-    private int line = 0;
     private Download currentSelected = new Download();
     private String downloadInstance = "";
 
-    public StatusPane(MainFrame mainframe) {
-        
+    public StatusPane(DownloadManager downloadManager) {
+
         super(new GridLayout(1, 1));
-        this.mainframe = mainframe;
+        this.dm = downloadManager;
         currentSelected.setData(new Data());
         errorView.setForeground(Color.RED);
         errorView.setEditable(false);
         //errorView.setEnabled(false);
-        
+
         //create tabbedpane
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Info", new JScrollPane(errorView));
@@ -74,25 +73,27 @@ public class StatusPane extends JPanel {
 
     }
 
-    public void updateErrorView() {        
-        try {
-            if (mainframe.getSelectedDownload() == null) {
-                this.setVisible(false);
-                return;
-            } else if (!mainframe.getSelectedDownload().toString().equals(downloadInstance)) {
-                currentSelected = mainframe.getSelectedDownload();
-                errorView.setText("Error Log : " + currentSelected.getData().getName() + "\n\n");
-                line = 0;
-            }            
-            downloadInstance = mainframe.getSelectedDownload().toString();//          
-            List<String[]> errolog = mainframe.getSelectedDownload().getErrorLog();
-            line++;
-            errorView.setText(errorView.getText() + line + " : " + errolog.get(errolog.size() - 1)[0] + "\n"
-                    + errolog.get(errolog.size() - 1)[1] + "\n");
-        } catch (Exception ex) {
-            // System.err.println(errorView.getText() + "\n" + ex.toString() + "/////////  " + i + mainframe.getSelectedDownload().getErrorLog().size());
+    public void updateErrorView() {
+        if (dm.getSelectedDownload() == null) {
+            this.setVisible(false);
+        } else if (!dm.getSelectedDownload().toString().equals(downloadInstance)) {
+            currentSelected = dm.getSelectedDownload();
+            downloadInstance = currentSelected.toString();//
+            errorView.setText("Error Log : " + currentSelected.getData().getName() + "\n\n");
+            if (currentSelected.getErrorLog().size() > 0) {
+                for (int i = 0; i < currentSelected.getErrorLog().size() - 1; i++) {
+                    errorView.setText(errorView.getText() + i + " : " + currentSelected.getErrorLog().get(i)[0] + "\n"
+                            + currentSelected.getErrorLog().get(i)[1] + "\n");
+                }
+            }
+        } else {
+            List<String[]> errLog = dm.getSelectedDownload().getErrorLog();
+            int lastLine = errLog.size() - 1;
+            if (lastLine > -1) {
+                errorView.setText(errorView.getText() + lastLine + " : " + errLog.get(lastLine)[0] + "\n"
+                        + errLog.get(lastLine)[1] + "\n");
+            }
         }
-
     }
 
 }

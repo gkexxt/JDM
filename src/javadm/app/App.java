@@ -30,7 +30,7 @@ package javadm.app;
 import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
-import javadm.ui.MainFrame;
+import javadm.ui.DownloadManager;
 import javadm.ui.MsgAlreadyRunning;
 import javax.swing.SwingUtilities;
 
@@ -41,21 +41,16 @@ public class App {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-
-            if (lockInstance("lock")) {
-                
-            
-                MainFrame main;
-                main = new MainFrame();
-                main.createAndShowGUI();
+            if (lockInstance("lock")) {            
+                DownloadManager dm;
+                dm = new DownloadManager();
+                dm.createAndShowGUI();
             }else{
                 System.err.println("app instance is already running");
                 MsgAlreadyRunning msg = new MsgAlreadyRunning();
                 msg.showMe();
                 
-            }
-            
-            
+            }            
         });
     }
 

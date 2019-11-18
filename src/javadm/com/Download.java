@@ -30,7 +30,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -56,15 +55,15 @@ public class Download {
     private DownloadControl downloadControl;
     private PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
-     private PropertyChangeSupport errorRecived
+    private PropertyChangeSupport errorRecived
             = new PropertyChangeSupport(this);
-     
+
     public Download() {
         this.errorMessage = new String[2];
         this.errorLog = new ArrayList();
         this.userAgent = "Mozilla/5.0 (Macintosh; U;"
                 + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
-        this.downloadControl = new DownloadControl();//ad instace of control
+        this.downloadControl = new DownloadControl();// instace of control
     }
 
     /**
@@ -153,7 +152,7 @@ public class Download {
             this.downloadControl.getProgressbar().setValue(value);
             propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
         } catch (Exception ex) {
-            this.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+            this.setErrorMessage(new String[]{ex.getMessage(), ex.toString()});
         }
     }
 
@@ -186,12 +185,12 @@ public class Download {
             conn.connect();
             return conn.getContentLengthLong();
         } catch (MalformedURLException ex) {
-            
-            this.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+
+            this.setErrorMessage(new String[]{ex.getMessage(), ex.toString()});
             return -2;
-            
+
         } catch (IOException ex) {
-            this.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+            this.setErrorMessage(new String[]{ex.getMessage(), ex.toString()});
             return -1;
         }
 
