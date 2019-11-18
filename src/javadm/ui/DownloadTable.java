@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.gui;
+package javadm.ui;
 
 import java.awt.Component;
 import javax.swing.JTable;
@@ -39,18 +39,9 @@ public class DownloadTable extends JTable {
         this.dm = dm;
         getColumn("control").setCellRenderer(new LabelRenderer());
         getColumn("Progress").setCellRenderer(new ProgresRenderer());
-        //System.err.println(rowHeight);
         this.setRowHeight(20);
 
-    }  
-
- 
-    public void setModelxx(TableModel dataModelx) {
-        super.setModel(dataModelx); //To change body of generated methods, choose Tools | Templates.
-        this.dm = dataModelx;
-        this.getModel().notifyAll();
-    }
-    
+    }     
     
 
   

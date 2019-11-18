@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -45,10 +47,10 @@ public class Downloader {
     }
 
     public void run() {
-
+        //System.out.println("javadm.com.Downloader.run()");
         BufferedInputStream in = null;
         RandomAccessFile raf = null;
-        try {
+      try {
             // open Http connection to URL
             URL url = new URL(download.getData().getUrl());
             String[] urlSplit = url.getFile().split("/");
@@ -59,10 +61,9 @@ public class Downloader {
                     + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
             // connect to server
             conn.connect();
-            long contentlength = conn.getContentLengthLong();
             download.getData().setFileSize(conn.getContentLengthLong());
             int responsecode = conn.getResponseCode();
-
+  
             // Make sure the response code is in the 200 range.
             if (responsecode / 100 == 2) {
 
@@ -78,31 +79,50 @@ public class Downloader {
                 while (download.isStart() && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
                     // write to buffer
                     raf.write(data, 0, numRead);
-                    download.setProgress(numRead);
+                    
+                    
+                    try {
+                        
+                        download.setProgress(numRead);
+                    } catch (Exception ex) {
+                        download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+                        //System.out.println("javadm.com.Downloader.run()");
+                    }
 
                 }
                 //if download is still instart mode and loop ended set complete
                 download.getData().setComplete(download.isStart());
 
             } else {
-                System.err.println(" http Response error - code : " + responsecode);
+                download.setErrorMessage(new String []{"protocol Error"," http Response error - code : " + responsecode});
             }
-        } catch (IOException e) {
-            System.err.println("Error : " + e.getMessage() + "\n" + e.toString());
+        } catch (Exception ex) {
+           download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+           //System.out.println("javadm.com.Downloader.run()");
         } finally {
+            
+            
+            
             if (raf != null) {
                 try {
                     raf.close();
-                } catch (IOException e) {
+                } catch (Exception ex) {
+                    download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
                 }
             }
 
+            
+            
             if (in != null) {
                 try {
                     in.close();
-                } catch (IOException e) {
+                } catch (Exception ex) {
+                    download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+                    //System.out.println("javadm.com.Downloader.run()");
                 }
             }
+            
+            
         }
     }
 

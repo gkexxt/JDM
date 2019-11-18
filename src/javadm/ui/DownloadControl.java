@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.gui;
+package javadm.ui;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -89,15 +89,15 @@ Dimension x = new Dimension(10,300);
 
     public void setLblControl(boolean startx) {
         
-        System.err.println(startx);
+        //System.err.println(startx);
         if (startx) {
-            System.out.println("start");
+            //System.out.println("start");
             lblControl.setForeground(Color.red);
             lblControl.setText("\u25A0");
             
         } else {
             //lblControl.setIcon(startIcon);
-            System.out.println("stop");
+            //System.out.println("stop");
             lblControl.setForeground(Color.GREEN);
             lblControl.setText("\u25B6");
         }

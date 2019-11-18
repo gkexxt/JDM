@@ -50,9 +50,10 @@ public class DownloadWorker implements Runnable {
                    Downloader downloader = new Downloader(download);
         downloader.run();
         download.setStart(false); 
-        } catch (Exception e) {
+        } catch (Exception ex) {
             download.setStart(false);
-            System.err.println(e.getMessage()+"\n" + e.toString());
+            download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+            //System.out.println("javadm.com.DownloadWorker.run()");
         }
 
 //        while(download.isStart()){

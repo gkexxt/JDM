@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.gui;
+package javadm.ui;
 
 import javadm.com.Download;
 import javadm.data.Data;
@@ -32,7 +32,7 @@ import javax.swing.JOptionPane;
  *
  * @author gkalianan
  */
-public class OptionDialog extends javax.swing.JDialog {
+public class DownloadOption extends javax.swing.JDialog {
 
     private final Download selectedDownload;
     private final boolean newDownload;
@@ -45,7 +45,7 @@ public class OptionDialog extends javax.swing.JDialog {
      * @param modal
      * @param newdownload
      */
-    public OptionDialog(MainFrame parent, boolean modal, boolean newdownload) {
+    public DownloadOption(MainFrame parent, boolean modal, boolean newdownload) {
         super(parent, modal);
         this.mainframe = parent;
         this.newDownload = newdownload;
@@ -301,7 +301,7 @@ public class OptionDialog extends javax.swing.JDialog {
                 }
             }
         } catch (Exception e) {
-            mainframe.showOptionPaneOK("Error update download \n" + e.getMessage(), "JavaDM",
+            mainframe.showInfo("Error update download \n" + e.getMessage(), "JavaDM",
                      JOptionPane.ERROR_MESSAGE);
             return false;
         }

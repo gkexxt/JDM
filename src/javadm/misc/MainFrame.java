@@ -28,10 +28,10 @@ package javadm.misc;
  * @author gk
  */
 import javadm.misc.DataManager;
-import javadm.gui.MenuBar;
+import javadm.ui.MenuBar;
 import java.awt.*;
-import javadm.gui.MenuBar;
-import javadm.gui.StatusPane;
+import javadm.ui.MenuBar;
+import javadm.ui.StatusPane;
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -51,7 +51,7 @@ public class MainFrame extends JPanel
         list.setSelectedIndex(0);
 
         //Vertical panels - downloadpane+StatusPane
-        StatusPane StatusPane = new StatusPane();
+        StatusPane StatusPane = new StatusPane(this);
         dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
         dowloadTable.setHorizontalAlignment(JLabel.CENTER);
         JScrollPane downloadPane = new JScrollPane(dowloadTable);

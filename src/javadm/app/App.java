@@ -27,10 +27,12 @@ package javadm.app;
  *
  * @author gk
  */
-
-import javadm.gui.MainFrame;
+import java.io.File;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileLock;
+import javadm.ui.MainFrame;
+import javadm.ui.MsgAlreadyRunning;
 import javax.swing.SwingUtilities;
-
 
 public class App {
 
@@ -39,15 +41,50 @@ public class App {
      */
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            //new ColorChoser("ColorChoser Demo");
-            MainFrame main;
-            main = new MainFrame();
-            main.setTitle("JavaDM");
-            main.createAndShowGUI();
-            //main.pack();
-            //System.err.println(main.getLocation());
-            main.refreshTable();
+
+            if (lockInstance("lock")) {
+                MainFrame main;
+                main = new MainFrame();
+                main.setTitle("JavaDM");
+                main.createAndShowGUI();
+                //main.pack();
+                //System.err.println(main.getLocation());
+                main.refreshTable();
+            }else{
+                System.err.println("app instance is already running");
+                MsgAlreadyRunning msg = new MsgAlreadyRunning();
+                msg.showMe();
+                
+            }
+            
+            
         });
+    }
+
+    private static boolean lockInstance(final String lockFile) {
+        try {
+            final File file = new File(lockFile);
+            final RandomAccessFile randomAccessFile = new RandomAccessFile(file, "rw");
+            final FileLock fileLock = randomAccessFile.getChannel().tryLock();
+            if (fileLock != null) {
+                Runtime.getRuntime().addShutdownHook(new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            fileLock.release();
+                            randomAccessFile.close();
+                            file.delete();
+                        } catch (Exception e) {
+                            System.err.println("Unable to create and/or lock file: " + lockFile + ": " + e.toString());
+                        }
+                    }
+                });
+                return true;
+            }
+        } catch (Exception e) {
+            System.err.println("Unable to create and/or lock file: " + lockFile + ": " + e.toString());
+        }
+        return false;
     }
 
 }

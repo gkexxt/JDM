@@ -25,13 +25,17 @@ package javadm.com;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javadm.data.Data;
-import javadm.gui.DownloadControl;
+import javadm.ui.DownloadControl;
 
 /**
  * collection of data + controls
@@ -42,13 +46,64 @@ public class Download {
 
     private Data data;
     private boolean start;
+    private String userAgent;
+    private String errorMessage[];
+    private List<String[]> errorLog;
 
-    public Download() {
-        this.downloadControl = new DownloadControl();//ad instace of control
+    public List<String[]> getErrorLog() {
+        return errorLog;
     }
     private DownloadControl downloadControl;
     private PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
+     private PropertyChangeSupport errorRecived
+            = new PropertyChangeSupport(this);
+     
+    public Download() {
+        this.errorMessage = new String[2];
+        this.errorLog = new ArrayList();
+        this.userAgent = "Mozilla/5.0 (Macintosh; U;"
+                + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
+        this.downloadControl = new DownloadControl();//ad instace of control
+    }
+
+    /**
+     *
+     * @return errorMessage[2]
+     */
+    public String[] getErrorMessage() {
+        return errorMessage;
+    }
+
+    /**
+     *
+     * @param errorMessage
+     */
+    public synchronized void setErrorMessage(String[] errorMessage) {
+        this.errorMessage = errorMessage;
+        this.errorLog.add(errorMessage);
+        //System.err.println(errorMessage[0]);
+        //System.err.println(Arrays.toString(errorLog.get(errorLog.size()-1)));
+        propChangeSupport.firePropertyChange("setErrorMessage", "errorMessage", "update");
+        //System.out.println("javadm.com.Download.setErrorMessage()");
+
+    }
+
+    /**
+     *
+     * @return userAgent String
+     */
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    /**
+     *
+     * @param userAgent
+     */
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
 
     public void addPropertyChangeListener(PropertyChangeListener listener) {
         propChangeSupport.addPropertyChangeListener(listener);
@@ -76,22 +131,18 @@ public class Download {
 
     public boolean isStart() {
         return start;
-
     }
-    
-    public boolean setDownloadName(String strUrl){
-            URL url;
+
+    public String getUrl_name() {
         try {
-            url = new URL(strUrl);
-            String[] urlSplit = url.getFile().split("/");
-            this.getData().setName(urlSplit[urlSplit.length-1]);
-            return true;
+            URL urlTemp;
+            urlTemp = new URL(this.getData().getUrl());
+            String[] urlSplit = urlTemp.getFile().split("/");
+            return (urlSplit[urlSplit.length - 1]);
         } catch (MalformedURLException ex) {
-            return false;
+            Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
         }
-            
-            
-        
+        return null;
     }
 
     public void setProgress(long buffersize) {
@@ -100,13 +151,14 @@ public class Download {
             int value = (int) (double) ((100.0 * data.getDoneSize())
                     / data.getFileSize());
             this.downloadControl.getProgressbar().setValue(value);
-        } catch (Exception e) {
+            propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
+        } catch (Exception ex) {
+            this.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
         }
-        propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
     }
 
     public void setStart(boolean startx) {
-        propChangeSupport.firePropertyChange("Startxxxxxxxxxx", start, startx);
+        //propChangeSupport.firePropertyChange("Startxxxxxxxxxx", start, startx);
         this.start = startx;
         //System.out.println("javadm.data.Download.setStart()");
         //System.out.println(start);
@@ -119,6 +171,28 @@ public class Download {
         } else {
 
             StopDownload();
+        }
+        propChangeSupport.firePropertyChange("setStart", "start", "stop");
+
+    }
+
+    public long getcontentLength() {
+
+        try {
+            URL urlTemp;
+            urlTemp = new URL(this.getData().getUrl());
+            HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
+            conn.setRequestProperty("User-Agent", userAgent);            // connect to server
+            conn.connect();
+            return conn.getContentLengthLong();
+        } catch (MalformedURLException ex) {
+            
+            this.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+            return -2;
+            
+        } catch (IOException ex) {
+            this.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+            return -1;
         }
 
     }
@@ -133,7 +207,7 @@ public class Download {
     }
 
     private void StopDownload() {
-        System.out.println("JavaDM.Data.DownloadData.StopDownload()");
+        //System.out.println("JavaDM.Data.DownloadData.StopDownload()");
     }
 
 }

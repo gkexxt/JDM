@@ -21,7 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.gui;
+package javadm.ui;
 
 /**
  * Java Download manager GUI class
@@ -75,6 +75,7 @@ public class MainFrame extends JFrame
             download.setProgress(download.getData().getDoneSize());
             model.addRow(download);
             download.addPropertyChangeListener(model);
+            download.addPropertyChangeListener(this);
         }
 
         table = new DownloadTable(model);
@@ -85,7 +86,7 @@ public class MainFrame extends JFrame
         toolbar = new ToolBar(this);
         //frame.getContentPane().
         //Vertical panels - downloadpane+StatusPane
-        statusPane = new StatusPane();
+        statusPane = new StatusPane(this);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //table.setRowSelectionInterval(0, 0);
         table.setOpaque(false);
@@ -95,9 +96,8 @@ public class MainFrame extends JFrame
                 toolbar.refreshToolBar(); //update toolbar state depending on selected
             }
         });
-
-        //table.setBackground(Color.WHITE);
-        ((DefaultTableCellRenderer) table.getDefaultRenderer(Object.class)).setBackground(Color.white);
+        
+        
         JScrollPane downloadPane = new JScrollPane(table);
         splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 downloadPane, statusPane);
@@ -128,6 +128,15 @@ public class MainFrame extends JFrame
         //splitPaneVertical.setBackground(Color.white);
         //splitPaneHortizontal.setBackground(Color.red);
         //statusPane.setBackground(Color.WHITE);
+
+        table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
+            toolbar.refreshToolBar();
+            statusPane.updateErrorView();
+
+            // do some actions here, for example
+            // print first column value from selected row
+            //System.out.println(table.getValueAt(table.getSelectedRow(), 0).toString());
+        });
     }
 
     //Listens to the list
@@ -140,17 +149,6 @@ public class MainFrame extends JFrame
         dm.addlist("tttttt");
     }
 
-    /**
-     * set split panes division position by ratio call after panel/frame after
-     * realized
-     *
-     */
-    public void setDiv() { //set panes divisor position
-        splitPaneVertical.setDividerLocation(0.6);
-        splitPaneHortizontal.setDividerLocation(0.3);
-
-    }
-
     public void upateToolbar() {
         toolbar.refreshToolBar();
     }
@@ -161,18 +159,19 @@ public class MainFrame extends JFrame
     public void createAndShowGUI() {
         //Create and set up the stage.
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-        this.getContentPane().add(mainsplitpane);
         //Display stage.
+        this.getContentPane().add(mainsplitpane);        
         this.setLocationByPlatform(true);
         this.pack();
         this.setVisible(true);
         //add lisner for the selection list --ide compalining when doit in constructor why?
         this.list.addListSelectionListener(this);
-        //set div for split panes -for artio 0-1 must be done after panes are realized?
-        this.setDiv();
+        //set div for split panes -for ratio 0-1 must be done after panes are realized?        
         statusPane.setVisible(false);
-        //this.updateUI();
+        splitPaneVertical.setDividerLocation(0.6);
+        splitPaneHortizontal.setDividerLocation(0.3);
+        //((DefaultTableCellRenderer) table.getDefaultRenderer(Object.class)).setBackground(Color.white);
+        
     }
 
     /**
@@ -185,35 +184,35 @@ public class MainFrame extends JFrame
             @Override
             public void run() {
                 //updateUI();
-                // model.fireTableRowsUpdated(0, model.getRowCount() - 1);
-                // toolbar.refreshToolBar();
+                model.fireTableRowsUpdated(0, model.getRowCount() - 1);
+                toolbar.refreshToolBar();
             }
         };
         t.scheduleAtFixedRate(tt, 0, 100);
     }
 
     /**
-     * show option pane with ok cancel message on mainframe.
+     * show option pane with OK & Cancel message on mainframe.
      *
      * @param message
      * @param title
      * @param type
      * @return
      */
-    public int showOptionPaneOKCancel(String message, String title, int type) {
+    public int showChoice(String message, String title, int type) {
         int result = JOptionPane.showConfirmDialog(this, message,
                 title, JOptionPane.YES_NO_OPTION, type);
         return result;
     }
 
     /**
-     * option pane ok
+     * option pane OK
      *
      * @param message
      * @param title
      * @param type
      */
-    public void showOptionPaneOK(String message, String title, int type) {
+    public void showInfo(String message, String title, int type) {
         JOptionPane.showConfirmDialog(this, message,
                 title, JOptionPane.CLOSED_OPTION, type);
         System.out.println("javadm.gui.MainFrame.showOptionPaneOK()");
@@ -223,7 +222,7 @@ public class MainFrame extends JFrame
     /**
      * return reference of currently selected download object on list
      *
-     * @return
+     * @return Download
      */
     public Download getSelectedDownload() {
         return model.getRow(table.getSelectedRow());
@@ -234,7 +233,7 @@ public class MainFrame extends JFrame
      * remove selected download from the list
      */
     public void removeDownload() {
-        if (showOptionPaneOKCancel("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
+        if (showChoice("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
             return;
         }
         try {
@@ -246,10 +245,12 @@ public class MainFrame extends JFrame
             DataDaoSqlite db = new DataDaoSqlite();
             db.deleteDownloadData(rmDownload.getData().getId());
             toolbar.refreshToolBar();
+            statusPane.setVisible(false);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, ex.getMessage(), "JavaDM: "
                     + "error removing download", JOptionPane.ERROR_MESSAGE);
         }
+        model.fireTableDataChanged();
     }
 
     /**
@@ -270,9 +271,9 @@ public class MainFrame extends JFrame
      * remove data and reboot the download
      */
     public void restartDownload() {
-        if (showOptionPaneOKCancel("Are you sure !!! \n"
+        if (showChoice("Are you sure !!! \n"
                 + "This Download is complete this will destroy all data and start again",
-                 "Redownload", JOptionPane.QUESTION_MESSAGE) > 0) {
+                "Redownload", JOptionPane.QUESTION_MESSAGE) > 0) {
             return;
         }
         getSelectedDownload().getData().setComplete(false);
@@ -286,9 +287,16 @@ public class MainFrame extends JFrame
      * @param download
      */
     public void addDownload(Download download) {
-        DataDaoSqlite db = new DataDaoSqlite();
-        db.insertDownloadData(download.getData());
-        model.addRow(download);
+
+        try {
+            Download tempd = download;
+            DataDaoSqlite db = new DataDaoSqlite();
+            db.insertDownloadData(tempd.getData());
+            tempd.setData(db.getLastDownloadData());
+            model.addRow(tempd);
+            tempd.addPropertyChangeListener(this);
+        } catch (Exception e) {
+        }
     }
 
     /**
@@ -337,29 +345,28 @@ public class MainFrame extends JFrame
 
             });
 
-        } catch (ClassNotFoundException | InstantiationException
-                | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            //Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
             System.out.println(ex.toString());
         }
-
     }
 
     /**
      * show /hide the statuspane
      */
-    public void showDetails() {
+    public void showStatusPane() {
         statusPane.setVisible(!statusPane.isVisible());
         if (statusPane.isVisible()) {
-            setDiv();
+            splitPaneVertical.setDividerLocation(0.6);
         }
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        // model.fireTableRowsUpdated(0, model.getRowCount() - 1);
-        System.out.println("javadm.gui.MainFrame.propertyChange()");
+        model.fireTableRowsUpdated(0, model.getRowCount() - 1);
+        toolbar.refreshToolBar();
+        if (evt.getPropertyName().equals("setErrorMessage")) {
+            statusPane.updateErrorView();
+        }
     }
 
 }

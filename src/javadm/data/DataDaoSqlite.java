@@ -67,6 +67,24 @@ public class DataDaoSqlite implements DaoAPI {
         }
         return null;
     }
+    
+    
+    @Override
+    public Data getLastDownloadData() {
+        Connection connection = ConnectionFactory.getConnection();
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM downloaddata ORDER BY id DESC LIMIT 1");
+
+            if (rs.next()) {
+                return extractDownloadDataFromResultSet(rs);
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
 
     @Override
     public List<Data> getAllDownloadData() {

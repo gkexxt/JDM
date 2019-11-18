@@ -30,8 +30,8 @@ package javadm.misc;
 import javadm.misc.DataManager;
 //import JavaDM.GUI.MenuBar;
 import java.awt.*;
-import javadm.gui.MenuBar;
-import javadm.gui.StatusPane;
+import javadm.ui.MenuBar;
+import javadm.ui.StatusPane;
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -90,7 +90,7 @@ public class MainFrameJDM extends JPanel
     /**Renders the selected data on TablePane label
     */
     private void updateLabel(String data) {
-        System.out.println(data);
+       // System.out.println(data);
         dowloadTable.setText(data);
 
     }

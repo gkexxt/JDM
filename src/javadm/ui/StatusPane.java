@@ -55,6 +55,8 @@ public class StatusPane extends JPanel {
         this.mainframe = mainframe;
         currentSelected.setData(new Data());
         errorView.setForeground(Color.RED);
+        errorView.setEditable(false);
+        //errorView.setEnabled(false);
         
         //create tabbedpane
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -72,10 +74,10 @@ public class StatusPane extends JPanel {
 
     }
 
-    public void updateErrorView() {
-        
+    public void updateErrorView() {        
         try {
             if (mainframe.getSelectedDownload() == null) {
+                this.setVisible(false);
                 return;
             } else if (!mainframe.getSelectedDownload().toString().equals(downloadInstance)) {
                 currentSelected = mainframe.getSelectedDownload();

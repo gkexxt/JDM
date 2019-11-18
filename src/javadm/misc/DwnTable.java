@@ -34,7 +34,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import javadm.data.Data;
 import javadm.data.DataDaoSqlite;
-import javadm.gui.DownloadControl;
+import javadm.ui.DownloadControl;
 import javax.swing.*;
 import javax.swing.JProgressBar;
 import javax.swing.table.TableCellRenderer;

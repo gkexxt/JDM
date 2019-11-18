@@ -21,14 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.gui;
+package javadm.ui;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javadm.util.RowTableModel;
 import java.util.*;
 import javadm.com.Download;
-import javadm.data.DataDaoSqlite;
+//import javadm.data.DataDaoSqlite;
 import javax.swing.*;
 import javax.swing.JProgressBar;
 
@@ -145,8 +145,8 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                 default:
                     break;
             }
-            DataDaoSqlite db = new DataDaoSqlite();
-            db.updateDownloadData(download.getData());
+            //DataDaoSqlite db = new DataDaoSqlite();
+            //db.updateDownloadData(download.getData());
             fireTableCellUpdated(row, column);
             this.fireTableRowsUpdated(0, this.getRowCount()-1);
             //fireTableRowsDeleted();

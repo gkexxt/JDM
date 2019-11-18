@@ -31,6 +31,7 @@ import java.util.List;
 public interface DaoAPI {
 
     Data getDownloadData(int id);
+    Data getLastDownloadData();
     List<Data> getAllDownloadData();
     //User getUserByUserNameAndPassword(String user, String pass);
     boolean insertDownloadData(Data downloadData);

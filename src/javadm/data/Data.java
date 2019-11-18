@@ -23,6 +23,8 @@
  */
 package javadm.data;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import static java.time.LocalDateTime.now;
 import java.util.List;
 
@@ -35,9 +37,9 @@ public class Data {
 
     private int id;
 
-    private String name ="";
-    private String url="";
-    private String directory="";
+    private String name = "";
+    private String url = "";
+    private String directory = "";
     private long fileSize;
     private long doneSize;
     private String createdDate = now().toString();
@@ -45,14 +47,14 @@ public class Data {
     private String completeDate;
     private int connections = 1; //min
     private boolean complete;
-    
- 
+    private String url_name;
 
     public Data() {
-    
-        
+
         //setProgress();
     }
+
+
 
     public int getId() {
         return id;
@@ -133,14 +135,14 @@ public class Data {
     public void setConnections(int connections) {
         this.connections = connections;
     }
-    
-       public boolean isComplete() {
+
+    public boolean isComplete() {
         return complete;
     }
 
-    public synchronized  void setComplete(boolean complete) {
+    public synchronized void setComplete(boolean complete) {
         this.complete = complete;
-        System.out.println("javadm.data.Data.setComplete()");
+        //System.out.println("javadm.data.Data.setComplete()");
     }
 
     @Override
