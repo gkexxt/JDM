@@ -28,51 +28,40 @@ package javadm.ui;
  *
  * @author gk
  */
+import java.awt.Color;
 import javax.swing.JTabbedPane;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JFrame;
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
+import java.util.List;
+import javadm.com.Download;
+import javadm.data.Data;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 public class StatusPane extends JPanel {
 
     private final MainFrame mainframe;
-    private JLabel errorView = new JLabel("xxxxxxx");
+    private final JTextArea errorView = new JTextArea();
+    private JLabel progressView = new JLabel();
+    private int line = 0;
+    private Download currentSelected = new Download();
 
     public StatusPane(MainFrame mainframe) {
         super(new GridLayout(1, 1));
         this.mainframe = mainframe;
+        currentSelected.setData(new Data());
+
         JTabbedPane tabbedPane = new JTabbedPane();
-        ImageIcon icon = createImageIcon("images/middle.gif");
-
-        JComponent panel1 = makeTextPanel("Panel #1", errorView);
-        tabbedPane.addTab("Tab 1", icon, panel1,
-                "Does nothing");
+        JScrollPane scroll = new JScrollPane(errorView);
+        tabbedPane.addTab("Info", scroll);
         tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
+        errorView.setForeground(Color.RED);
 
-        JComponent panel2 = makeTextPanel("Panel #2", new JLabel());
-        tabbedPane.addTab("Tab 2", icon, panel2,
-                "Does twice as much nothing");
+        JScrollPane scroll2 = new JScrollPane(progressView);
+        tabbedPane.addTab("Progress", scroll2);
         tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-
-        JComponent panel3 = makeTextPanel("Panel #3", new JLabel());
-        tabbedPane.addTab("Tab 3", icon, panel3,
-                "Still does nothing");
-        tabbedPane.setMnemonicAt(2, KeyEvent.VK_3);
-
-        JComponent panel4 = makeTextPanel(
-                "Panel #4 (has a preferred size of 410 x 50).", new JLabel());
-        panel4.setPreferredSize(new Dimension(410, 50));
-        tabbedPane.addTab("Tab 4", icon, panel4,
-                "Does nothing at all");
-        tabbedPane.setMnemonicAt(3, KeyEvent.VK_4);
 
         //Add the tabbed pane to this panel.
         add(tabbedPane);
@@ -83,49 +72,26 @@ public class StatusPane extends JPanel {
     }
 
     public void updateErrorView() {
+        line++;
         int i = 0;
         try {
-            for ( i = 0; i < mainframe.getSelectedDownload().getErrorLog().size()-2; i++) {
-                errorView.setText(errorView.getText()+mainframe.getSelectedDownload().getErrorLog().get(i)[0] + "\n"
-                        + mainframe.getSelectedDownload().getErrorLog().get(i)[1] + "\n");
+
+            if (mainframe.getSelectedDownload() == null) {
+                return;
+            } else if (mainframe.getSelectedDownload().getData().getId() != currentSelected.getData().getId()) {
+                currentSelected = mainframe.getSelectedDownload();
+                errorView.setText("Error Log : " + currentSelected.getData().getName() + "\n\n");
+                line = 0;
             }
+
+            currentSelected = mainframe.getSelectedDownload();//          
+            List<String[]> errolog = mainframe.getSelectedDownload().getErrorLog();
+            errorView.setText(errorView.getText() + line + " : " + errolog.get(errolog.size() - 1)[0] + "\n"
+                    + errolog.get(errolog.size() - 1)[1] + "\n");
         } catch (Exception ex) {
-            System.err.println(errorView.getText()+"\n"+ex.toString() + "/////////  " +i+ mainframe.getSelectedDownload().getErrorLog().size()); 
+            // System.err.println(errorView.getText() + "\n" + ex.toString() + "/////////  " + i + mainframe.getSelectedDownload().getErrorLog().size());
         }
 
-    }
-    
-    
-
-    /**
-     *
-     * @param text
-     * @param canvas
-     * @return
-     */
-    protected JComponent makeTextPanel(String text, JLabel canvas) {
-        JPanel panel = new JPanel(false);
-        JLabel filler = new JLabel(text);
-        filler.setHorizontalAlignment(JLabel.CENTER);
-        panel.setLayout(new GridLayout(1, 1));
-        panel.add(canvas);
-        return panel;
-    }
-
-    /**
-     * Returns an ImageIcon, or null if the path was invalid.
-     *
-     * @param path
-     * @return
-     */
-    protected static ImageIcon createImageIcon(String path) {
-        java.net.URL imgURL = StatusPane.class.getResource(path);
-        if (imgURL != null) {
-            return new ImageIcon(imgURL);
-        } else {
-            System.err.println("Couldn't find file: " + path);
-            return null;
-        }
     }
 
 }
