@@ -24,7 +24,6 @@
 package javadm.ui;
 
 import javadm.com.Setting;
-import javadm.com.SettingDaoSqlite;
 
 /**
  *
