@@ -143,7 +143,7 @@ public class DownloadManager extends JFrame
         this.pack();
         this.setVisible(true);
         //add lisner for the selection list --ide compalining when doit in constructor why?
-        this.list.addListSelectionListener(this);
+        list.addListSelectionListener(this);
         //set div for split panes -for ratio 0-1 must be done after panes are realized?        
         statusPane.setVisible(false);
         splitPaneVertical.setDividerLocation(0.6);
