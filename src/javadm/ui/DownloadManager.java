@@ -33,9 +33,15 @@ import javadm.misc.DataManager;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javadm.app.App;
 import javadm.com.Download;
 import javadm.com.Setting;
 import javadm.com.SettingDaoSqlite;
@@ -47,39 +53,47 @@ import javax.swing.event.*;
 public class DownloadManager extends JFrame
         implements ListSelectionListener, PropertyChangeListener {
 
-    private final DataManager dm = new DataManager();//data manager handle items data
-    private final JSplitPane splitPaneHortizontal;
-    private final JSplitPane splitPaneVertical;
-    private final JList list = new JList(); //hold download items data
-    private final DownloadTable table;
-    private static TableModel model;
-    private final JSplitPane mainsplitpane;
+    private DataManager dm = new DataManager();//data manager handle items data
+    private JSplitPane splitPaneHortizontal;
+    private JSplitPane splitPaneVertical;
+    private JList list = new JList(); //hold download items data
+    private DownloadTable table;
+    private TableModel model;
+    private JSplitPane mainsplitpane;
     private ToolBar toolbar;
     private StatusPane statusPane;
-    private final ClipboardTextListener clplstn;
+    private ClipboardTextListener clplstn;
     private Setting curSetting;
 
     public DownloadManager() {
+
+    }
+
+    //Listens to the list
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (e.getValueIsAdjusting()) {
+            return;
+        }
+
+        dm.addlist("tttttt");
+    }
+
+    public void upateToolbar() {
+        toolbar.refreshToolBar();
+    }
+
+    /**
+     * Create the DownloadManager and show it.
+     */
+    public void createAndShowGUI() {
 
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
         clplstn = new ClipboardTextListener();
+
         model = new TableModel(this);
-        DataDaoSqlite db = new DataDaoSqlite();
-        java.util.List<Data> datas = new ArrayList<>();
-        datas.addAll(db.getAllDownloadData());
-
-        for (int i = 0; i < datas.size(); i++) {
-            Data data = datas.get(i);
-            Download download = new Download();
-            download.setData(data);
-            download.setProgress(download.getData().getDoneSize());
-            model.addRow(download);
-            download.addPropertyChangeListener(model);
-            download.addPropertyChangeListener(this);
-        }
-
         table = new DownloadTable(model);
 
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -122,26 +136,7 @@ public class DownloadManager extends JFrame
             toolbar.refreshToolBar();
             statusPane.updateErrorView();
         });
-    }
 
-    //Listens to the list
-    @Override
-    public void valueChanged(ListSelectionEvent e) {
-        if (e.getValueIsAdjusting()) {
-            return;
-        }
-
-        dm.addlist("tttttt");
-    }
-
-    public void upateToolbar() {
-        toolbar.refreshToolBar();
-    }
-
-    /**
-     * Create the DownloadManager and show it.
-     */
-    public void createAndShowGUI() {
         //Create and set up the stage.
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         //Display stage.
@@ -159,17 +154,92 @@ public class DownloadManager extends JFrame
         ImageIcon img = new ImageIcon(imageURL);
         this.setIconImage(img.getImage());
         this.setTitle("JDM");
-        SettingDaoSqlite db = new SettingDaoSqlite();
-        System.err.println(db.isTableExists("setting"));
-        System.err.println(db.isTableExists("downloaddata"));
-        curSetting = db.getSetting();
+        checkDB();
+        //SettingDaoSqlite dbx = new SettingDaoSqlite();
+        //this.refreshTable();
+        //ClipboardTextListener xxx = new ClipboardTextListener();
+    }
+
+    private void checkDB() {
+        SettingDaoSqlite dbs = new SettingDaoSqlite();
+        boolean settingok = dbs.isTableExists("setting");
+        boolean dataok = dbs.isTableExists("downloaddata");
+        if (!dataok) {
+            if (showChoice("Rebuild data table?\nClicking no will exit the app",
+                    "Data table error", JOptionPane.ERROR_MESSAGE) < 1) {
+                newDataTable();
+            } else {
+                System.exit(1);
+            }
+
+        }
+
+        if (!settingok) {
+            if (showChoice("Rebuild data table?\nClicking no will exit the app",
+                    "Data table error", JOptionPane.ERROR_MESSAGE) < 1) {
+                newSettingTable();
+            } else {
+                System.exit(1);
+            }
+        }
+        
+        showInfo("Tables Rebuilded\nPlease restart the app", "JDM - Restart", JOptionPane.INFORMATION_MESSAGE);
+        System.exit(0);
+
+    }
+
+    public void restartApplication() throws IOException, URISyntaxException {
+        final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
+        final File currentJar = new File(App.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+
+        /* is it a jar file? */
+        if (!currentJar.getName().endsWith(".jar")) {
+            return;
+        }
+
+        /* Build command: java -jar application.jar */
+        final ArrayList<String> command = new ArrayList<String>();
+        command.add(javaBin);
+        command.add("-jar");
+        command.add(currentJar.getPath());
+
+        final ProcessBuilder builder = new ProcessBuilder(command);
+        builder.start();
+        System.out.println("javadm.ui.DownloadManager.restartApplication()");
+        System.exit(0);
+    }
+
+    private void newSettingTable() {
+        System.out.println("javadm.ui.DownloadManager.newSettingTable()");
+    }
+
+    private void newDataTable() {
+        System.out.println("javadm.ui.DownloadManager.newDataTable()");
+    }
+
+    public void loadall() {
+        DataDaoSqlite db = new DataDaoSqlite();
+        java.util.List<Data> datas = new ArrayList<>();
+        datas.addAll(db.getAllDownloadData());
+
+        for (int i = 0; i < datas.size(); i++) {
+            Data data = datas.get(i);
+            Download download = new Download();
+            download.setData(data);
+            download.setProgress(download.getData().getDoneSize());
+            model.addRow(download);
+            download.addPropertyChangeListener(model);
+            download.addPropertyChangeListener(this);
+        }
+
+        SettingDaoSqlite dbs = new SettingDaoSqlite();
+
+        curSetting = dbs.getSetting();
+
         if (curSetting.getMonitorMode() > 0) {
             startClipListner();
         }
 
-        //SettingDaoSqlite dbx = new SettingDaoSqlite();
-        //this.refreshTable();
-        //ClipboardTextListener xxx = new ClipboardTextListener();
     }
 
     /**
