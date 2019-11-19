@@ -23,10 +23,7 @@
  */
 package javadm.data;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import static java.time.LocalDateTime.now;
-import java.util.List;
 
 /**
  * Class to hold save able data and of its method
@@ -51,7 +48,7 @@ public class Data {
 
     public Data() {
 
-        //setProgress();
+   
     }
 
 

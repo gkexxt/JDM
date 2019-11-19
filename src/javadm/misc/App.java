@@ -28,7 +28,8 @@ package javadm.misc;
  * @author gk
  */
 
-import javadm.util.MainFrame;
+import javadm.com.Setting;
+import javadm.com.SettingDaoSqlite;
 import javax.swing.SwingUtilities;
 
 
@@ -38,13 +39,10 @@ public class App {
      * @param args
      */
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            
-            @Override
-            public void run() {
-                new MainFrame("SwingWorker Demo");
-            }
-        });
+        Setting setting = new Setting();
+        SettingDaoSqlite xx = new SettingDaoSqlite();
+        setting = xx.getSetting();
+        
     }
 
 }

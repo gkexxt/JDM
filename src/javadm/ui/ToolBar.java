@@ -129,7 +129,7 @@ public class ToolBar extends JPanel
             @Override
             public void actionPerformed(ActionEvent e) {
                 //JOptionPane.showMessageDialog(dm, "Option 1 selected");
-                SystemSetting syssetting = new SystemSetting(dm, enabled);
+                SettingMenu syssetting = new SettingMenu(dm, enabled);
                 syssetting.setVisible(true);
                 syssetting.setLocationRelativeTo(dm);
 
@@ -250,7 +250,7 @@ public class ToolBar extends JPanel
                     break;
                 case ADD:
                     // second button clicked                  
-                    DownloadOption newDwn = new DownloadOption(dm, true, true);
+                    OptionMenu newDwn = new OptionMenu(dm, true, true);
                     newDwn.setTitle("Add New download");
 
                     break;
@@ -267,7 +267,7 @@ public class ToolBar extends JPanel
                     dm.restartDownload();
                     break;
                 case SETTING:
-                    DownloadOption seldownload = new DownloadOption(dm, true, false);
+                    OptionMenu seldownload = new OptionMenu(dm, true, false);
                     seldownload.setTitle("Download Options- " + selectedDownload.getData().getName());
                     break;
                 case SCHEDULE:

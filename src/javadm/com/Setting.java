@@ -1,7 +1,7 @@
-/* 
+/*
  * The MIT License
  *
- * Copyright 2019 G.K #gkexxt@outlook.com.
+ * Copyright 2019 gkalianan.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,21 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.data;
+package javadm.com;
 
-import java.util.List;
 /**
- *interface providing DAO API
+ *
  * @author gkalianan
  */
-public interface DaoAPI {
+public class Setting {
+    private String directory;
+    private int connectionCount;
+    private int monitorMode;
+    private boolean autoStart;
 
-    Data getDownloadData(int id);
-    Data getLastDownloadData();
-    List<Data> getAllDownloadData();
-    //User getUserByUserNameAndPassword(String user, String pass);
-    boolean insertDownloadData(Data downloadData);
-    boolean updateDownloadData(Data downloadData);
-    boolean deleteDownloadData(int id);
+    public String getDirectory() {
+        return directory;
+    }
 
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
+
+    public int getConnectionCount() {
+        return connectionCount;
+    }
+
+    public void setConnectionCount(int connectionCount) {
+        this.connectionCount = connectionCount;
+    }
+
+    public int getMonitorMode() {
+        return monitorMode;
+    }
+
+    public void setMonitorMode(int monitorMode) {
+        this.monitorMode = monitorMode;
+    }
+
+    public boolean isAutoStart() {
+        return autoStart;
+    }
+
+    public void setAutoStart(boolean autoStart) {
+        this.autoStart = autoStart;
+    }
 }

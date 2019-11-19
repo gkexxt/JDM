@@ -24,12 +24,9 @@
 package javadm.com;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -85,7 +82,7 @@ public class Downloader {
                         
                         download.setProgress(numRead);
                     } catch (Exception ex) {
-                        download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+                        download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
                         //System.out.println("javadm.com.Downloader.run()");
                     }
 
@@ -94,10 +91,10 @@ public class Downloader {
                 download.getData().setComplete(download.isStart());
 
             } else {
-                download.setErrorMessage(new String []{"protocol Error"," http Response error - code : " + responsecode});
+                download.addErrorMessage(new String []{"protocol Error"," http Response error - code : " + responsecode});
             }
         } catch (Exception ex) {
-           download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+           download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
            //System.out.println("javadm.com.Downloader.run()");
         } finally {
             
@@ -107,7 +104,7 @@ public class Downloader {
                 try {
                     raf.close();
                 } catch (Exception ex) {
-                    download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+                    download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
                 }
             }
 
@@ -117,7 +114,7 @@ public class Downloader {
                 try {
                     in.close();
                 } catch (Exception ex) {
-                    download.setErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+                    download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
                     //System.out.println("javadm.com.Downloader.run()");
                 }
             }

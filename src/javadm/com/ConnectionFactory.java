@@ -24,48 +24,60 @@
 package javadm.com;
 
 /**
+ * Class providing connection for db
  *
  * @author gkalianan
  */
-public class DownloadWorker implements Runnable {
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
-    String name;
-    Thread t;
-    Download download;
+public class ConnectionFactory {
+    
+    private static Connection c;
 
-    DownloadWorker(String threadname, Download download) {
-        this.download = download;
-        name = threadname;
-        t = new Thread(this, name);
-        //System.out.println("New thread: " + t);
-    }
-
-    public void start() {
-        t.start();
-    }
-
-    @Override
-    public void run() {
+    public static Connection getConnection(String dbName) {
         try {
-                   Downloader downloader = new Downloader(download);
-        downloader.run();
-        download.setStart(false); 
-        } catch (Exception ex) {
-            download.setStart(false);
-            download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
-            //System.out.println("javadm.com.DownloadWorker.run()");
-        }
 
-//        while(download.isStart()){
-//            try {
-//                download.setProgress(download.getData().getDoneSize() + 1);
-//                Thread.sleep(0);
-//            } catch (InterruptedException ex) {
-//                System.err.println(ex.toString()+"\n"+ex.toString());
-//            }
-//        }
+            if (c == null) {
+                Class.forName("org.sqlite.JDBC");
+                c = DriverManager.getConnection("jdbc:sqlite:"
+                        + dbName
+                        + ".db");
+            }
+            return c;
         
-        //System.err.println("Download thread exiting while");
+        //Class.forName("org.sqlite.JDBC");
+
+        //Connection connection = DriverManager.getConnection("jdbc:sqlite:downloads.db");
+        //return connection;
+    }
+    catch (ClassNotFoundException e
+
+    
+        ) {
+            e.printStackTrace();
+        return null;
+    }
+    catch (SQLException e
+
+    
+        ) {
+            e.printStackTrace();
+        return null;
+    }
+}
+
+/**
+ *
+ * Test Connection
+ *
+ */
+public static void main(String[] args) {
+
+        Connection connection = ConnectionFactory.getConnection("test");
+        //System.err.println(connection);
+
     }
 
 }

@@ -21,46 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.util;
+package javadm.data;
 
+import java.util.List;
 /**
- *
+ *interface providing DAO API
  * @author gkalianan
- 
-public class Obs {
-    
-}*/
+ */
+public interface DataDaoAPI {
 
-import java.util.Observable;
-import java.util.Observer;
+    Data getDownloadData(int id);
+    Data getLastDownloadData();
+    List<Data> getAllDownloadData();
+    //User getUserByUserNameAndPassword(String user, String pass);
+    boolean insertDownloadData(Data downloadData);
+    boolean updateDownloadData(Data downloadData);
+    boolean deleteDownloadData(int id);
 
-class MessageBoard extends Observable
-{
-    public void changeMessage(String message) 
-    {
-        setChanged();
-        notifyObservers(message);
-    }
-}
-
-class Student implements Observer 
-{
-    @Override
-    public void update(Observable o, Object arg) 
-    {
-        System.out.println("Message board changed: " + arg);
-    }
-}
-
-public class Obs 
-{
-    public static void main(String[] args) 
-    {
-        MessageBoard  board = new MessageBoard ();
-        Student bob = new Student();
-        Student joe = new Student();
-        board.addObserver(bob);
-        board.addObserver(joe);
-        board.changeMessage("More Homework!");
-    }
 }

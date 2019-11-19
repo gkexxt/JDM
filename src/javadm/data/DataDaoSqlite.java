@@ -22,7 +22,7 @@
  * THE SOFTWARE.
  */
 package javadm.data;
-
+import javadm.com.ConnectionFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -35,8 +35,8 @@ import java.util.List;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class DataDaoSqlite implements DaoAPI {
-
+public class DataDaoSqlite implements DataDaoAPI {
+    private String dbName = "downloads";
     private Data extractDownloadDataFromResultSet(ResultSet rs) throws SQLException {
         Data downloadData = new Data();
         downloadData.setId(rs.getInt("id"));
@@ -53,7 +53,7 @@ public class DataDaoSqlite implements DaoAPI {
 
     @Override
     public Data getDownloadData(int id) {
-        Connection connection = ConnectionFactory.getConnection();
+        Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM downloaddata WHERE id=" + id);
@@ -71,7 +71,7 @@ public class DataDaoSqlite implements DaoAPI {
     
     @Override
     public Data getLastDownloadData() {
-        Connection connection = ConnectionFactory.getConnection();
+        Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM downloaddata ORDER BY id DESC LIMIT 1");
@@ -88,7 +88,7 @@ public class DataDaoSqlite implements DaoAPI {
 
     @Override
     public List<Data> getAllDownloadData() {
-        Connection connection = ConnectionFactory.getConnection();
+        Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM downloaddata");
@@ -107,7 +107,7 @@ public class DataDaoSqlite implements DaoAPI {
 
     @Override
     public boolean insertDownloadData(Data downloadData) {
-        Connection connection = ConnectionFactory.getConnection();
+        Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             PreparedStatement ps = connection.prepareStatement("INSERT INTO downloaddata VALUES (NULL, ?, ?, ?,?,?,?,?,?)");
             ps.setString(1, downloadData.getName());
@@ -130,7 +130,7 @@ public class DataDaoSqlite implements DaoAPI {
 
     @Override
     public boolean updateDownloadData(Data downloadData) {
-        Connection connection = ConnectionFactory.getConnection();
+        Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE downloaddata SET name=?, url=?, directory=?, fsize=?, dnsize=?, crtdate=?, lstdate=?, cmpdate=? WHERE id=?");
             ps.setString(1, downloadData.getName());
@@ -155,7 +155,7 @@ public class DataDaoSqlite implements DaoAPI {
 
     @Override
     public boolean deleteDownloadData(int id) {
-        Connection connection = ConnectionFactory.getConnection();
+        Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             Statement stmt = connection.createStatement();
             int i = stmt.executeUpdate("DELETE FROM downloaddata WHERE id=" + id);

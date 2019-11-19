@@ -28,7 +28,6 @@ import java.beans.PropertyChangeListener;
 import javadm.util.RowTableModel;
 import java.util.*;
 import javadm.com.Download;
-//import javadm.data.DataDaoSqlite;
 import javax.swing.*;
 import javax.swing.JProgressBar;
 
@@ -146,7 +145,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                     break;
             }
             //fireTableCellUpdated(row, column);
-            this.fireTableRowsUpdated(0, this.getRowCount()-1);
+            this.fireTableRowsUpdated(0, this.getRowCount());
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null,e.getMessage() + "\n" + e.toString(), "InfoBox: "
                     + "error update db", JOptionPane.INFORMATION_MESSAGE);

@@ -26,7 +26,6 @@ package javadm.ui;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
 import javax.swing.JTable;
@@ -36,7 +35,8 @@ import javax.swing.JTable;
  * @author G.K #gkexxt@outlook.com
  */
 public class DownloadControl {
-Dimension x = new Dimension(10,300);
+
+    Dimension x = new Dimension(10, 300);
     private final JLabel lblControl;
     private final JProgressBar progressbar;
     private boolean rowlocked;
@@ -53,11 +53,9 @@ Dimension x = new Dimension(10,300);
     public void setRowlocked(boolean rowlocked) {
         this.rowlocked = rowlocked;
     }
-    
-    
 
     public DownloadControl() {
-        
+
         lblControl = new JLabel();
         lblControl.setHorizontalAlignment(JLabel.CENTER);
         //lblControl.setIcon(startIcon);
@@ -82,13 +80,13 @@ Dimension x = new Dimension(10,300);
     }
 
     public void setLblControl(boolean startx) {
-        
+
         //System.err.println(startx);
         if (startx) {
             //System.out.println("start");
             lblControl.setForeground(Color.red);
             lblControl.setText("\u25A0");
-            
+
         } else {
             //lblControl.setIcon(startIcon);
             //System.out.println("stop");

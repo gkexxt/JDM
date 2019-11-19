@@ -32,7 +32,7 @@ import javax.swing.JOptionPane;
  *
  * @author gkalianan
  */
-public class DownloadOption extends javax.swing.JDialog {
+public class OptionMenu extends javax.swing.JDialog {
 
     private final Download selectedDownload;
     private final boolean newDownload;
@@ -45,7 +45,7 @@ public class DownloadOption extends javax.swing.JDialog {
      * @param modal
      * @param newdownload
      */
-    public DownloadOption(DownloadManager downloadManager, boolean modal, boolean newdownload) {
+    public OptionMenu(DownloadManager downloadManager, boolean modal, boolean newdownload) {
         super(downloadManager, modal);
         this.dm = downloadManager;
         this.newDownload = newdownload;
@@ -111,7 +111,7 @@ public class DownloadOption extends javax.swing.JDialog {
         txtUrl.setFont(txtUrl.getFont().deriveFont((float)14));
         txtUrl.setText(selectedDownload.getData().getUrl());
 
-        btnDirectory.setFont(btnDirectory.getFont().deriveFont((float)14));
+        btnDirectory.setFont(btnDirectory.getFont());
         btnDirectory.setText("Select");
         btnDirectory.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -131,7 +131,7 @@ public class DownloadOption extends javax.swing.JDialog {
         SpinConnNCount.setFont(SpinConnNCount.getFont().deriveFont((float)14));
         SpinConnNCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
 
-        btnSave.setFont(btnSave.getFont().deriveFont((float)14));
+        btnSave.setFont(btnSave.getFont());
         btnSave.setText("Save");
         btnSave.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -139,7 +139,7 @@ public class DownloadOption extends javax.swing.JDialog {
             }
         });
 
-        btnRemove.setFont(btnRemove.getFont().deriveFont((float)14));
+        btnRemove.setFont(btnRemove.getFont());
         btnRemove.setText("Remove");
         btnRemove.setFocusPainted(false);
         btnRemove.addActionListener(new java.awt.event.ActionListener() {
@@ -148,7 +148,7 @@ public class DownloadOption extends javax.swing.JDialog {
             }
         });
 
-        btnCancel.setFont(btnCancel.getFont().deriveFont((float)14));
+        btnCancel.setFont(btnCancel.getFont());
         btnCancel.setText("Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -156,6 +156,7 @@ public class DownloadOption extends javax.swing.JDialog {
             }
         });
 
+        btnOK.setFont(btnOK.getFont());
         btnOK.setText("OK");
         btnOK.setMinimumSize(new java.awt.Dimension(40, 33));
         btnOK.addActionListener(new java.awt.event.ActionListener() {
@@ -175,15 +176,15 @@ public class DownloadOption extends javax.swing.JDialog {
                         .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnRemove)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(12, 12, 12)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnCancel)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 27, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -226,7 +227,7 @@ public class DownloadOption extends javax.swing.JDialog {
                     .addComponent(btnRemove)
                     .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCancel))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(12, Short.MAX_VALUE))
         );
 
         pack();

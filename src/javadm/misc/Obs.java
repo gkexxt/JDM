@@ -21,61 +21,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.data;
+package javadm.misc;
 
 /**
- * Class providing connection for db
  *
  * @author gkalianan
- */
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-
-public class ConnectionFactory {
+ 
+public class Obs {
     
-    private static Connection c;
+}*/
 
-    public static Connection getConnection() {
-        try {
+import java.util.Observable;
+import java.util.Observer;
 
-            if (c == null) {
-                Class.forName("org.sqlite.JDBC");
-                c = DriverManager.getConnection("jdbc:sqlite:downloads.db");
-            }
-            return c;
-        
-        //Class.forName("org.sqlite.JDBC");
-
-        //Connection connection = DriverManager.getConnection("jdbc:sqlite:downloads.db");
-        //return connection;
-    }
-    catch (ClassNotFoundException e
-
-    
-        ) {
-            e.printStackTrace();
-        return null;
-    }
-    catch (SQLException e
-
-    
-        ) {
-            e.printStackTrace();
-        return null;
+class MessageBoard extends Observable
+{
+    public void changeMessage(String message) 
+    {
+        setChanged();
+        notifyObservers(message);
     }
 }
 
-/**
- *
- * Test Connection
- *
- */
-public static void main(String[] args) {
-
-        Connection connection = ConnectionFactory.getConnection();
-        //System.err.println(connection);
-
+class Student implements Observer 
+{
+    @Override
+    public void update(Observable o, Object arg) 
+    {
+        System.out.println("Message board changed: " + arg);
     }
+}
 
+public class Obs 
+{
+    public static void main(String[] args) 
+    {
+        MessageBoard  board = new MessageBoard ();
+        Student bob = new Student();
+        Student joe = new Student();
+        board.addObserver(bob);
+        board.addObserver(joe);
+        board.changeMessage("More Homework!");
+    }
 }

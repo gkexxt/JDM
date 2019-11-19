@@ -24,148 +24,152 @@
 package javadm.misc;
 
 /**
- *Java Download manager GUI class
+ *
  * @author gk
  */
-import javadm.misc.DataManager;
-import javadm.ui.MenuBar;
-import java.awt.*;
-import javadm.ui.MenuBar;
-import javadm.ui.StatusPane;
-import javax.swing.*;
-import javax.swing.event.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.MouseInfo;
+import java.awt.Panel;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-public class MainFrame extends JPanel
-        implements ListSelectionListener {
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingWorker;
 
-    private JLabel dowloadTable = new JLabel();//will be a table later
-    private DataManager dm = new DataManager();//data manager handle items data
-    private JSplitPane splitPaneHortizontal;
-    private JSplitPane splitPaneVertical;
-    private JList list = new JList(); //hold downlad items data
+public class MainFrame extends JFrame {
 
-    public MainFrame() {
-
-        list.setModel(dm.getDownloadList());
-        list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        list.setSelectedIndex(0);
-
-        //Vertical panels - downloadpane+StatusPane
-        StatusPane StatusPane = new StatusPane(this);
-        dowloadTable.setFont(dowloadTable.getFont().deriveFont(Font.ITALIC));
-        dowloadTable.setHorizontalAlignment(JLabel.CENTER);
-        JScrollPane downloadPane = new JScrollPane(dowloadTable);
-        splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                downloadPane, StatusPane);
-        splitPaneVertical.setBorder(null);//need for nesting panel - remove double border
-
-        //HORIZONTAL_SPLIT panels - categorypane+splitPaneVertical(nested)
-        JScrollPane categoryPane = new JScrollPane(list);
-        splitPaneHortizontal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                categoryPane, splitPaneVertical);
-        //splitPaneHortizontal.setOneTouchExpandable(true);
-
-        //Provide minimum sizes for components in the split pane.
-        Dimension minimumSize = new Dimension(100, 100);
-        categoryPane.setMinimumSize(minimumSize);
-        downloadPane.setMinimumSize(minimumSize);
-        StatusPane.setMinimumSize(minimumSize);
-        //Provide a preferred size for the split pane.
-        splitPaneHortizontal.setPreferredSize(new Dimension(600, 400));
-
-        //updateLabel(list.getModel().getElementAt(list.getSelectedIndex()).toString());
-    }
-
-    //Listens to the list
-    @Override
-    public void valueChanged(ListSelectionEvent e) {
-        if (e.getValueIsAdjusting()) {
-            return;
-        }
-        updateLabel(this.list.getModel()
-                .getElementAt(list.getSelectedIndex()).toString());
-        dm.addlist("tttttt");
-    }
-
-    /**Renders the selected data on TablePane label
-    */
-    private void updateLabel(String data) {
-        System.out.println(data);
-        dowloadTable.setText(data);
-
-    }
+    private JLabel countLabel1 = new JLabel("0");
+    private JLabel statusLabel = new JLabel("Task not completed.");
+    private JButton startButton = new JButton("Start");
+    private JButton stopButton = new JButton("Stop");
+    private JPanel panel_l = new JPanel();
     
-    /**return MAinGUI nested panes to be add in JFrame
-     * 
-     * @return JSplitPane
-     */
-    public JSplitPane getMainPane() {
-        return splitPaneHortizontal;
-    }
-    
-   /** set split panes division position by ratio call after panel/frame after 
-    * realized
-    * 
-    */
-    public void setDiv() { //set panes divisor position
-        splitPaneVertical.setDividerLocation(0.4);
-        splitPaneHortizontal.setDividerLocation(0.3);
+    private volatile boolean stop = false;
 
-    }
-
-    /**
-     * Create the MainFrame and show it.
-     */
-    private static void createAndShowGUI() {
-        //Create and set up the stage.
-        JFrame frame = new JFrame("JAVA Download Manager");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //menubar
-        MenuBar demo = new MenuBar();
-        frame.setJMenuBar(demo.createMenuBar());
-        //make panels
-        MainFrame mainUI = new MainFrame();
-        //add to stage
-        frame.getContentPane().add(mainUI.getMainPane());
-        //Display stage.
-        frame.pack();
-        frame.setVisible(true);
-        //add lisner for the selection list --ide compalining when doit in constructor why?
-        mainUI.list.addListSelectionListener(mainUI);
-        //set div for split panes -for artio 0-1 must be done after panes are realized?
-        mainUI.setDiv();
-        
-    }
-
-    public static void main(String[] args) {
-        try {
-
-            /* 
-            -get os name and use proper laf               
-            -getSystemLookAndFeelClassName return nothing in kde               \
-            -metal laf is butt ugly keepit as last choice.
-            -custom laf??? nah...too much work
-             */
-            String osname = System.getProperty("os.name").toLowerCase();
-            if (osname.contains("linux")) {
-                UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
-            } else if (System.getProperty("os.name").contains("window")) {
-                UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-            } else {
-                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    public MainFrame(String title) {
+        super(title);
+               addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mousePressed(java.awt.event.MouseEvent evt) {
+                formMousePressed(evt);
             }
 
-            //run ui/app
-            javax.swing.SwingUtilities.invokeLater(() -> {
-                createAndShowGUI();
-            });
+            private void formMousePressed(MouseEvent evt) {
+                //System.exit(0); //To change body of generated methods, choose Tools | Templates.
+            }
+        });
+        setLayout(new GridBagLayout());
 
-        } catch (ClassNotFoundException | InstantiationException
-                | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            //Logger.getLogger(MainFrame.class.getName()).log(Level.SEVERE, null, ex);
-            System.out.println(ex.toString());
-        }
+        GridBagConstraints gc = new GridBagConstraints();
 
+        gc.fill = GridBagConstraints.RELATIVE;
+        gc.gridwidth =2;
+        gc.weightx = 0.1;
+        gc.weighty =0.1;
+                
+
+        gc.gridx = 1;
+        gc.gridy = 0;
+        add(countLabel1, gc);
+        
+        gc.gridx = 1;
+        gc.gridy = 1;
+        add(statusLabel, gc);
+        
+        gc.gridwidth=1;        
+        gc.gridx = 1;
+        gc.gridy = 2;
+        add(startButton, gc);
+        
+        gc.gridx = 2;
+        gc.gridy = 2;
+        add(stopButton, gc);
+
+        startButton.addActionListener((ActionEvent arg0) -> {
+            stop = false;
+            start();
+        });
+
+        stopButton.addActionListener((ActionEvent arg0) -> {
+            stop = true;
+        });
+
+        setSize(200, 400);
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setVisible(true);
     }
 
+    private void start() {
+
+        // Use SwingWorker<Void, Void> and return null from doInBackground if
+        // you don't want any final result and you don't want to update the GUI
+        // as the thread goes along.
+        // First argument is the thread result, returned when processing finished.
+        // Second argument is the value to update the GUI with via publish() and process()
+        statusLabel.setText("starting......");
+        SwingWorker<Boolean, Point> worker = new SwingWorker<Boolean, Point>() {
+
+            @Override
+            /*
+             * Note: do not update the GUI from within doInBackground.
+             */
+            protected Boolean doInBackground() throws Exception {
+                statusLabel.setText("started......");
+                // Simulate useful work
+                int i = 0;
+                //location i = new DocumentationTool.Location
+                while (!stop) {
+                    //Thread.sleep(100);
+                    //System.out.println("Hello: " + i);
+                    //i++;
+                    Point locationx =  MouseInfo.getPointerInfo().getLocation();
+                    
+                    //System.out.println(MouseInfo.getPointerInfo().getLocation());
+
+                    // optional: use publish to send values to process(), which
+                    // you can then use to update the GUI.
+                    publish(locationx);
+                    Thread.sleep(100);
+                }
+                return false;
+            }
+
+            @Override
+            // This will be called if you call publish() from doInBackground()
+            // Can safely update the GUI here.
+            protected void process(List<Point> chunks) {
+                Point value = chunks.get(chunks.size() - 1);
+
+                countLabel1.setText("Current value: " + value);
+            }
+
+            @Override
+            // This is called when the thread finishes.
+            // Can safely update GUI here.
+            protected void done() {
+
+                try {
+                    Boolean status = get();
+                    statusLabel.setText("Completed with status: " + status);
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (ExecutionException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+
+            }
+
+        };
+
+        worker.execute();
+    }
 }

@@ -54,8 +54,7 @@ public class StatusPane extends JPanel {
         this.dm = downloadManager;
         currentSelected.setData(new Data());
         errorView.setForeground(Color.RED);
-        errorView.setEditable(false);
-        //errorView.setEnabled(false);
+        errorView.setEditable(false);;
 
         //create tabbedpane
         JTabbedPane tabbedPane = new JTabbedPane();

@@ -20,7 +20,7 @@ bgtrvur6cvknf                              g gbxc *
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.ui;
+package javadm.misc;
 
 /**
  * Java Download manager MenuBar class add a MenuBar to GUI

@@ -28,15 +28,17 @@ package javadm.ui;
  *
  * @author gk
  */
+import javadm.util.ClipboardTextListener;
 import javadm.misc.DataManager;
 import java.awt.*;
-import java.awt.datatransfer.FlavorEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import javadm.com.Download;
+import javadm.com.Setting;
+import javadm.com.SettingDaoSqlite;
 import javadm.data.Data;
 import javadm.data.DataDaoSqlite;
 import javax.swing.*;
@@ -48,20 +50,21 @@ public class DownloadManager extends JFrame
     private final DataManager dm = new DataManager();//data manager handle items data
     private final JSplitPane splitPaneHortizontal;
     private final JSplitPane splitPaneVertical;
-    private final JList list = new JList(); //hold downlad items data
+    private final JList list = new JList(); //hold download items data
     private final DownloadTable table;
     private static TableModel model;
     private final JSplitPane mainsplitpane;
-    //private Download selectedDownload;
     private ToolBar toolbar;
     private StatusPane statusPane;
+    private final ClipboardTextListener clplstn;
+    private Setting curSetting;
 
     public DownloadManager() {
 
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
-
+        clplstn = new ClipboardTextListener();
         model = new TableModel(this);
         DataDaoSqlite db = new DataDaoSqlite();
         java.util.List<Data> datas = new ArrayList<>();
@@ -79,22 +82,13 @@ public class DownloadManager extends JFrame
 
         table = new DownloadTable(model);
 
-        //table.setRowSelectionInterval(0, 1);
-        //table.setLayout(new BorderLayout());
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         toolbar = new ToolBar(this);
-        //frame.getContentPane().
         //Vertical panels - downloadpane+StatusPane
         statusPane = new StatusPane(this);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //table.setRowSelectionInterval(0, 0);
         table.setOpaque(false);
-
-        table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
-            if (table.getSelectedRow() > -1) {
-                toolbar.refreshToolBar(); //update toolbar state depending on selected
-            }
-        });
 
         JScrollPane downloadPane = new JScrollPane(table);
         splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
@@ -123,9 +117,6 @@ public class DownloadManager extends JFrame
         splitPaneHortizontal.setDividerSize(6);
         splitPaneVertical.setDividerSize(6);
         splitPaneVertical.setDividerLocation(400);
-        //splitPaneVertical.setBackground(Color.white);
-        //splitPaneHortizontal.setBackground(Color.red);
-        //statusPane.setBackground(Color.WHITE);
 
         table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
             toolbar.refreshToolBar();
@@ -164,12 +155,15 @@ public class DownloadManager extends JFrame
         statusPane.setVisible(false);
         splitPaneVertical.setDividerLocation(0.6);
         splitPaneHortizontal.setDividerLocation(0.3);
-        //((DefaultTableCellRenderer) table.getDefaultRenderer(Object.class)).setBackground(Color.white);
         URL imageURL = getClass().getResource("/jdm24.png");
         ImageIcon img = new ImageIcon(imageURL);
         this.setIconImage(img.getImage());
         this.setTitle("JDM");
+        SettingDaoSqlite db = new SettingDaoSqlite();
+        curSetting = db.getSetting();
         //this.refreshTable();
+        //ClipboardTextListener xxx = new ClipboardTextListener();
+
     }
 
     /**
@@ -239,7 +233,6 @@ public class DownloadManager extends JFrame
         if (showChoice("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
             return;
         }
-
         Download rmDownload = getSelectedDownload();
         model.removeTableModelListener(table);//remove table listner before delete from model
         model.removeRows(table.getSelectedRow());
@@ -285,7 +278,6 @@ public class DownloadManager extends JFrame
      * @param download
      */
     public void addDownload(Download download) {
-
         try {
             Download tempd = download;
             DataDaoSqlite db = new DataDaoSqlite();
@@ -314,12 +306,9 @@ public class DownloadManager extends JFrame
      * @param args
      */
     public static void main(String[] args) {
-        try {
-            //listen to clipboard
 
-            Toolkit.getDefaultToolkit().getSystemClipboard().addFlavorListener((FlavorEvent e) -> {
-                System.out.println("ClipBoard UPDATED: " + e.getSource() + " " + e.toString());
-            });
+        //listen to clipboard
+        try {
             /* 
             -get os name and use proper laf               
             -getSystemLookAndFeelClassName return nothing in kde               \
@@ -349,7 +338,7 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * show /hide the statuspane
+     * show /hide the StatusPane
      */
     public void showStatusPane() {
         statusPane.setVisible(!statusPane.isVisible());
@@ -358,12 +347,36 @@ public class DownloadManager extends JFrame
         }
     }
 
+    public void startClipListner() {
+        clplstn.addPropertyChangeListener(this);
+        clplstn.startMonitor();
+    }
+
+    public void stopClipListner() {
+
+        clplstn.removePropertyChangeListener(this);
+        clplstn.terminate();
+    }
+
+    public Setting getSetting() {
+        return curSetting;
+        
+    }
+
+    public void setSetting(Setting setting) {
+        this.curSetting = setting;
+        SettingDaoSqlite db = new SettingDaoSqlite();
+        db.setSetting(setting);
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         model.fireTableRowsUpdated(0, model.getRowCount());
         toolbar.refreshToolBar();
-        if (evt.getPropertyName().equals("setErrorMessage")) {
+        if (evt.getPropertyName().equals("addErrorMessage")) {
             statusPane.updateErrorView();
+        } else if (evt.getPropertyName().equals("ClipboardUpdate")) {
+            System.err.println(evt.getNewValue().toString());
         }
     }
 
