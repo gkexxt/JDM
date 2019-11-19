@@ -39,8 +39,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javadm.app.App;
 import javadm.com.Download;
 import javadm.com.Setting;
@@ -53,10 +51,10 @@ import javax.swing.event.*;
 public class DownloadManager extends JFrame
         implements ListSelectionListener, PropertyChangeListener {
 
-    private DataManager dm = new DataManager();//data manager handle items data
+    private final DataManager dm = new DataManager();//data manager handle items data
     private JSplitPane splitPaneHortizontal;
     private JSplitPane splitPaneVertical;
-    private JList list = new JList(); //hold download items data
+    private final JList list = new JList(); //hold download items data
     private DownloadTable table;
     private TableModel model;
     private JSplitPane mainsplitpane;
@@ -198,7 +196,7 @@ public class DownloadManager extends JFrame
         }
 
         /* Build command: java -jar application.jar */
-        final ArrayList<String> command = new ArrayList<String>();
+        final ArrayList<String> command = new ArrayList<>();
         command.add(javaBin);
         command.add("-jar");
         command.add(currentJar.getPath());
