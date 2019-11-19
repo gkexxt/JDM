@@ -429,14 +429,12 @@ public class DownloadManager extends JFrame
     }
 
     public void stopClipListner() {
-
         clplstn.removePropertyChangeListener(this);
         clplstn.terminate();
     }
 
     public Setting getSetting() {
         return curSetting;
-
     }
 
     public String chooseFolder() {
