@@ -28,6 +28,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.DatabaseMetaData;
 
 /**
  *
@@ -77,6 +78,21 @@ public class SettingDaoSqlite implements SettingDaoAPI {
         } catch (SQLException ex) {
             System.err.println(ex.getMessage());
             ex.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isTableExists(String tableName) {
+        Connection connection = ConnectionFactory.getConnection(dbName);
+        try {
+            DatabaseMetaData md = connection.getMetaData();
+            ResultSet rs = md.getTables(null, null, tableName, null);
+            while (rs.next()) {
+                if (rs.getString("Table_NAME").equals(tableName)) {
+                    return true;
+                }
+            }
+        } catch (SQLException ex) {
         }
         return false;
     }

@@ -30,6 +30,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -61,7 +62,6 @@ public class Download {
     public List<String[]> getErrorLog() {
         return errorLog;
     }
-
 
     /**
      *
@@ -116,16 +116,12 @@ public class Download {
         return start;
     }
 
-    public String getUrl_name() {
-        try {
-            URL urlTemp;
-            urlTemp = new URL(this.getData().getUrl());
-            String[] urlSplit = urlTemp.getFile().split("/");
-            return (urlSplit[urlSplit.length - 1]);
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+    public String getUrl_name(String url) {
+        String[] urlSplit = url.split("/");
+        System.err.println(Arrays.toString(urlSplit));
+        String fname = urlSplit[urlSplit.length - 1];
+        System.err.println(fname);
+        return (fname);
     }
 
     public void setProgress(long buffersize) {
@@ -191,6 +187,16 @@ public class Download {
 
     private void StopDownload() {
         //System.out.println("JavaDM.Data.DownloadData.StopDownload()");
+    }
+
+    public boolean isUrlOK(String url) {
+        try {
+            URL u = new URL(url); // this would check for the protocol
+            u.toURI();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

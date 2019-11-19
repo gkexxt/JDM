@@ -160,10 +160,16 @@ public class DownloadManager extends JFrame
         this.setIconImage(img.getImage());
         this.setTitle("JDM");
         SettingDaoSqlite db = new SettingDaoSqlite();
+        System.err.println(db.isTableExists("setting"));
+        System.err.println(db.isTableExists("downloaddata"));
         curSetting = db.getSetting();
+        if (curSetting.getMonitorMode() > 0) {
+            startClipListner();
+        }
+
+        //SettingDaoSqlite dbx = new SettingDaoSqlite();
         //this.refreshTable();
         //ClipboardTextListener xxx = new ClipboardTextListener();
-
     }
 
     /**
@@ -360,7 +366,28 @@ public class DownloadManager extends JFrame
 
     public Setting getSetting() {
         return curSetting;
-        
+
+    }
+
+    public String chooseFolder() {
+        JFileChooser chooser = new JFileChooser();
+        chooser.setCurrentDirectory(new java.io.File("."));
+        chooser.setDialogTitle("Save to");
+
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setFileHidingEnabled(true);
+        //
+        // disable the "All files" option.
+        //
+        chooser.setAcceptAllFileFilterUsed(false);
+        //    
+        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+            return (chooser.getSelectedFile().toString());
+            //System.out.println("getSelectedFile() : "
+            //  + chooser.getSelectedFile());
+        }
+        return "";
     }
 
     public void setSetting(Setting setting) {

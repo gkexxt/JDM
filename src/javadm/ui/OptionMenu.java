@@ -25,7 +25,6 @@ package javadm.ui;
 
 import javadm.com.Download;
 import javadm.data.Data;
-import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 
 /**
@@ -56,10 +55,13 @@ public class OptionMenu extends javax.swing.JDialog {
             initComponents();
             btnRemove.setVisible(false);
             btnSave.setVisible(false);
+            txtDirectory.setText(dm.getSetting().getDirectory());
+            SpinConnNCount.setValue(dm.getSetting().getConnectionCount());
 
         } else {
             this.selectedDownload = dm.getSelectedDownload();
             initComponents();
+            SpinConnNCount.setValue(selectedDownload.getData().getConnections());
             if (selectedDownload.getData().getDoneSize() > 0) {
                 txtDirectory.setEnabled(false);
                 btnDirectory.setEnabled(false);
@@ -67,7 +69,7 @@ public class OptionMenu extends javax.swing.JDialog {
             }
         }
 
-        SpinConnNCount.setValue(selectedDownload.getData().getConnections());
+        txtName.setEditable(false);
         this.setLocation(dm.getLocation().x - (this.getWidth() - dm.getWidth()) / 2, dm.getLocation().y - (this.getHeight() - dm.getHeight()) / 2);
         this.setVisible(true);
     }
@@ -241,7 +243,7 @@ public class OptionMenu extends javax.swing.JDialog {
 
     private void btnDirectoryActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDirectoryActionPerformed
         // TODO add your handling code here:
-        chooseFolder();
+        txtDirectory.setText(dm.chooseFolder());
     }//GEN-LAST:event_btnDirectoryActionPerformed
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
@@ -264,37 +266,28 @@ public class OptionMenu extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_btnOKActionPerformed
 
-    private void chooseFolder() {
-        JFileChooser chooser = new JFileChooser();
-        chooser.setCurrentDirectory(new java.io.File("."));
-        chooser.setDialogTitle("Save to");
-
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setFileHidingEnabled(true);
-        //
-        // disable the "All files" option.
-        //
-        chooser.setAcceptAllFileFilterUsed(false);
-        //    
-        if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-            txtDirectory.setText(chooser.getSelectedFile().toString());
-            //System.out.println("getSelectedFile() : "
-            //  + chooser.getSelectedFile());
-        }
-    }
-
     private boolean updateData() {
+        String url = txtUrl.getText().trim();
+        String fname = selectedDownload.getUrl_name(url);
+        String directory = txtDirectory.getText().trim();
+        txtName.setText(fname);
         try {
-            if (txtDirectory.getText().isBlank() || txtUrl.getText().isBlank()) {
-                throw new IllegalArgumentException("fields cant be left empthy");
+
+            if (directory.isBlank() || url.isBlank()) {
+                throw new IllegalArgumentException("fields cant be left blank");
+            } else if (!selectedDownload.isUrlOK(url)) {
+                throw new IllegalArgumentException("invalid url");
+            } else if (!txtName.isEditable() && txtName.getText().isBlank()) {
+                txtName.setEditable(true);
+                throw new IllegalArgumentException("unable parse filename input manually");
+            } else if (txtName.isEditable() && txtName.getText().isBlank()) {
+                throw new IllegalArgumentException("field file name is blank");
             } else {
                 selectedDownload.getData().setConnections((int) SpinConnNCount.getValue());
-                selectedDownload.getData().setName(txtName.getText());
-                selectedDownload.getData().setUrl(txtUrl.getText());
+                selectedDownload.getData().setUrl(url);
                 selectedDownload.getData().setDirectory(txtDirectory.getText());
+                selectedDownload.getData().setName(txtName.getText());
                 if (newDownload) {
-
                     dm.addDownload(selectedDownload);
                 } else {
                     dm.updateDownload(selectedDownload);
@@ -303,7 +296,7 @@ public class OptionMenu extends javax.swing.JDialog {
             }
         } catch (Exception e) {
             dm.showInfo("Error update download \n" + e.getMessage(), "JavaDM",
-                     JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.ERROR_MESSAGE);
             return false;
         }
         return true;

@@ -50,20 +50,20 @@ public class Downloader {
       try {
             // open Http connection to URL
             URL url = new URL(download.getData().getUrl());
-            String[] urlSplit = url.getFile().split("/");
-            download.getData().setName(urlSplit[urlSplit.length-1]);
             
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U;"
                     + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2");
             // connect to server
             conn.connect();
-            download.getData().setFileSize(conn.getContentLengthLong());
+            
             int responsecode = conn.getResponseCode();
   
             // Make sure the response code is in the 200 range.
             if (responsecode / 100 == 2) {
-
+                
+                //set download size
+                download.getData().setFileSize(conn.getContentLengthLong());
                 // get the input stream
                 in = new BufferedInputStream(conn.getInputStream());
 
