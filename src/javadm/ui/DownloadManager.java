@@ -182,10 +182,10 @@ public class DownloadManager extends JFrame
                 System.exit(1);
             }
         }
-        
-        showInfo("Tables Rebuilded\nPlease restart the app", "JDM - Restart", JOptionPane.INFORMATION_MESSAGE);
-        System.exit(0);
-
+        if (!settingok || !dataok) {
+            showInfo("Tables Rebuilded", "JDM", JOptionPane.INFORMATION_MESSAGE);
+        }
+        loadall();
     }
 
     public void restartApplication() throws IOException, URISyntaxException {
