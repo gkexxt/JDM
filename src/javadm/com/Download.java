@@ -42,7 +42,13 @@ public class Download {
     private Data data;
     private boolean start;
     private String userAgent;
-    private final List<String[]> logMsg;
+
+    private final List<String[]> logMsgs;
+    public static final String ERROR = "Error";
+    public static final String WARNING = "Warning";
+    public static final String DEBUG = "Debug";
+    public static final String INFO = "Info";
+
     private DownloadControl downloadControl;
     private final PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
@@ -62,14 +68,14 @@ public class Download {
     }
 
     public Download() {
-        this.logMsg = new ArrayList();
+        this.logMsgs = new ArrayList();
         this.userAgent = "Mozilla/5.0 (Macintosh; U;"
                 + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
         this.downloadControl = new DownloadControl();// instace of control
     }
 
-    public List<String[]> getLogMsg() {
-        return logMsg;
+    public List<String[]> getLogMsgs() {
+        return logMsgs;
     }
 
     /**
@@ -77,7 +83,7 @@ public class Download {
      * @param errorMessage
      */
     public synchronized void addLogMsg(String[] errorMessage) {
-        this.logMsg.add(errorMessage);
+        this.logMsgs.add(errorMessage);
         propChangeSupport.firePropertyChange("addErrorMessage", "errorMessage", "update");
     }
 
