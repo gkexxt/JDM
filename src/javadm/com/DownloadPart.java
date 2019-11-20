@@ -21,12 +21,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.util;
+package javadm.com;
 
 /**
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class DbCheck {
+public class DownloadPart {
+    private long startByte;
+    private long endByte;
+    private long currentByte;
+    private long partSize = 1000000; //1Mb
+    private String partFileName;
+
+    public String getPartFileName() {
+        return partFileName;
+    }
+
+    public void setPartFileName(String partFileName) {
+        this.partFileName = partFileName;
+    }
+
+    public long getStartByte() {
+        return startByte;
+    }
+
+    public void setStartByte(long startByte) {
+        this.startByte = startByte;
+    }
+
+    public long getEndByte() {
+        return endByte;
+    }
+
+    public void setEndByte(long endByte) {
+        this.endByte = endByte;
+    }
+
+    public long getCurrentByte() {
+        return currentByte;
+    }
+
+    public void setCurrentByte(long currentByte) {
+        this.currentByte = currentByte;
+    }
     
 }

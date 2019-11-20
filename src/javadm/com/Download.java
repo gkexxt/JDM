@@ -25,15 +25,11 @@ package javadm.com;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javadm.ui.DownloadControl;
 
 /**
@@ -50,6 +46,20 @@ public class Download {
     private DownloadControl downloadControl;
     private PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
+    private List<DownloadPart> parts;
+
+    public List<DownloadPart> getParts() {
+        return parts;
+    }
+
+    public void setParts(List<DownloadPart> parts) {
+
+        this.parts = parts;
+    }
+
+    public void initParts() {
+
+    }
 
     public Download() {
         this.errorLog = new ArrayList();
@@ -116,7 +126,8 @@ public class Download {
     }
 
     /**
-     *get filename from url
+     * get filename from url
+     *
      * @param url
      * @return fname
      */
@@ -149,7 +160,8 @@ public class Download {
         this.downloadControl.setRowlocked(start);
         if (start) {
 
-            StartDownload();
+            //StartDownload();
+            getData().setFileSize(getcontentLength());
 
         } else {
 
@@ -160,7 +172,6 @@ public class Download {
     }
 
     public long getcontentLength() {
-
         try {
             URL urlTemp;
             urlTemp = new URL(this.getData().getUrl());
@@ -168,24 +179,16 @@ public class Download {
             conn.setRequestProperty("User-Agent", userAgent);            // connect to server
             conn.connect();
             return conn.getContentLengthLong();
-        } catch (MalformedURLException ex) {
-
+        } catch (Exception ex) {
             this.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
             return -2;
 
-        } catch (IOException ex) {
-            this.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
-            return -1;
         }
 
     }
 
     private void StartDownload() {
-        DownloadWorker t1 = new DownloadWorker("thread 1", this);
-        //DownloadWorker t2 = new DownloadWorker("thread 2", this);
-        //DownloadWorker t3 = new DownloadWorker("thread 4", this);
-        t1.start();
-        //t2.start();
+
 
     }
 
@@ -194,7 +197,8 @@ public class Download {
     }
 
     /**
-     *check url is valid
+     * check url is valid
+     *
      * @param url
      * @return true if valid
      */

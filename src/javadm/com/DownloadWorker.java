@@ -23,49 +23,145 @@
  */
 package javadm.com;
 
+import java.io.BufferedInputStream;
+import java.io.RandomAccessFile;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 /**
  *
  * @author gkalianan
  */
-public class DownloadWorker implements Runnable {
+public class DownloadWorker {
 
     String name;
-    Thread t;
     Download download;
 
-    DownloadWorker(String threadname, Download download) {
+    DownloadWorker(Download download) {
         this.download = download;
-        name = threadname;
-        t = new Thread(this, name);
         //System.out.println("New thread: " + t);
     }
 
-    public void start() {
-        t.start();
+    public void startDownloader() {
+        new Downloader(download).start();
     }
 
-    @Override
-    public void run() {
-        try {
-                   Downloader downloader = new Downloader(download);
-        downloader.run();
-        download.setStart(false); 
-        } catch (Exception ex) {
-            download.setStart(false);
-            download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
-            //System.out.println("javadm.com.DownloadWorker.run()");
+    public void startFileSizeGetter() {
+        new fileSizeGetter(download).start();
+    }
+
+    class fileSizeGetter implements Runnable {
+
+        private final Download download;
+        Thread t;
+
+        public fileSizeGetter(Download download) {
+            this.download = download;
         }
 
-//        while(download.isStart()){
-//            try {
-//                download.setProgress(download.getData().getDoneSize() + 1);
-//                Thread.sleep(0);
-//            } catch (InterruptedException ex) {
-//                System.err.println(ex.toString()+"\n"+ex.toString());
-//            }
-//        }
-        
-        //System.err.println("Download thread exiting while");
+        public void start() {
+            t = new Thread(this);
+            t.start();
+        }
+
+        @Override
+        public void run() {
+            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        }
+
+    }
+
+    class Downloader implements Runnable {
+
+        private String fname;
+        Thread t;
+        int BUFFER_SIZE = 4092;
+        private final Download download;
+
+        public Downloader(Download download) {
+            this.download = download;
+
+        }
+
+        public void start() {
+            t = new Thread(this);
+            t.start();
+        }
+
+        @Override
+        public void run() {
+            //System.out.println("javadm.com.Downloader.run()");
+            BufferedInputStream in = null;
+            RandomAccessFile raf = null;
+            try {
+                // open Http connection to URL
+                URL url = new URL(download.getData().getUrl());
+
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U;"
+                        + download.getUserAgent());
+                // connect to server
+                conn.connect();
+
+                int responsecode = conn.getResponseCode();
+
+                // Make sure the response code is in the 200 range.
+                if (responsecode / 100 == 2) {
+
+                    //set download size
+                    //download.getData().setFileSize(conn.getContentLengthLong());
+                    // get the input stream
+                    in = new BufferedInputStream(conn.getInputStream());
+
+                    // open the output file and seek to the start location
+                    fname = download.getData().getDirectory() + "/" + download.getData().getName();
+                    raf = new RandomAccessFile(fname, "rw");
+
+                    byte data[] = new byte[BUFFER_SIZE];
+                    int numRead;
+                    while (download.isStart() && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
+                        // write to buffer
+                        raf.write(data, 0, numRead);
+
+                        try {
+
+                            download.setProgress(numRead);
+                        } catch (Exception ex) {
+                            download.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
+                            //System.out.println("javadm.com.Downloader.run()");
+                        }
+
+                    }
+                    //if download is still instart mode and loop ended set complete
+                    download.getData().setComplete(download.isStart());
+
+                } else {
+                    download.addErrorMessage(new String[]{"protocol Error", " http Response error - code : " + responsecode});
+                }
+            } catch (Exception ex) {
+                download.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
+                //System.out.println("javadm.com.Downloader.run()");
+            } finally {
+
+                if (raf != null) {
+                    try {
+                        raf.close();
+                    } catch (Exception ex) {
+                        download.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
+                    }
+                }
+
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (Exception ex) {
+                        download.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
+                        //System.out.println("javadm.com.Downloader.run()");
+                    }
+                }
+
+            }
+        }
     }
 
 }

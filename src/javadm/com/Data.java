@@ -45,7 +45,6 @@ public class Data {
     private int connections = 1; //min
     private boolean complete;
     private String url_name;
-
     public Data() {
 
    
@@ -147,5 +146,7 @@ public class Data {
         return this.getId() + " : " + this.getDirectory() + " : " + this.getCreatedDate();
 
     }
+    
+   
 
 }
