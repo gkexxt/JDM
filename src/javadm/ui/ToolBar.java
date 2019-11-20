@@ -42,6 +42,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
+import javadm.com.Data;
 import javadm.com.Download;
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
@@ -245,12 +246,16 @@ public class ToolBar extends JPanel
                 case MENU:
                     //first button clicked
                     //chooseFolder();
-                    popup.show(btnMenu, btnMenu.getLocation().x, 
+                    popup.show(btnMenu, btnMenu.getLocation().x,
                             btnMenu.getLocation().y + btnMenu.getHeight());
                     break;
                 case ADD:
-                    // second button clicked                  
-                    OptionMenu newDwn = new OptionMenu(dm, true, true);
+                    // second button clicked 
+                    Download dwn = new Download();
+                    dwn.setData(new Data());
+                    dwn.getData().setDirectory(dm.getSetting().getDirectory());
+                    dwn.getData().setConnections(dm.getSetting().getConnectionCount());
+                    OptionMenu newDwn = new OptionMenu(dm, dwn, true, true);
                     newDwn.setTitle("Add New download");
 
                     break;
@@ -267,8 +272,8 @@ public class ToolBar extends JPanel
                     dm.restartDownload();
                     break;
                 case SETTING:
-                    OptionMenu seldownload = new OptionMenu(dm, true, false);
-                    seldownload.setTitle("Download Options- " + selectedDownload.getData().getName());
+                    OptionMenu seldownload = new OptionMenu(dm, dm.getSelectedDownload(), true, false);
+                    //seldownload.setTitle("Download Options- " + selectedDownload.getData().getName());
                     break;
                 case SCHEDULE:
                     //System.err.println(showChoice("wannaa bla bla", SCHEDULE));

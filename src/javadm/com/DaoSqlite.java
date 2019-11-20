@@ -21,21 +21,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.data;
+package javadm.com;
+import javadm.com.DaoAPI;
 import javadm.com.ConnectionFactory;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import javadm.com.Setting;
 
 /**
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class DataDaoSqlite implements DataDaoAPI {
+public class DaoSqlite implements DaoAPI {
     private String dbName = "downloads";
     private Data extractDownloadDataFromResultSet(ResultSet rs) throws SQLException {
         Data downloadData = new Data();
@@ -164,6 +167,65 @@ public class DataDaoSqlite implements DataDaoAPI {
             }
         } catch (SQLException ex) {
             ex.printStackTrace();
+        }
+        return false;
+    }
+    
+        @Override
+    public Setting getSetting() {
+        Connection connection = ConnectionFactory.getConnection(dbName);
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM setting WHERE id=" + 1);
+
+            if (rs.next()) {
+                Setting setting = new Setting();
+                setting.setDirectory(rs.getString("directory"));
+                setting.setConnectionCount(rs.getInt("conncount"));
+                setting.setMonitorMode(rs.getInt("monmode"));
+                setting.setAutoStart(rs.getBoolean("automode"));
+                return setting;
+            }
+
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
+    @Override
+    public boolean setSetting(Setting setting) {
+        Connection connection = ConnectionFactory.getConnection(dbName);
+        try {
+            PreparedStatement ps = connection.prepareStatement("UPDATE setting SET directory=?, conncount=?, monmode=?, automode=? WHERE id=?");
+            ps.setString(1, setting.getDirectory());
+            ps.setInt(2, setting.getConnectionCount());
+            ps.setInt(3, setting.getMonitorMode());
+            ps.setBoolean(4, setting.isAutoStart());
+            ps.setInt(5, 1);
+            System.err.println(ps.toString());
+            int i = ps.executeUpdate();
+            if (i == 1) {
+                return true;
+            }
+        } catch (SQLException ex) {
+            System.err.println(ex.getMessage());
+            ex.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isTableExists(String tableName) {
+        Connection connection = ConnectionFactory.getConnection(dbName);
+        try {
+            DatabaseMetaData md = connection.getMetaData();
+            ResultSet rs = md.getTables(null, null, tableName, null);
+            while (rs.next()) {
+                if (rs.getString("Table_NAME").equals(tableName)) {
+                    return true;
+                }
+            }
+        } catch (SQLException ex) {
         }
         return false;
     }

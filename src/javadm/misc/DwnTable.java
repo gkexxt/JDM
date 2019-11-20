@@ -32,8 +32,8 @@ import javadm.com.Download;
 import java.util.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import javadm.data.Data;
-import javadm.data.DataDaoSqlite;
+import javadm.com.Data;
+import javadm.com.DaoSqlite;
 import javadm.ui.DownloadControl;
 import javax.swing.*;
 import javax.swing.JProgressBar;
@@ -200,7 +200,7 @@ public class DwnTable extends RowTableModel<Download> {
         //  Use the BeanTableModel  
 //		BeanTableModel<JButton> model =
 //			new BeanTableModel<JButton>(JButton.class, java.awt.Component.class);
-        DataDaoSqlite db = new DataDaoSqlite();
+        DaoSqlite db = new DaoSqlite();
 
         //System.out.println();
         List<Data> datas = new ArrayList<>();

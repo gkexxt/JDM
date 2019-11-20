@@ -42,9 +42,8 @@ import java.util.TimerTask;
 import javadm.app.App;
 import javadm.com.Download;
 import javadm.com.Setting;
-import javadm.com.SettingDaoSqlite;
-import javadm.data.Data;
-import javadm.data.DataDaoSqlite;
+import javadm.com.Data;
+import javadm.com.DaoSqlite;
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -61,7 +60,8 @@ public class DownloadManager extends JFrame
     private ToolBar toolbar;
     private StatusPane statusPane;
     private ClipboardTextListener clplstn;
-    private Setting curSetting;
+    private Setting setting;
+    private String clipedUrl;
 
     public DownloadManager() {
 
@@ -77,14 +77,10 @@ public class DownloadManager extends JFrame
         dm.addlist("tttttt");
     }
 
-    public void upateToolbar() {
-        toolbar.refreshToolBar();
-    }
-
     /**
      * Create the DownloadManager and show it.
      */
-    public void createAndShowGUI() {
+    public void showMe() {
 
         list.setModel(dm.getDownloadList());
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -159,31 +155,42 @@ public class DownloadManager extends JFrame
     }
 
     private void checkDB() {
-        SettingDaoSqlite dbs = new SettingDaoSqlite();
-        boolean settingok = dbs.isTableExists("setting");
-        boolean dataok = dbs.isTableExists("downloaddata");
-        if (!dataok) {
-            if (showChoice("Rebuild data table?\nClicking no will exit the app",
-                    "Data table error", JOptionPane.ERROR_MESSAGE) < 1) {
-                newDataTable();
+        DaoSqlite db = new DaoSqlite();
+        boolean settingok = db.isTableExists("setting");
+        boolean dataok = db.isTableExists("downloaddata");
+        if (!dataok || !settingok) {
+
+            if (!dataok) {
+                if (showChoice("Initialize new Data Table?\nClicking No will exit the app",
+                        "Data Table Error", JOptionPane.ERROR_MESSAGE) < 1) {
+                    newDataTable();
+                } else {
+                    System.exit(0);
+                }
+            }
+            if (!settingok) {
+                if (showChoice("Initalize new Setting Table?\nClicking No will exit the app",
+                        "Setting Table Error", JOptionPane.ERROR_MESSAGE) < 1) {
+                    newSettingTable();
+                } else {
+                    System.exit(0);
+                }
+            }
+            //here after tables are repaired
+            settingok = db.isTableExists("setting");
+            dataok = db.isTableExists("downloaddata");
+            if (settingok && dataok) {
+                showInfo("Tables Initialized", "JDM", JOptionPane.INFORMATION_MESSAGE);
+                loadall();
+                return;
             } else {
-                System.exit(1);
+                showInfo("Error Initializing Tables\nApp will exit", "JDM Error", JOptionPane.ERROR_MESSAGE);
+                System.exit(0);
             }
 
+        } else if (settingok && dataok) {
+            loadall();
         }
-
-        if (!settingok) {
-            if (showChoice("Rebuild data table?\nClicking no will exit the app",
-                    "Data table error", JOptionPane.ERROR_MESSAGE) < 1) {
-                newSettingTable();
-            } else {
-                System.exit(1);
-            }
-        }
-        if (!settingok || !dataok) {
-            showInfo("Tables Rebuilded", "JDM", JOptionPane.INFORMATION_MESSAGE);
-        }
-        loadall();
     }
 
     public void restartApplication() throws IOException, URISyntaxException {
@@ -216,7 +223,7 @@ public class DownloadManager extends JFrame
     }
 
     public void loadall() {
-        DataDaoSqlite db = new DataDaoSqlite();
+        DaoSqlite db = new DaoSqlite();
         java.util.List<Data> datas = new ArrayList<>();
         datas.addAll(db.getAllDownloadData());
 
@@ -230,11 +237,9 @@ public class DownloadManager extends JFrame
             download.addPropertyChangeListener(this);
         }
 
-        SettingDaoSqlite dbs = new SettingDaoSqlite();
+        setting = db.getSetting();
 
-        curSetting = dbs.getSetting();
-
-        if (curSetting.getMonitorMode() > 0) {
+        if (setting.getMonitorMode() > 0) {
             startClipListner();
         }
 
@@ -311,7 +316,7 @@ public class DownloadManager extends JFrame
         model.removeTableModelListener(table);//remove table listner before delete from model
         model.removeRows(table.getSelectedRow());
         model.addTableModelListener(table);//add it back
-        DataDaoSqlite db = new DataDaoSqlite();
+        DaoSqlite db = new DaoSqlite();
         db.deleteDownloadData(rmDownload.getData().getId());
         toolbar.refreshToolBar();
         statusPane.setVisible(false);
@@ -354,11 +359,14 @@ public class DownloadManager extends JFrame
     public void addDownload(Download download) {
         try {
             Download tempd = download;
-            DataDaoSqlite db = new DataDaoSqlite();
+            DaoSqlite db = new DaoSqlite();
             db.insertDownloadData(tempd.getData());
             tempd.setData(db.getLastDownloadData());
             model.addRow(tempd);
             tempd.addPropertyChangeListener(this);
+            if (setting.isAutoStart()) {
+                tempd.setStart(true);
+            }
         } catch (Exception e) {
         }
     }
@@ -370,7 +378,7 @@ public class DownloadManager extends JFrame
      */
     public void updateDownload(Download download) {
         model.getRow(table.getSelectedRow()).setData(download.getData());
-        DataDaoSqlite db = new DataDaoSqlite();
+        DaoSqlite db = new DaoSqlite();
         db.updateDownloadData(download.getData());
         model.fireTableRowsUpdated(0, model.getRowCount());
     }
@@ -401,7 +409,7 @@ public class DownloadManager extends JFrame
             //run ui/app
             javax.swing.SwingUtilities.invokeLater(() -> {
                 DownloadManager frame = new DownloadManager();
-                frame.createAndShowGUI();
+                frame.showMe();
                 //frame.refreshTable();
 
             });
@@ -432,7 +440,7 @@ public class DownloadManager extends JFrame
     }
 
     public Setting getSetting() {
-        return curSetting;
+        return setting;
     }
 
     public String chooseFolder() {
@@ -457,9 +465,26 @@ public class DownloadManager extends JFrame
     }
 
     public void setSetting(Setting setting) {
-        this.curSetting = setting;
-        SettingDaoSqlite db = new SettingDaoSqlite();
+        this.setting = setting;
+        DaoSqlite db = new DaoSqlite();
         db.setSetting(setting);
+    }
+
+    private void clipMonitorParse(String url) {
+        if (Download.isUrlOK(url)) {
+            Download dwn = new Download();
+            dwn.setData(new Data());
+            dwn.getData().setUrl(url);
+            dwn.getData().setName(Download.getUrl_name(url));
+            dwn.getData().setDirectory(setting.getDirectory());
+            dwn.getData().setConnections(setting.getConnectionCount());
+            if (setting.getMonitorMode() == 1) {
+                OptionMenu newdwnmenu = new OptionMenu(this, dwn, true, true);
+
+            } else if (setting.getMonitorMode() == 2) {
+                addDownload(dwn);
+            }
+        }
     }
 
     @Override
@@ -468,8 +493,12 @@ public class DownloadManager extends JFrame
         toolbar.refreshToolBar();
         if (evt.getPropertyName().equals("addErrorMessage")) {
             statusPane.updateErrorView();
-        } else if (evt.getPropertyName().equals("ClipboardUpdate")) {
+        } else if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0) {
             System.err.println(evt.getNewValue().toString());
+            System.err.println(evt.getOldValue().toString());
+            //clipedUrl = evt.getNewValue().toString();
+            clipMonitorParse(evt.getNewValue().toString());
+
         }
     }
 

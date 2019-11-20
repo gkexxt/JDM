@@ -37,16 +37,18 @@ import java.util.List;
  */
 public class ClipboardTextListener implements Runnable {
 
+    private String recentContent = "";
     Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
 
-    private volatile boolean running ;
+    private volatile boolean running;
     private PropertyChangeSupport clipboardUpdate
             = new PropertyChangeSupport(this);
+
     public void terminate() {
         running = false;
     }
-    
-      public void addPropertyChangeListener(PropertyChangeListener listener) {
+
+    public void addPropertyChangeListener(PropertyChangeListener listener) {
         clipboardUpdate.addPropertyChangeListener(listener);
     }
 
@@ -57,7 +59,19 @@ public class ClipboardTextListener implements Runnable {
     @Override
     public void run() {
         // the first output will be when a non-empty text is detected
-        String recentContent = "";
+
+        try {
+            // request what kind of data-flavor is supported
+            List<DataFlavor> flavors = Arrays.asList(sysClip.getAvailableDataFlavors());
+            // this implementation only supports string-flavor
+            if (flavors.contains(DataFlavor.stringFlavor)) {
+                recentContent = (String) sysClip.getData(DataFlavor.stringFlavor);
+
+            }
+
+        } catch (Exception e1) {
+        }
+
         // continuously perform read from clipboard
         while (running) {
             try {
@@ -72,21 +86,21 @@ public class ClipboardTextListener implements Runnable {
                 if (flavors.contains(DataFlavor.stringFlavor)) {
                     String data = (String) sysClip.getData(DataFlavor.stringFlavor);
                     if (!data.equals(recentContent)) {
+                        clipboardUpdate.firePropertyChange("ClipboardUpdate", recentContent, data);
                         recentContent = data;
-                        // Do whatever you want to do when a clipboard change was detected, e.g.:
-                        //System.out.println("New clipboard text detected: " + data);
-                        clipboardUpdate.firePropertyChange("ClipboardUpdate", "", data);
                     }
                 }
 
             } catch (Exception e1) {
-            } 
+            }
         }
     }
-    
-    public void startMonitor(){
-        running = true;
-        Thread thread = new Thread(this);
-        thread.start();
+
+    public void startMonitor() {
+        if (!running) {
+            running = true;
+            Thread thread = new Thread(this);
+            thread.start();
+        }
     }
 }

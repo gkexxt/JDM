@@ -36,7 +36,7 @@ import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javadm.com.Download;
-import javadm.data.Data;
+import javadm.com.Data;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 

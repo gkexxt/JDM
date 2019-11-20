@@ -21,21 +21,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.data;
+package javadm.com;
 
 import java.util.List;
+import javadm.com.Setting;
+
 /**
- *interface providing DAO API
+ * interface providing DAO API
+ *
  * @author gkalianan
  */
-public interface DataDaoAPI {
+public interface DaoAPI {
 
     Data getDownloadData(int id);
+
     Data getLastDownloadData();
+
     List<Data> getAllDownloadData();
+
     //User getUserByUserNameAndPassword(String user, String pass);
     boolean insertDownloadData(Data downloadData);
+
     boolean updateDownloadData(Data downloadData);
+
     boolean deleteDownloadData(int id);
+
+    Setting getSetting();
+
+    boolean setSetting(Setting setting);
 
 }

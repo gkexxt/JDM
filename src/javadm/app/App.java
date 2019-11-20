@@ -44,7 +44,7 @@ public class App {
             if (lockInstance("lock")) {            
                 DownloadManager dm;
                 dm = new DownloadManager();
-                dm.createAndShowGUI();
+                dm.showMe();
             }else{
                 System.err.println("app instance is already running");
                 MsgAlreadyRunning msg = new MsgAlreadyRunning();

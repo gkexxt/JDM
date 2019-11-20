@@ -27,7 +27,6 @@ package javadm.util;
  *
  * @author G.K #gkexxt@outlook.com
  */
-import javadm.data.*;
 import java.lang.reflect.*;
 import java.util.*;
 import javax.swing.table.*;

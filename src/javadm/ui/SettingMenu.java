@@ -77,7 +77,7 @@ public class SettingMenu extends javax.swing.JDialog {
         jLabel1 = new javax.swing.JLabel();
         txtDirectory = new javax.swing.JTextField();
         spConnCount = new javax.swing.JSpinner();
-        jButton2 = new javax.swing.JButton();
+        btnChoose = new javax.swing.JButton();
         jLabel2 = new javax.swing.JLabel();
         jLabel3 = new javax.swing.JLabel();
         rbCBoff = new javax.swing.JRadioButton();
@@ -102,10 +102,10 @@ public class SettingMenu extends javax.swing.JDialog {
         spConnCount.setFont(spConnCount.getFont());
         spConnCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
 
-        jButton2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/folder.png"))); // NOI18N
-        jButton2.addActionListener(new java.awt.event.ActionListener() {
+        btnChoose.setIcon(new javax.swing.ImageIcon(getClass().getResource("/folder.png"))); // NOI18N
+        btnChoose.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton2ActionPerformed(evt);
+                btnChooseActionPerformed(evt);
             }
         });
 
@@ -117,27 +117,12 @@ public class SettingMenu extends javax.swing.JDialog {
 
         clipGroup.add(rbCBoff);
         rbCBoff.setText("Off");
-        rbCBoff.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rbCBoffActionPerformed(evt);
-            }
-        });
 
         clipGroup.add(rbCBmon);
         rbCBmon.setText("Monitor");
-        rbCBmon.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rbCBmonActionPerformed(evt);
-            }
-        });
 
         clipGroup.add(rbCBsilent);
         rbCBsilent.setText("Silent");
-        rbCBsilent.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                rbCBsilentActionPerformed(evt);
-            }
-        });
 
         jLabel4.setFont(jLabel4.getFont());
         jLabel4.setText("Autostart :");
@@ -158,12 +143,6 @@ public class SettingMenu extends javax.swing.JDialog {
             }
         });
 
-        cbAutostart.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbAutostartActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -176,7 +155,7 @@ public class SettingMenu extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtDirectory, javax.swing.GroupLayout.DEFAULT_SIZE, 425, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(btnChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 31, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(24, 24, 24))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -213,7 +192,7 @@ public class SettingMenu extends javax.swing.JDialog {
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(txtDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel1))
-                    .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
+                    .addComponent(btnChoose, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(spConnCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -238,11 +217,6 @@ public class SettingMenu extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void rbCBoffActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbCBoffActionPerformed
-        // TODO add your handling code here:
-        dm.stopClipListner();
-    }//GEN-LAST:event_rbCBoffActionPerformed
-
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         this.dispose();
     }//GEN-LAST:event_btnCancelActionPerformed
@@ -255,42 +229,31 @@ public class SettingMenu extends javax.swing.JDialog {
         setting.setDirectory(txtDirectory.getText());
         if (rbCBsilent.isSelected()) {
             setting.setMonitorMode(2);
+            dm.startClipListner();
         } else if (rbCBmon.isSelected()) {
             setting.setMonitorMode(1);
+            dm.startClipListner();
         } else {
             setting.setMonitorMode(0);
+            dm.stopClipListner();
         }
         dm.setSetting(setting);
         this.dispose();
 
     }//GEN-LAST:event_btnOKActionPerformed
 
-    private void rbCBmonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbCBmonActionPerformed
-        // TODO add your handling code here:
-        dm.startClipListner();
-    }//GEN-LAST:event_rbCBmonActionPerformed
-
-    private void rbCBsilentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_rbCBsilentActionPerformed
-        // TODO add your handling code here:
-        dm.startClipListner();
-    }//GEN-LAST:event_rbCBsilentActionPerformed
-
-    private void cbAutostartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbAutostartActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cbAutostartActionPerformed
-
-    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+    private void btnChooseActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseActionPerformed
         // TODO add your handling code here:
         txtDirectory.setText(dm.chooseFolder());
-    }//GEN-LAST:event_jButton2ActionPerformed
+    }//GEN-LAST:event_btnChooseActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnChoose;
     private javax.swing.JButton btnOK;
     private javax.swing.JCheckBox cbAutostart;
     private javax.swing.ButtonGroup clipGroup;
-    private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;

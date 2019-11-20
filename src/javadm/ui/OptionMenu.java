@@ -24,7 +24,7 @@
 package javadm.ui;
 
 import javadm.com.Download;
-import javadm.data.Data;
+import javadm.com.Data;
 import javax.swing.JOptionPane;
 
 /**
@@ -34,24 +34,22 @@ import javax.swing.JOptionPane;
 public class OptionMenu extends javax.swing.JDialog {
 
     private final Download selectedDownload;
-    private final boolean newDownload;
+    private final boolean isNewDownload;
     private final DownloadManager dm;
-
     /**
      * Creates new OptionDialog
      *
      * @param downloadManager
+     * @param download
      * @param modal
-     * @param newdownload
+     * @param isNewdownload
      */
-    public OptionMenu(DownloadManager downloadManager, boolean modal, boolean newdownload) {
+    public OptionMenu(DownloadManager downloadManager, Download download, boolean modal, boolean isNewdownload) {
         super(downloadManager, modal);
         this.dm = downloadManager;
-        this.newDownload = newdownload;
-
-        if (newDownload) {
-            this.selectedDownload = new Download();
-            selectedDownload.setData(new Data());
+        this.isNewDownload = isNewdownload;
+        this.selectedDownload = download;
+        if (isNewDownload) {            
             initComponents();
             btnRemove.setVisible(false);
             btnSave.setVisible(false);
@@ -59,7 +57,6 @@ public class OptionMenu extends javax.swing.JDialog {
             SpinConnNCount.setValue(dm.getSetting().getConnectionCount());
 
         } else {
-            this.selectedDownload = dm.getSelectedDownload();
             initComponents();
             SpinConnNCount.setValue(selectedDownload.getData().getConnections());
             if (selectedDownload.getData().getDoneSize() > 0) {
@@ -287,7 +284,7 @@ public class OptionMenu extends javax.swing.JDialog {
                 selectedDownload.getData().setUrl(url);
                 selectedDownload.getData().setDirectory(txtDirectory.getText());
                 selectedDownload.getData().setName(txtName.getText());
-                if (newDownload) {
+                if (isNewDownload) {
                     dm.addDownload(selectedDownload);
                 } else {
                     dm.updateDownload(selectedDownload);

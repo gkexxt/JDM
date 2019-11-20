@@ -34,7 +34,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javadm.data.Data;
 import javadm.ui.DownloadControl;
 
 /**
@@ -116,7 +115,12 @@ public class Download {
         return start;
     }
 
-    public String getUrl_name(String url) {
+    /**
+     *get filename from url
+     * @param url
+     * @return fname
+     */
+    public static String getUrl_name(String url) {
         String[] urlSplit = url.split("/");
         System.err.println(Arrays.toString(urlSplit));
         String fname = urlSplit[urlSplit.length - 1];
@@ -189,7 +193,12 @@ public class Download {
         //System.out.println("JavaDM.Data.DownloadData.StopDownload()");
     }
 
-    public boolean isUrlOK(String url) {
+    /**
+     *check url is valid
+     * @param url
+     * @return true if valid
+     */
+    public static boolean isUrlOK(String url) {
         try {
             URL u = new URL(url); // this would check for the protocol
             u.toURI();
