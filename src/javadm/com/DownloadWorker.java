@@ -36,9 +36,11 @@ public class DownloadWorker {
 
     String name;
     Download download;
+    public static final long CONERR = -2;
 
     DownloadWorker(Download download) {
         this.download = download;
+        System.out.println("javadm.com.DownloadWorker.<init>()");
         //System.out.println("New thread: " + t);
     }
 
@@ -66,9 +68,20 @@ public class DownloadWorker {
 
         @Override
         public void run() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
+            try {
+                URL urlTemp;
+                urlTemp = new URL(download.getData().getUrl());
+                HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
+                conn.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
+                conn.connect();
+                download.setDownloadSize(conn.getContentLengthLong());
+                conn.disconnect();
+            } catch (Exception ex) {
+                download.setDownloadSize(DownloadWorker.CONERR);
+                download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
 
+            }
+        }
     }
 
     class Downloader implements Runnable {
@@ -85,7 +98,9 @@ public class DownloadWorker {
 
         public void start() {
             t = new Thread(this);
+            System.out.println("javadm.com.DownloadWorker.Downloader.start()");
             t.start();
+            
         }
 
         @Override
@@ -94,6 +109,7 @@ public class DownloadWorker {
             BufferedInputStream in = null;
             RandomAccessFile raf = null;
             try {
+                System.out.println("javadm.com.DownloadWorker.Downloader.run()");
                 // open Http connection to URL
                 URL url = new URL(download.getData().getUrl());
 
@@ -127,7 +143,7 @@ public class DownloadWorker {
 
                             download.setProgress(numRead);
                         } catch (Exception ex) {
-                            download.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
+                            download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
                             //System.out.println("javadm.com.Downloader.run()");
                         }
 
@@ -136,10 +152,10 @@ public class DownloadWorker {
                     download.getData().setComplete(download.isStart());
 
                 } else {
-                    download.addErrorMessage(new String[]{"protocol Error", " http Response error - code : " + responsecode});
+                    download.addLogMsg(new String[]{"protocol Error", " http Response error - code : " + responsecode});
                 }
             } catch (Exception ex) {
-                download.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
+                download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
                 //System.out.println("javadm.com.Downloader.run()");
             } finally {
 
@@ -147,7 +163,7 @@ public class DownloadWorker {
                     try {
                         raf.close();
                     } catch (Exception ex) {
-                        download.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
+                        download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
                     }
                 }
 
@@ -155,7 +171,7 @@ public class DownloadWorker {
                     try {
                         in.close();
                     } catch (Exception ex) {
-                        download.addErrorMessage(new String[]{ex.getMessage(), ex.toString()});
+                        download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
                         //System.out.println("javadm.com.Downloader.run()");
                     }
                 }

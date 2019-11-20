@@ -79,14 +79,14 @@ public class StatusPane extends JPanel {
             currentSelected = dm.getSelectedDownload();
             downloadInstance = currentSelected.toString();//
             errorView.setText("Error Log : " + currentSelected.getData().getName() + "\n\n");
-            if (currentSelected.getErrorLog().size() > 0) {
-                for (int i = 0; i < currentSelected.getErrorLog().size() - 1; i++) {
-                    errorView.setText(errorView.getText() + i + " : " + currentSelected.getErrorLog().get(i)[0] + "\n"
-                            + currentSelected.getErrorLog().get(i)[1] + "\n");
+            if (currentSelected.getLogMsg().size() > 0) {
+                for (int i = 0; i < currentSelected.getLogMsg().size() - 1; i++) {
+                    errorView.setText(errorView.getText() + i + " : " + currentSelected.getLogMsg().get(i)[0] + "\n"
+                            + currentSelected.getLogMsg().get(i)[1] + "\n");
                 }
             }
         } else {
-            List<String[]> errLog = dm.getSelectedDownload().getErrorLog();
+            List<String[]> errLog = dm.getSelectedDownload().getLogMsg();
             int lastLine = errLog.size() - 1;
             if (lastLine > -1) {
                 errorView.setText(errorView.getText() + lastLine + " : " + errLog.get(lastLine)[0] + "\n"

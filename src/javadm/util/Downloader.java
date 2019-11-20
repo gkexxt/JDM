@@ -21,12 +21,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.com;
+package javadm.util;
 
 import java.io.BufferedInputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import javadm.com.Download;
 
 /**
  *
@@ -82,7 +83,7 @@ public class Downloader {
                         
                         download.setProgress(numRead);
                     } catch (Exception ex) {
-                        download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+                        download.addLogMsg(new String [] {ex.getMessage(),ex.toString()});
                         //System.out.println("javadm.com.Downloader.run()");
                     }
 
@@ -91,10 +92,10 @@ public class Downloader {
                 download.getData().setComplete(download.isStart());
 
             } else {
-                download.addErrorMessage(new String []{"protocol Error"," http Response error - code : " + responsecode});
+                download.addLogMsg(new String []{"protocol Error"," http Response error - code : " + responsecode});
             }
         } catch (Exception ex) {
-           download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+           download.addLogMsg(new String [] {ex.getMessage(),ex.toString()});
            //System.out.println("javadm.com.Downloader.run()");
         } finally {
             
@@ -104,7 +105,7 @@ public class Downloader {
                 try {
                     raf.close();
                 } catch (Exception ex) {
-                    download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+                    download.addLogMsg(new String [] {ex.getMessage(),ex.toString()});
                 }
             }
 
@@ -114,7 +115,7 @@ public class Downloader {
                 try {
                     in.close();
                 } catch (Exception ex) {
-                    download.addErrorMessage(new String [] {ex.getMessage(),ex.toString()});
+                    download.addLogMsg(new String [] {ex.getMessage(),ex.toString()});
                     //System.out.println("javadm.com.Downloader.run()");
                 }
             }
