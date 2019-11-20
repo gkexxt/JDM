@@ -255,8 +255,7 @@ public class ToolBar extends JPanel
                     dwn.setData(new Data());
                     dwn.getData().setDirectory(dm.getSetting().getDirectory());
                     dwn.getData().setConnections(dm.getSetting().getConnectionCount());
-                    OptionMenu newDwn = new OptionMenu(dm, dwn, true, true);
-                    newDwn.setTitle("Add New download");
+                    new OptionMenu(dm, dwn, true, true);
 
                     break;
                 case REMOVE:
@@ -272,7 +271,7 @@ public class ToolBar extends JPanel
                     dm.restartDownload();
                     break;
                 case SETTING:
-                    OptionMenu seldownload = new OptionMenu(dm, dm.getSelectedDownload(), true, false);
+                     new OptionMenu(dm, dm.getSelectedDownload(), true, false);
                     //seldownload.setTitle("Download Options- " + selectedDownload.getData().getName());
                     break;
                 case SCHEDULE:
