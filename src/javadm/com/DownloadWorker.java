@@ -55,7 +55,7 @@ public class DownloadWorker {
 
     public void startDownloadController() {
         downloadController xxx = new downloadController();
-        xxx.start();
+        xxx.startx();
     }
 
     public synchronized void decThreacount() {
@@ -88,15 +88,16 @@ public class DownloadWorker {
             this.inCompParts = new ArrayList<>();
         }
 
-        public void start() {
+        public void startx() {
             t = new Thread(this);
-            System.out.println("javadm.com.DownloadWorker.Downloader.start()");
+            //System.out.println("javadm.com.DownloadWorker.Downloader.start()");
             t.start();
 
         }
 
         @Override
         public void run() {
+            start = true;
             long filesize = -2;
             try {
                 URL urlTemp;
@@ -112,23 +113,31 @@ public class DownloadWorker {
 
             }
 
-            if (filesize < -1) {
+            if (download.getData().getFileSize() < -1) {
+                // System.err.println("----------------");
                 return;
             }
 
             download.initParts();
+            System.err.println(download.getData().getName());
+
             this.downloadParts = download.getParts();
             int loopCount = 0;
-
+            //System.err.println("----------------");
             for (int i = 0; i < downloadParts.size(); i++) {
                 if (!downloadParts.get(i).isCompleted()) {
                     inCompParts.add(downloadParts.get(i));
+
                 }
 
             }
-
-            while (download.isStart()) {
-
+            //
+            while (download.isStart() && (inCompParts.size() >0 || getThreacount() >0)) {
+                //System.err.println("controller running");
+                
+                System.err.println(" Thcount : " + threacount);
+                System.err.println(inCompParts.size());
+                
                 if (loopCount > 50 && !downloading) {
 
                     start = false;
@@ -140,10 +149,13 @@ public class DownloadWorker {
                 } else {
 
                     if (threacount < download.getData().getConnections() && inCompParts.size() > 0) {
+                        System.out.println("Spawning new thread");
                         Downloader dt = new Downloader(inCompParts.get(0));
                         inCompParts.remove(0);
                         dt.addPropertyChangeListener(this);
-                        dt.run();
+                        dt.startx();
+                        System.out.println("Spawning new thread --- ");
+                        threacount=threacount+1;
 
                     }
 
@@ -156,16 +168,27 @@ public class DownloadWorker {
                 }
             }
 
+            System.err.println("controller exit");
+
         }
 
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 
-            if (evt.toString().equals("error")) {
+            if (evt.getPropertyName().equals("error")) {
 
-                threacount = threacount - 1;
                 inCompParts.add((Download.DownloadPart) evt.getNewValue());
+                //threacount = threacount - 1;
+
+            }
+
+            if (evt.getPropertyName().equals("tend")) {
+                
+                
+
+               // threacount = threacount - 1;
+                //inCompParts.add((Download.DownloadPart) evt.getNewValue());
 
             }
 
@@ -178,7 +201,7 @@ public class DownloadWorker {
         private final PropertyChangeSupport propChangeSupport
                 = new PropertyChangeSupport(this);
         private String fname;
-        Thread t;
+        Thread tx;
         int BUFFER_SIZE = 4092;
         private final Download.DownloadPart part;
 
@@ -195,10 +218,10 @@ public class DownloadWorker {
             propChangeSupport.removePropertyChangeListener(listener);
         }
 
-        public void start() {
-            t = new Thread(this);
+        public void startx() {
+            tx = new Thread(this);
             System.out.println("javadm.com.DownloadWorker.Downloader.start()");
-            t.start();
+            tx.start();
 
         }
 
@@ -211,21 +234,21 @@ public class DownloadWorker {
                 System.out.println("javadm.com.DownloadWorker.Downloader.run()");
                 // open Http connection to URL
                 URL url = new URL(download.getData().getUrl());
-
+                System.out.println("javadm.com.DownloadWorker.Downloader.run() + ");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 String byteRange = part.getStartByte() + "-" + part.getEndByte();
                 conn.setRequestProperty("Range", "bytes=" + byteRange);
                 System.out.println("bytes=" + byteRange);
-                conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U;"
-                        + download.getUserAgent());
+                conn.setRequestProperty("User-Agent", download.getUserAgent());
                 // connect to server
+                System.out.println("javadm.com.DownloadWorker.Downloader.run() + before connect ");
                 conn.connect();
-
+                System.out.println("javadm.com.DownloadWorker.Downloader.run() + after connect ");
                 int responsecode = conn.getResponseCode();
-
+                System.err.println("Response code : " + responsecode);
                 // Make sure the response code is in the 200 range.
                 if (responsecode / 100 == 2) {
-
+                    System.err.println("Response code xxx: " + responsecode);
                     //set part size
                     //download.getData().setFileSize(conn.getContentLengthLong());
                     // get the input stream
@@ -240,6 +263,7 @@ public class DownloadWorker {
 
                     while (start && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
                         // write to buffer
+                        //System.err.println("enter while loop");
                         raf.write(data, 0, numRead);
                         setDownloading(true);
                         try {
@@ -284,9 +308,11 @@ public class DownloadWorker {
                 }
 
             }
-
+            
+            //propChangeSupport.firePropertyChange("");
             decThreacount();
             setDownloading(false);
+            System.err.println("thread exit");
 
         }
 

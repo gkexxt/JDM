@@ -59,27 +59,34 @@ public class Download {
     }
 
     public void setParts(List<DownloadPart> parts) {
-
         this.parts = parts;
     }
 
-    public void initParts() {
-        parts = new ArrayList<>();
-       double x =  (int) (getData().getFileSize()/DownloadPart.partSize);
-       int y = (int) x;
-       if (((double)x)<y){
-          x= x+1;
-        
-    }
-       
-        for (int i = 0; i < x; i++) {            
-            DownloadPart part = new DownloadPart();
-            part.startByte = i*DownloadPart.partSize;
-            part.endByte = i*DownloadPart.partSize + (DownloadPart.partSize-1);
-            part.setPartFileName(getData().getName()+".part"+i);
-            parts.add(new DownloadPart());            
+    public void display() {
+        for (int i = 0; i < parts.size(); i++) {
+            System.err.println(parts.get(i).getStartByte());
         }
-       
+    }
+
+    public void initParts() {
+
+        long x =  getData().getFileSize() / DownloadPart.partSize ;   
+        if (x*DownloadPart.partSize < getData().getFileSize()) {
+            x = x + 1;
+        }
+        
+        System.err.println("segments : " + x);
+        for (int i = 0; i < x; i++) {
+            DownloadPart part = new DownloadPart();
+            part.startByte = i * DownloadPart.partSize;
+            System.err.println(part.startByte);
+            part.endByte = i * DownloadPart.partSize + (DownloadPart.partSize - 1);
+            System.err.println(part.endByte);
+            part.setPartFileName(getData().getName() + ".part" + i);
+            parts.add(part);
+
+        }
+
     }
 
     public Download() {
@@ -87,6 +94,7 @@ public class Download {
         this.userAgent = "Mozilla/5.0 (Macintosh; U;"
                 + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
         this.downloadControl = new DownloadControl();// instace of control
+        parts = new ArrayList<>();
     }
 
     public List<String[]> getLogMsgs() {
@@ -134,7 +142,7 @@ public class Download {
         this.downloadControl = downloadControl;
     }
 
-    public Data getData() {
+    public synchronized Data getData() {
         return data;
     }
 
@@ -160,7 +168,7 @@ public class Download {
         return (fname);
     }
 
-    public void setProgress(long buffersize) {
+    public synchronized void setProgress(long buffersize) {
         try {
             data.setDoneSize(data.getDoneSize() + buffersize);
             int value = (int) (double) ((100.0 * data.getDoneSize())
@@ -189,6 +197,7 @@ public class Download {
 
             StopDownload();
         }
+        
         propChangeSupport.firePropertyChange("setStart", oldstart, start);
 
     }
@@ -197,7 +206,7 @@ public class Download {
         this.data.setFileSize(fsize);
         if (start) {
             System.out.println("javadm.com.Download.setDownloadSize()");
-           // new DownloadWorker(this).startDownloader();
+            // new DownloadWorker(this).startDownloader();
         }
     }
 
@@ -226,6 +235,7 @@ public class Download {
     }
 
     class DownloadPart {
+
         private long startByte;
         private long endByte;
         private long currentByte;
@@ -239,8 +249,6 @@ public class Download {
         public void setCompleted(boolean completed) {
             this.completed = completed;
         }
-
-    
 
         private static final long partSize = 5000000; //1Mb
 
