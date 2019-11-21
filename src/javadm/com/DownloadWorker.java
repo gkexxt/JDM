@@ -77,7 +77,7 @@ public class DownloadWorker {
     class downloadController implements Runnable, PropertyChangeListener {
         
         private List<Part> downloadParts;
-        private List<Part> inCompletePart;
+        private List<Part> xCompletePart;
         private List<Part> inQuePart;
         private Part rpart = new Part();
         Thread t;
@@ -85,7 +85,7 @@ public class DownloadWorker {
         public downloadController() {
             
             this.inQuePart = new ArrayList<>();
-            this.inCompletePart = new ArrayList<>();
+            this.xCompletePart = new ArrayList<>();
         }
         
         public void startx() {
@@ -126,7 +126,7 @@ public class DownloadWorker {
             //System.err.println("----------------");
             for (int i = 0; i < downloadParts.size(); i++) {
                 if (!downloadParts.get(i).isCompleted()) {
-                    inCompletePart.add(downloadParts.get(i));
+                    xCompletePart.add(downloadParts.get(i));
                     
                 }
                 
@@ -148,9 +148,9 @@ public class DownloadWorker {
                     
                 } else {
                     
-                    if (inCompletePart.size() > 0 && inQuePart.size() < 1) {
-                        inQuePart.add(inCompletePart.get(0));
-                        inCompletePart.remove(0);
+                    if (xCompletePart.size() > 0 && inQuePart.size() < 1) {
+                        inQuePart.add(xCompletePart.get(0));
+                        xCompletePart.remove(0);
                     }
                     
                     if (threacount < download.getData().getConnections() && inQuePart.size() > 0) {
