@@ -137,7 +137,7 @@ public class DownloadWorker {
 
                 //System.err.println(" Thcount : " + threacount);
                 //System.err.println(inQuePart.size());
-                if (loopCount > 50 && !downloading) {
+                if (loopCount > 200 && !downloading && false) {
                     System.out.println("javadm.com.DownloadWorker.downloading timeout");
                     start = false;
                     //;
@@ -260,6 +260,8 @@ public class DownloadWorker {
                 conn.setRequestProperty("User-Agent", download.getUserAgent());
                 // connect to server
                 System.out.println("javadm.com.DownloadWorker.Downloader.run() + before connect ");
+                conn.setConnectTimeout(5000);
+                conn.setReadTimeout(5000);
                 conn.connect();
                 System.out.println("javadm.com.DownloadWorker.Downloader.run() + after connect ");
                 int responsecode = conn.getResponseCode();
