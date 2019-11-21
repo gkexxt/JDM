@@ -64,7 +64,22 @@ public class Download {
     }
 
     public void initParts() {
-
+        parts = new ArrayList<>();
+       double x =  (int) (getData().getFileSize()/DownloadPart.partSize);
+       int y = (int) x;
+       if (((double)x)<y){
+          x= x+1;
+        
+    }
+       
+        for (int i = 0; i < x; i++) {            
+            DownloadPart part = new DownloadPart();
+            part.startByte = i*DownloadPart.partSize;
+            part.endByte = i*DownloadPart.partSize + (DownloadPart.partSize-1);
+            part.setPartFileName(getData().getName()+".part"+i);
+            parts.add(new DownloadPart());            
+        }
+       
     }
 
     public Download() {
@@ -169,7 +184,7 @@ public class Download {
 
             //StartDownload();
             //getData().setFileSize(getcontentLength());
-            new DownloadWorker(this).startFileSizeGetter();
+            new DownloadWorker(this).startDownloadController();
         } else {
 
             StopDownload();
@@ -182,7 +197,7 @@ public class Download {
         this.data.setFileSize(fsize);
         if (start) {
             System.out.println("javadm.com.Download.setDownloadSize()");
-            new DownloadWorker(this).startDownloader();
+           // new DownloadWorker(this).startDownloader();
         }
     }
 
@@ -208,6 +223,63 @@ public class Download {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    class DownloadPart {
+        private long startByte;
+        private long endByte;
+        private long currentByte;
+        private String partFileName;
+        private boolean completed;
+
+        public boolean isCompleted() {
+            return completed;
+        }
+
+        public void setCompleted(boolean completed) {
+            this.completed = completed;
+        }
+
+    
+
+        private static final long partSize = 5000000; //1Mb
+
+        public long getPartSize() {
+            return partSize;
+        }
+
+        public String getPartFileName() {
+            return partFileName;
+        }
+
+        public void setPartFileName(String partFileName) {
+            this.partFileName = partFileName;
+        }
+
+        public long getStartByte() {
+            return startByte;
+        }
+
+        public void setStartByte(long startByte) {
+            this.startByte = startByte;
+        }
+
+        public long getEndByte() {
+            return endByte;
+        }
+
+        public void setEndByte(long endByte) {
+            this.endByte = endByte;
+        }
+
+        public long getCurrentByte() {
+            return currentByte;
+        }
+
+        public void setCurrentByte(long currentByte) {
+            this.currentByte = currentByte;
+        }
+
     }
 
 }
