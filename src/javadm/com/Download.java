@@ -25,7 +25,6 @@ package javadm.com;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,13 +51,13 @@ public class Download {
     private DownloadControl downloadControl;
     private final PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
-    private List<DownloadPart> parts;
+    private List<Part> parts;
 
-    public List<DownloadPart> getParts() {
+    public List<Part> getParts() {
         return parts;
     }
 
-    public void setParts(List<DownloadPart> parts) {
+    public void setParts(List<Part> parts) {
         this.parts = parts;
     }
 
@@ -70,22 +69,33 @@ public class Download {
 
     public void initParts() {
 
-        long x =  getData().getFileSize() / DownloadPart.partSize ;   
-        if (x*DownloadPart.partSize < getData().getFileSize()) {
-            x = x + 1;
-        }
+        long x = getData().getFileSize() / Part.partDefaultSize;
+        long last_length = getData().getFileSize() - x*Part.partDefaultSize;
+      
         
-        System.err.println("segments : " + x);
+        
+
+        //System.err.println("segments : " + x);
         for (int i = 0; i < x; i++) {
-            DownloadPart part = new DownloadPart();
-            part.startByte = i * DownloadPart.partSize;
-            System.err.println(part.startByte);
-            part.endByte = i * DownloadPart.partSize + (DownloadPart.partSize - 1);
-            System.err.println(part.endByte);
+            Part part = new Part();
+            part.setStartByte(i * Part.partDefaultSize);
+            part.setEndByte(i * Part.partDefaultSize + (Part.partDefaultSize - 1));
+           part.setPartSize(Part.partDefaultSize);
             part.setPartFileName(getData().getName() + ".part" + i);
             parts.add(part);
 
         }
+        
+        if (last_length >0){
+            Part part = new Part();
+            part.setStartByte(x * Part.partDefaultSize);
+            part.setPartSize(last_length);
+            part.setEndByte(x * Part.partDefaultSize + last_length-1);
+            part.setPartFileName(getData().getName() + ".part" + x);
+            parts.add(part);
+        }
+        
+        
 
     }
 
@@ -197,7 +207,7 @@ public class Download {
 
             StopDownload();
         }
-        
+
         propChangeSupport.firePropertyChange("setStart", oldstart, start);
 
     }
@@ -215,7 +225,7 @@ public class Download {
     }
 
     private void StopDownload() {
-        //System.out.println("JavaDM.Data.DownloadData.StopDownload()");
+        //System.out.println("JavaDM.Data.Data.StopDownload()");
     }
 
     /**
@@ -234,60 +244,6 @@ public class Download {
         }
     }
 
-    class DownloadPart {
-
-        private long startByte;
-        private long endByte;
-        private long currentByte;
-        private String partFileName;
-        private boolean completed;
-
-        public boolean isCompleted() {
-            return completed;
-        }
-
-        public void setCompleted(boolean completed) {
-            this.completed = completed;
-        }
-
-        private static final long partSize = 5000000; //1Mb
-
-        public long getPartSize() {
-            return partSize;
-        }
-
-        public String getPartFileName() {
-            return partFileName;
-        }
-
-        public void setPartFileName(String partFileName) {
-            this.partFileName = partFileName;
-        }
-
-        public long getStartByte() {
-            return startByte;
-        }
-
-        public void setStartByte(long startByte) {
-            this.startByte = startByte;
-        }
-
-        public long getEndByte() {
-            return endByte;
-        }
-
-        public void setEndByte(long endByte) {
-            this.endByte = endByte;
-        }
-
-        public long getCurrentByte() {
-            return currentByte;
-        }
-
-        public void setCurrentByte(long currentByte) {
-            this.currentByte = currentByte;
-        }
-
-    }
+   
 
 }
