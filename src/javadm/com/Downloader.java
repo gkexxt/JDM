@@ -37,37 +37,31 @@ import java.util.List;
  *
  * @author gkalianan
  */
-public class DownloadWorker implements Runnable, PropertyChangeListener {
+public class Downloader implements Runnable, PropertyChangeListener {
 
     private List<Part> downloadParts;
     private List<Part> xCompletePart;
     private List<Part> inQuePart;
     private Part rpart = new Part();
-
     Thread t;
-    String name;
     Download download;
-
     public static final long CONERR = -2;
     private volatile boolean start;
     private volatile boolean downloading = false;
+    private int workerThreadCount = 0;
 
-    private int threacount = 0;
-
-    DownloadWorker(Download download) {
+    public Downloader(Download download) {
         this.download = download;
-
         this.inQuePart = new ArrayList<>();
         this.xCompletePart = new ArrayList<>();
-        //System.out.println("New thread: " + t);
     }
 
-    public int getThreacount() {
-        return threacount;
+    public int getWorkerThreadCount() {
+        return workerThreadCount;
     }
 
     public synchronized void decThreacount() {
-        this.threacount = this.threacount - 1;
+        this.workerThreadCount = this.workerThreadCount - 1;
     }
 
     private synchronized void setDownloading(boolean downloading) {
@@ -78,42 +72,41 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
         return downloading;
     }
 
-    public void startx() {
+    public void start() {
         t = new Thread(this);
-        //System.out.println("javadm.com.DownloadWorker.Downloader.start()");
         t.start();
-
     }
 
     @Override
     public void run() {
-        start = true;
-        long filesize = -2;
-        try {
-            URL urlTemp;
-            urlTemp = new URL(download.getData().getUrl());
-            HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
-            conn.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
-            conn.connect();
-            download.setDownloadSize(conn.getContentLengthLong());
-            conn.disconnect();
-        } catch (Exception ex) {
-            download.setDownloadSize(DownloadWorker.CONERR);
-            download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
 
-        }
+        //is part not initialize   
+        if (download.getParts().size() < 1 && !download.getData().isComplete()) {            
 
-        if (download.getData().getFileSize() < -1) {
-            // System.err.println("----------------");
+            try {
+                URL urlTemp;
+                urlTemp = new URL(download.getData().getUrl());
+                HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
+                conn.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
+                conn.setConnectTimeout(3000);
+                conn.setReadTimeout(3000);
+                conn.connect();
+                download.setDownloadSize(conn.getContentLengthLong());
+                conn.disconnect();
+            } catch (Exception ex) {
+                download.setDownloadSize(Downloader.CONERR);
+                download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
+                return;//exut when error connecting
+            }           
+
+            download.initParts();
+        }else{
+            download.addLogMsg(new String[]{Download.INFO, "Download already completed"});
             return;
         }
 
-        download.initParts();
-        System.err.println(download.getData().getName());
-
         this.downloadParts = download.getParts();
         int loopCount = 0;
-        //System.err.println("----------------");
         for (int i = 0; i < downloadParts.size(); i++) {
             if (!downloadParts.get(i).isCompleted()) {
                 xCompletePart.add(downloadParts.get(i));
@@ -121,17 +114,13 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
             }
 
         }
-        //
-        while (download.isStart()) {
-            //System.err.println("controller running");
 
-            //System.err.println(" Thcount : " + threacount);
-            //System.err.println(inQuePart.size());
+        start = true;
+        while (download.isStart()) {
             if (loopCount > 200 && !downloading && false) {
                 System.out.println("javadm.com.DownloadWorker.downloading timeout");
                 start = false;
-                //;
-                if (getThreacount() < 0) {
+                if (getWorkerThreadCount() < 0) {
                     download.setStart(false);
                     break;
                 }
@@ -143,14 +132,14 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
                     xCompletePart.remove(0);
                 }
 
-                if (threacount < download.getData().getConnections() && inQuePart.size() > 0) {
+                if (workerThreadCount < download.getData().getConnections() && inQuePart.size() > 0) {
                     System.out.println("Spawning new thread");
-                    Downloader dt = new Downloader(inQuePart.get(0));
+                    DownloadWorker dt = new DownloadWorker(inQuePart.get(0));
                     inQuePart.remove(0);
                     dt.addPropertyChangeListener(this);
                     dt.startx();
                     System.out.println("Spawning new thread --- ");
-                    threacount = threacount + 1;
+                    workerThreadCount = workerThreadCount + 1;
 
                 }
 
@@ -169,38 +158,33 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         rpart = (Part) evt.getNewValue();
         if (evt.getPropertyName().equals("error")) {
 
-            if (rpart.getCurrentSize() < rpart.getPartSize()) {
+            if (rpart.getCurrentSize() < rpart.getSize()) {
                 inQuePart.add(rpart);
             } else {
                 rpart.setCompleted(true);
             }
             decThreacount();
-            //threacount = threacount - 1;
 
         }
 
         if (evt.getPropertyName().equals("tend")) {
 
-            if (rpart.getCurrentSize() < rpart.getPartSize()) {
+            if (rpart.getCurrentSize() < rpart.getSize()) {
                 inQuePart.add(rpart);
             } else {
                 rpart.setCompleted(true);
             }
             decThreacount();
-
-            // threacount = threacount - 1;
-            //inCompParts.add((Download.Part) evt.getNewValue());
         }
 
         System.err.println("rpart : " + rpart.getPartFileName() + " : " + rpart.getCurrentSize());
 
     }
 
-    class Downloader implements Runnable {
+    class DownloadWorker implements Runnable {
 
         private final PropertyChangeSupport propChangeSupport
                 = new PropertyChangeSupport(this);
@@ -210,7 +194,7 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
         int BUFFER_SIZE = 16368;
         private Part part;
 
-        public Downloader(Part part) {
+        public DownloadWorker(Part part) {
             this.part = part;
 
         }
@@ -232,7 +216,6 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
 
         @Override
         public void run() {
-            //System.out.println("javadm.com.Downloader.run()");
             BufferedInputStream in = null;
             RandomAccessFile raf = null;
             try {
@@ -258,7 +241,6 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
                 if (responsecode / 100 == 2) {
                     System.err.println("Response code xxx: " + responsecode);
                     //set part size
-                    //download.getData().setFileSize(conn.getContentLengthLong());
                     // get the input stream
                     in = new BufferedInputStream(conn.getInputStream());
 
@@ -271,7 +253,6 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
 
                     while (start && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
                         // write to buffer
-                        //System.err.println("enter while loop");
                         raf.write(data, 0, numRead);
                         part.setCurrentSize(part.getCurrentSize() + numRead);
                         setDownloading(true);
@@ -281,15 +262,12 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
                             download.setProgress(numRead);
                         } catch (Exception ex) {
                             download.addLogMsg(new String[]{Download.WARNING, ex.toString()});
-                            //System.out.println("javadm.com.Downloader.run()");
                         }
 
                     }
-                    //if part is still instart mode and loop ended set complete
-                    //part.setCompleted(start || (in.read(data, 0, BUFFER_SIZE) != -1));
+
                     propChangeSupport.firePropertyChange("tend", "", part);
                     System.err.println(part.getPartFileName() + " - done_size : " + part.getCurrentSize());
-                    //download.getData().setComplete(download.isStart());
 
                 } else {
                     download.addLogMsg(new String[]{"protocol Error", " http Response error - code : " + responsecode});
@@ -298,7 +276,6 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
             } catch (Exception ex) {
                 download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
                 propChangeSupport.firePropertyChange("error", ex.toString(), part);
-                //System.out.println("javadm.com.Downloader.run()");
             } finally {
 
                 if (raf != null) {
@@ -314,7 +291,6 @@ public class DownloadWorker implements Runnable, PropertyChangeListener {
                         in.close();
                     } catch (Exception ex) {
                         download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
-                        //System.out.println("javadm.com.Downloader.run()");
                     }
                 }
 

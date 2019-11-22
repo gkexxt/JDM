@@ -41,17 +41,23 @@ public class Download {
     private Data data;
     private boolean start;
     private String userAgent;
-
     private final List<String[]> logMsgs;
     public static final String ERROR = "Error";
     public static final String WARNING = "Warning";
     public static final String DEBUG = "Debug";
     public static final String INFO = "Info";
-
     private DownloadControl downloadControl;
     private final PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
     private List<Part> parts;
+
+    public Download() {
+        this.logMsgs = new ArrayList();
+        this.userAgent = "Mozilla/5.0 (Macintosh; U;"
+                + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
+        this.downloadControl = new DownloadControl();// instace of control
+        parts = new ArrayList<>();
+    }
 
     public List<Part> getParts() {
         return parts;
@@ -69,42 +75,35 @@ public class Download {
 
     public void initParts() {
 
-        long x = getData().getFileSize() / Part.partDefaultSize;
-        long last_length = getData().getFileSize() - x*Part.partDefaultSize;
-      
-        
-        
-
-        //System.err.println("segments : " + x);
-        for (int i = 0; i < x; i++) {
+        if (getData().getFileSize() < Part.partSize) { //no multipdart
             Part part = new Part();
-            part.setStartByte(i * Part.partDefaultSize);
-            part.setEndByte(i * Part.partDefaultSize + (Part.partDefaultSize - 1));
-           part.setPartSize(Part.partDefaultSize);
-            part.setPartFileName(getData().getName() + ".part" + i);
+            part.setStartByte(0);
+            part.setEndByte(getData().getFileSize() - 1);
+            part.setSize(getData().getFileSize());
+            part.setPartFileName(getData().getName());
             parts.add(part);
 
+        } else {
+            long x = getData().getFileSize() / Part.partSize;
+            long last_length = getData().getFileSize() - x * Part.partSize;
+            for (int i = 0; i < x; i++) {
+                Part part = new Part();
+                part.setStartByte(i * Part.partSize);
+                part.setEndByte(i * Part.partSize + (Part.partSize - 1));
+                part.setSize(Part.partSize);
+                part.setPartFileName(getData().getName() + ".part" + i);
+                parts.add(part);
+            }
+            if (last_length > 0) {
+                Part part = new Part();
+                part.setStartByte(x * Part.partSize);
+                part.setSize(last_length);
+                part.setEndByte(x * Part.partSize + last_length - 1);
+                part.setPartFileName(getData().getName() + ".part" + x);
+                parts.add(part);
+            }
         }
-        
-        if (last_length >0){
-            Part part = new Part();
-            part.setStartByte(x * Part.partDefaultSize);
-            part.setPartSize(last_length);
-            part.setEndByte(x * Part.partDefaultSize + last_length-1);
-            part.setPartFileName(getData().getName() + ".part" + x);
-            parts.add(part);
-        }
-        
-        
 
-    }
-
-    public Download() {
-        this.logMsgs = new ArrayList();
-        this.userAgent = "Mozilla/5.0 (Macintosh; U;"
-                + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
-        this.downloadControl = new DownloadControl();// instace of control
-        parts = new ArrayList<>();
     }
 
     public List<String[]> getLogMsgs() {
@@ -191,7 +190,7 @@ public class Download {
     }
 
     public void setStart(boolean startx) {
-        //propChangeSupport.firePropertyChange("Startxxxxxxxxxx", start, startx);
+        //propChangeSupport.firePropertyChange("Startxxxxxxxxxx", start, start);
         boolean oldstart = this.start;
         this.start = startx;
         //System.out.println("javadm.data.Download.setStart()");
@@ -202,7 +201,7 @@ public class Download {
 
             //StartDownload();
             //getData().setFileSize(getcontentLength());
-            new DownloadWorker(this).startDownloadController();
+            new Downloader(this).start();
         } else {
 
             StopDownload();
@@ -243,7 +242,5 @@ public class Download {
             return false;
         }
     }
-
-   
 
 }

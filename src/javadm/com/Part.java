@@ -32,21 +32,21 @@ public class Part {
     private long startByte;
     private long endByte;
     private long currentSize =0;
-    private long partSize;
+    private long size;
     private String partFileName;
     private boolean completed;
-    public static long partDefaultSize = 5000000; //1Mb
+    public static long partSize = 5000000; //default 5Mb
 
-    public long getPartSize() {
-        return partSize;
+    public long getSize() {
+        return size;
     }
 
-    public void setPartSize(long partSize) {
-        this.partSize = partSize;
+    public void setSize(long size) {
+        this.size = size;
     }
 
-    public static void setPartDefaultSize(long partDefaultSize) {
-        Part.partDefaultSize = partDefaultSize;
+    public static void setPartSize(long partSize) {
+        Part.partSize = partSize;
     }
 
     public boolean isCompleted() {
@@ -57,9 +57,7 @@ public class Part {
         this.completed = completed;
     }
 
-    public long getPartDefaultSize() {
-        return partDefaultSize;
-    }
+
 
     public String getPartFileName() {
         return partFileName;
