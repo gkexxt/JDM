@@ -43,10 +43,10 @@ public class Downloader implements Runnable, PropertyChangeListener {
     private List<Part> xCompletePart;
     private List<Part> inQuePart;
     private Part rpart = new Part();
-    Thread t;
+    Thread tDownloader;
     Download download;
     public static final long CONERR = -2;
-    private volatile boolean start;
+    private volatile boolean stop;
     private volatile boolean downloading = false;
     private int workerThreadCount = 0;
 
@@ -72,16 +72,16 @@ public class Downloader implements Runnable, PropertyChangeListener {
         return downloading;
     }
 
-    public void start() {
-        t = new Thread(this);
-        t.start();
+    public void startDownloader() {
+        tDownloader = new Thread(this);
+        tDownloader.start();
     }
 
     @Override
     public void run() {
 
         //is part not initialize   
-        if (download.getParts().size() < 1 && !download.getData().isComplete()) {            
+        if (download.getParts().size() < 1 && !download.getData().isComplete()) {
 
             try {
                 URL urlTemp;
@@ -97,10 +97,10 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 download.setDownloadSize(Downloader.CONERR);
                 download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
                 return;//exut when error connecting
-            }           
+            }
 
             download.initParts();
-        }else{
+        } else {
             download.addLogMsg(new String[]{Download.INFO, "Download already completed"});
             return;
         }
@@ -115,11 +115,11 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         }
 
-        start = true;
+        stop = true;
         while (download.isStart()) {
-            if (loopCount > 200 && !downloading && false) {
+            if (!downloading) {
                 System.out.println("javadm.com.DownloadWorker.downloading timeout");
-                start = false;
+                stop = true;
                 if (getWorkerThreadCount() < 0) {
                     download.setStart(false);
                     break;
@@ -137,7 +137,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     DownloadWorker dt = new DownloadWorker(inQuePart.get(0));
                     inQuePart.remove(0);
                     dt.addPropertyChangeListener(this);
-                    dt.startx();
+                    dt.startDworker();
                     System.out.println("Spawning new thread --- ");
                     workerThreadCount = workerThreadCount + 1;
 
@@ -158,30 +158,27 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
+
         rpart = (Part) evt.getNewValue();
-        if (evt.getPropertyName().equals("error")) {
-
+        if (rpart.getSize() > 0) {
             if (rpart.getCurrentSize() < rpart.getSize()) {
                 inQuePart.add(rpart);
             } else {
                 rpart.setCompleted(true);
             }
             decThreacount();
-
+            System.err.println("rpart : " + rpart.getPartFileName() + " : " + rpart.getCurrentSize());
+        } else {
+            downloading = false;
         }
 
-        if (evt.getPropertyName().equals("tend")) {
-
-            if (rpart.getCurrentSize() < rpart.getSize()) {
-                inQuePart.add(rpart);
-            } else {
-                rpart.setCompleted(true);
+        boolean complete = true;
+        for (int i = 0; i < xCompletePart.size(); i++) {
+            if (!xCompletePart.get(i).isCompleted()) {
+                complete = false;
             }
-            decThreacount();
         }
-
-        System.err.println("rpart : " + rpart.getPartFileName() + " : " + rpart.getCurrentSize());
-
+        downloading = !complete;
     }
 
     class DownloadWorker implements Runnable {
@@ -189,7 +186,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
         private final PropertyChangeSupport propChangeSupport
                 = new PropertyChangeSupport(this);
         private String fname;
-        Thread tx;
+        Thread tDworker;
         long done_size = 0;
         int BUFFER_SIZE = 16368;
         private Part part;
@@ -207,10 +204,10 @@ public class Downloader implements Runnable, PropertyChangeListener {
             propChangeSupport.removePropertyChangeListener(listener);
         }
 
-        public void startx() {
-            tx = new Thread(this);
+        public void startDworker() {
+            tDworker = new Thread(this);
             System.out.println("javadm.com.DownloadWorker.Downloader.start()");
-            tx.start();
+            tDworker.start();
 
         }
 
@@ -244,18 +241,17 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     // get the input stream
                     in = new BufferedInputStream(conn.getInputStream());
 
-                    // open the output file and seek to the start location
+                    // open the output file and seek to the stop location
                     fname = download.getData().getDirectory() + "/" + part.getPartFileName();
                     raf = new RandomAccessFile(fname, "rw");
                     raf.seek(part.getCurrentSize());
                     byte data[] = new byte[BUFFER_SIZE];
                     int numRead;
 
-                    while (start && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
+                    while (!stop && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
                         // write to buffer
                         raf.write(data, 0, numRead);
                         part.setCurrentSize(part.getCurrentSize() + numRead);
-                        setDownloading(true);
 
                         try {
 
@@ -297,7 +293,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
             }
 
             //propChangeSupport.firePropertyChange("");
-            setDownloading(false);
             System.err.println("thread exit");
 
         }
