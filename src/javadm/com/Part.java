@@ -87,7 +87,7 @@ public class Part {
         return currentSize;
     }
 
-    public void setCurrentSize(long currentSize) {
+    public synchronized void setCurrentSize(long currentSize) {
         this.currentSize = currentSize;
     }
 

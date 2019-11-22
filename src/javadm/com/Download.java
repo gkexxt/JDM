@@ -214,7 +214,7 @@ public class Download {
     public void setDownloadSize(long fsize) {
         this.data.setFileSize(fsize);
         if (start) {
-            System.out.println("javadm.com.Download.setDownloadSize()");
+            //System.out.println("javadm.com.Download.setDownloadSize()");
             // new DownloadWorker(this).startDownloader();
         }
     }

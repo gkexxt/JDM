@@ -90,7 +90,7 @@ public class Data {
 
     public void setFileSize(long fileSize) {
         this.fileSize = fileSize;
-        System.out.println("javadm.com.Data.setFileSize()");
+        //System.out.println("javadm.com.Data.setFileSize()");
     }
 
     public long getDoneSize() {

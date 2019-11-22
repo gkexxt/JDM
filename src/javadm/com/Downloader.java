@@ -32,6 +32,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -47,9 +48,11 @@ public class Downloader implements Runnable, PropertyChangeListener {
     Thread tDownloader;
     Download download;
     public static final long CONERR = -2;
-    private volatile boolean stop;
+    private volatile boolean stopWorker;
     private volatile boolean downloading = false;
+    private volatile boolean workerConnected;
     private int workerThreadCount = 0;
+    
 
     public Downloader(Download download) {
         this.download = download;
@@ -93,6 +96,19 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 conn.setConnectTimeout(3000);
                 conn.setReadTimeout(3000);
                 conn.connect();
+                String resSumeble = conn.getHeaderField("Accept-Ranges");
+                System.err.println(resSumeble);
+                
+                Map<String, List<String>> xxx = conn.getHeaderFields();
+                xxx.entrySet().stream().map((entry) -> {
+                    String key = entry.getKey();
+                    System.err.println(key);
+                    return entry;
+                }).forEachOrdered((entry) -> {
+                    List<String> val = entry.getValue();
+                    System.out.println(val);
+                });
+                
                 download.setDownloadSize(conn.getContentLengthLong());
                 conn.disconnect();
             } catch (Exception ex) {
@@ -104,6 +120,10 @@ public class Downloader implements Runnable, PropertyChangeListener {
             download.initParts();
         } else {
 
+            return;
+        }
+        
+        if(true){
             return;
         }
 
@@ -121,12 +141,14 @@ public class Downloader implements Runnable, PropertyChangeListener {
             return;
         }
 
-        stop = false;
+        stopWorker = false;
         downloading = true;
-        while (download.isStart()) {
-            if (!downloading) {
+        while (true) {
+            
+         
+            if (!downloading || !download.isStart()) {
                 System.out.println("javadm.com.DownloadWorker.downloader exit");
-                stop = true;
+                stopWorker = true;
                 if (getWorkerThreadCount() < 1) {
                     download.setStart(false);
                     break;
@@ -139,7 +161,8 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     xCompletePart.remove(0);
                 }
 
-                if (workerThreadCount < download.getData().getConnections() && inQuePart.size() > 0) {
+                if (workerThreadCount < download.getData().getConnections() && inQuePart.size() > 0 && (workerConnected || workerThreadCount<1 )) {
+                    workerConnected = false;
                     System.out.println("Spawning new thread");
                     DownloadWorker dt = new DownloadWorker(inQuePart.get(0));
                     inQuePart.remove(0);
@@ -198,7 +221,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
         private String fname;
         Thread tDworker;
         long done_size = 0;
-        int BUFFER_SIZE = 16368;
+        int BUFFER_SIZE = 4092;
         private Part part;
 
         public DownloadWorker(Part part) {
@@ -239,9 +262,9 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 // connect to server
                 System.out.println("javadm.com.DownloadWorker.Downloader.run() + before connect ");
                 conn.setConnectTimeout(5000);
-                conn.setReadTimeout(10000);
+                conn.setReadTimeout(60000);
                 conn.connect();
-                System.out.println("javadm.com.DownloadWorker.Downloader.run() + after connect ");
+                
                 int responsecode = conn.getResponseCode();
                 System.err.println("Response code : " + responsecode);
                 // Make sure the response code is in the 200 range.
@@ -251,14 +274,15 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     // get the input stream
                     in = new BufferedInputStream(conn.getInputStream());
 
-                    // open the output file and seek to the stop location
+                    // open the output file and seek to the stopWorker location
                     fname = download.getData().getDirectory() + "/" + part.getPartFileName();
                     raf = new RandomAccessFile(fname, "rw");
                     raf.seek(part.getCurrentSize());
                     byte data[] = new byte[BUFFER_SIZE];
                     int numRead;
-
-                    while (!stop && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
+                    System.out.println("javadm.com.DownloadWorker.Downloader.run() + after connect ");
+                    workerConnected = true;
+                    while (!stopWorker && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
                         // write to buffer
                         raf.write(data, 0, numRead);
                         part.setCurrentSize(part.getCurrentSize() + numRead);
