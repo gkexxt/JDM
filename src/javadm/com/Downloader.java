@@ -42,6 +42,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
     private List<Part> downloadParts;
     private List<Part> xCompletePart;
     private List<Part> inQuePart;
+    private List<Part> allxCompletePart;
     private Part rpart = new Part();
     Thread tDownloader;
     Download download;
@@ -54,6 +55,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
         this.download = download;
         this.inQuePart = new ArrayList<>();
         this.xCompletePart = new ArrayList<>();
+        this.allxCompletePart = new ArrayList<>();
     }
 
     public int getWorkerThreadCount() {
@@ -101,7 +103,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
             download.initParts();
         } else {
-            download.addLogMsg(new String[]{Download.INFO, "Download already completed"});
+
             return;
         }
 
@@ -109,18 +111,23 @@ public class Downloader implements Runnable, PropertyChangeListener {
         int loopCount = 0;
         for (int i = 0; i < downloadParts.size(); i++) {
             if (!downloadParts.get(i).isCompleted()) {
+                allxCompletePart.add(downloadParts.get(i));
                 xCompletePart.add(downloadParts.get(i));
-
             }
-
         }
 
-        stop = true;
+        if (xCompletePart.size() < 1) {
+            download.addLogMsg(new String[]{Download.INFO, "No parts to download"});
+            return;
+        }
+
+        stop = false;
+        downloading = true;
         while (download.isStart()) {
             if (!downloading) {
-                System.out.println("javadm.com.DownloadWorker.downloading timeout");
+                System.out.println("javadm.com.DownloadWorker.downloader exit");
                 stop = true;
-                if (getWorkerThreadCount() < 0) {
+                if (getWorkerThreadCount() < 1) {
                     download.setStart(false);
                     break;
                 }
@@ -169,16 +176,19 @@ public class Downloader implements Runnable, PropertyChangeListener {
             decThreacount();
             System.err.println("rpart : " + rpart.getPartFileName() + " : " + rpart.getCurrentSize());
         } else {
-            downloading = false;
+            downloading = false; // size -1 download error.
         }
 
         boolean complete = true;
-        for (int i = 0; i < xCompletePart.size(); i++) {
-            if (!xCompletePart.get(i).isCompleted()) {
+        for (int i = 0; i < allxCompletePart.size(); i++) {
+            if (!allxCompletePart.get(i).isCompleted()) {
                 complete = false;
             }
         }
+
         downloading = !complete;
+        System.err.println("Downloading : " + downloading);
+        System.err.println("complete : " + complete);
     }
 
     class DownloadWorker implements Runnable {
@@ -229,7 +239,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 // connect to server
                 System.out.println("javadm.com.DownloadWorker.Downloader.run() + before connect ");
                 conn.setConnectTimeout(5000);
-                conn.setReadTimeout(5000);
+                conn.setReadTimeout(10000);
                 conn.connect();
                 System.out.println("javadm.com.DownloadWorker.Downloader.run() + after connect ");
                 int responsecode = conn.getResponseCode();
