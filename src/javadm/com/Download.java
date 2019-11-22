@@ -190,18 +190,18 @@ public class Download {
     }
 
     public void setStart(boolean startx) {
-        //propChangeSupport.firePropertyChange("Startxxxxxxxxxx", start, start);
+        //propChangeSupport.firePropertyChange("Startxxxxxxxxxx", startDownloader, startDownloader);
         boolean oldstart = this.start;
         this.start = startx;
         //System.out.println("javadm.data.Download.setStart()");
-        //System.out.println(start);
+        //System.out.println(startDownloader);
         this.downloadControl.setLblControl(start);
         this.downloadControl.setRowlocked(start);
         if (start) {
 
             //StartDownload();
             //getData().setFileSize(getcontentLength());
-            new Downloader(this).start();
+            new Downloader(this).startDownloader();
         } else {
 
             StopDownload();
