@@ -159,6 +159,8 @@ public class SettingMenu extends javax.swing.JDialog {
         jLabel4.setFont(jLabel4.getFont().deriveFont(jLabel4.getFont().getSize()+3f));
         jLabel4.setText("Settings");
 
+        txtUagent.setEnabled(cbUAgent.isSelected());
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(

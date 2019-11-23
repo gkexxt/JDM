@@ -29,7 +29,6 @@ package javadm.ui;
  * @author gk
  */
 import javadm.util.ClipboardTextListener;
-import javadm.misc.DataManager;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -40,7 +39,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.TimerTask;
 import javadm.app.App;
-import javadm.com.Download;
 import javadm.com.Setting;
 import javadm.com.Download;
 import javadm.com.DaoSqlite;
@@ -50,7 +48,7 @@ import javax.swing.event.*;
 public class DownloadManager extends JFrame
         implements ListSelectionListener, PropertyChangeListener {
 
-    private final DataManager dm = new DataManager();//data manager handle items data
+    //private final DataManager dm = new DataManager();//data manager handle items data
     private JSplitPane splitPaneHortizontal;
     private JSplitPane splitPaneVertical;
     private final JList list = new JList(); //hold download items data
@@ -74,15 +72,20 @@ public class DownloadManager extends JFrame
             return;
         }
 
-        dm.addlist("tttttt");
+        //dm.addlist("tttttt");
     }
 
     /**
      * Create the DownloadManager and show it.
      */
     public void showMe() {
-
-        list.setModel(dm.getDownloadList());
+        DefaultListModel listModel = new DefaultListModel();
+         String[] category = {"All","Active","Inactive","Completed"};
+        for (String item : category) {
+            listModel.addElement(item);
+        }
+        
+        list.setModel(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
         clplstn = new ClipboardTextListener();
@@ -226,9 +229,7 @@ public class DownloadManager extends JFrame
         DaoSqlite db = new DaoSqlite();
         java.util.List<Download> downloads = db.getAllDownload();
         
-        for (Download download : downloads) {
-            
-       
+        for (Download download : downloads) {       
             download.setParts(db.getParts(download.getId()));
             download.setProgress(download.getDoneSize());
             model.addRow(download);
@@ -455,8 +456,6 @@ public class DownloadManager extends JFrame
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
             return (chooser.getSelectedFile().toString());
-            //System.out.println("getSelectedFile() : "
-            //  + chooser.getSelectedFile());
         }
         return "";
     }

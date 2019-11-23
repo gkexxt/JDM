@@ -264,6 +264,11 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="txtUagent">
+      <Properties>
+        <Property name="enabled" type="boolean" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
+          <Connection code="cbUAgent.isSelected()" type="code"/>
+        </Property>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

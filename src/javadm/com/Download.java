@@ -51,9 +51,7 @@ public class Download {
     public static final byte NON_RESUMEABLE = -2;
     public static final byte UNKNOWN = 0;
     public byte type = UNKNOWN;
-
     private int id;
-
     private String name = "";
     private String url = "";
     private String directory = "";
@@ -64,7 +62,6 @@ public class Download {
     private String completeDate;
     private int connections = 1; //min
     private boolean complete;
-    private String url_name;
     
     private List<Part> parts;
 
@@ -83,11 +80,7 @@ public class Download {
 
     public Download() {
         this.logMsgs = new ArrayList();
-        this.userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0";
-        this.userAgent = "Mozilla/5.0 (Macintosh; U;"
-                + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
         this.downloadControl = new DownloadControl();// instace of control
-
         parts = new ArrayList<>();
     }
 
