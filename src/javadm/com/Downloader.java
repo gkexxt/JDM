@@ -85,7 +85,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
     public void run() {
 
         //is part not initialize   
-        if (download.getParts().size() < 1 && !download.isComplete()) {
+        if (download.getType() == Download.UNKNOWN) {
             String accept_ranges = "";
             try {
                 URL urlTemp;
@@ -101,24 +101,22 @@ public class Downloader implements Runnable, PropertyChangeListener {
             } catch (Exception ex) {
                 download.setDownloadSize(Downloader.CONERR);
                 download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
+                download.setStart(false);
                 return;//exut when error connecting
             }
+
             if (accept_ranges != null && accept_ranges.equalsIgnoreCase("bytes") && download.getFileSize() > 0) {
-                download.initParts(Download.RESUMABLE);
+                download.setType(Download.RESUMABLE);
             } else if (accept_ranges == null && download.getFileSize() > 0) {
-                download.initParts(Download.NON_RESUMEABLE);
+                download.setType(Download.NON_RESUMEABLE);
             } else if (download.getFileSize() < 0) {
-                download.initParts(Download.DYNAMIC);
+                download.setType(Download.DYNAMIC);
             }
-
+            download.initParts();
             download.addLogMsg(new String[]{Download.INFO, "Initializing - New Download"});
-        } else if (download.getParts().size() > 0 && !download.isComplete()) {
-            download.addLogMsg(new String[]{Download.INFO, "Resuming - Download"});
-
-        } else {
-            download.addLogMsg(new String[]{Download.INFO, "Completed download or no parts"});
-            return;
         }
+
+
 
         this.downloadParts = download.getParts();
         for (int i = 0; i < downloadParts.size(); i++) {
@@ -183,7 +181,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
 
         rpart = (Part) evt.getNewValue();
-        if (rpart.getType() == Download.RESUMABLE) {
+        if (download.getType() == Download.RESUMABLE) {
             if (rpart.getCurrentSize() < rpart.getSize()) {
                 if (rpart.getCurrentSize() > 0) {
                     DaoSqlite db = new DaoSqlite();
@@ -256,7 +254,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 //System.out.println("javadm.com.DownloadWorker.Downloader.run() + ");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
-                if (part.getType() == Download.RESUMABLE) {
+                if (download.getType() == Download.RESUMABLE) {
                     long rstartbyte = part.getStartByte() + part.getCurrentSize();
                     String byteRange = rstartbyte + "-" + part.getEndByte();
                     conn.setRequestProperty("Range", "bytes=" + byteRange);

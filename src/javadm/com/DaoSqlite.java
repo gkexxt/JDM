@@ -51,6 +51,7 @@ public class DaoSqlite implements DaoAPI {
         download.setCreatedDate(rs.getString("crtdate"));
         download.setLastDate(rs.getString("lstdate"));
         download.setCompleteDate(rs.getString("cmpdate"));
+        download.setType(rs.getByte("type"));
         return download;
     }
 
@@ -111,7 +112,7 @@ public class DaoSqlite implements DaoAPI {
     public boolean insertDownload(Download download) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO downloaddata VALUES (NULL, ?, ?, ?,?,?,?,?,?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO downloaddata VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
             ps.setString(1, download.getName());
             ps.setString(2, download.getUrl());
             ps.setString(3, download.getDirectory());
@@ -120,6 +121,7 @@ public class DaoSqlite implements DaoAPI {
             ps.setString(6, download.getCreatedDate());
             ps.setString(7, download.getLastDate());
             ps.setString(8, download.getCompleteDate());
+            ps.setByte(9, download.getType());
             int i = ps.executeUpdate();
             if (i == 1) {
                 return true;
@@ -134,7 +136,7 @@ public class DaoSqlite implements DaoAPI {
     public boolean updateDownload(Download download) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE downloaddata SET name=?, url=?, directory=?, fsize=?, dnsize=?, crtdate=?, lstdate=?, cmpdate=? WHERE id=?");
+            PreparedStatement ps = connection.prepareStatement("UPDATE downloaddata SET name=?, url=?, directory=?, fsize=?, dnsize=?, crtdate=?, lstdate=?, cmpdate=?, type=? WHERE id=?");
             ps.setString(1, download.getName());
             ps.setString(2, download.getUrl());
             ps.setString(3, download.getDirectory());
@@ -143,7 +145,8 @@ public class DaoSqlite implements DaoAPI {
             ps.setString(6, download.getCreatedDate());
             ps.setString(7, download.getLastDate());
             ps.setString(8, download.getCompleteDate());
-            ps.setInt(9, download.getId());
+            ps.setByte(9, download.getType());
+            ps.setInt(10, download.getId());
             int i = ps.executeUpdate();
             if (i == 1) {
                 return true;
@@ -242,9 +245,8 @@ public class DaoSqlite implements DaoAPI {
                 part.setPartFileName(rs.getString("name"));
                 part.setSize(rs.getLong("part_size"));
                 part.setCurrentSize(rs.getLong("current_size"));
-                part.setStartByte(rs.getLong("start_byte"));                
+                part.setStartByte(rs.getLong("start_byte"));
                 part.setEndByte(rs.getLong("end_byte"));
-                part.setType(rs.getByte("type"));
                 part.setCompleted(rs.getBoolean("completed"));
                 downloadParts.add(part);
 
@@ -281,15 +283,14 @@ public class DaoSqlite implements DaoAPI {
         for (Part part : parts) {
 
             try {
-                PreparedStatement ps = connection.prepareStatement("INSERT INTO downloadpart VALUES (?, ?, ?, ?,?,?,?,?)");;
+                PreparedStatement ps = connection.prepareStatement("INSERT INTO downloadpart VALUES (?, ?, ?,?,?,?,?)");;
                 ps.setLong(1, download_id);
                 ps.setString(2, part.getPartFileName());
                 ps.setLong(3, part.getSize());
                 ps.setLong(4, part.getCurrentSize());
                 ps.setLong(5, part.getStartByte());
                 ps.setLong(6, part.getEndByte());
-                ps.setByte(7, part.getType());                
-                ps.setBoolean(8, part.isCompleted());
+                ps.setBoolean(7, part.isCompleted());
                 int i = ps.executeUpdate();
                 if (i != 1) {
                     return false;

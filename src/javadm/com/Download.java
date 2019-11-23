@@ -48,8 +48,8 @@ public class Download {
     public static final String INFO = "Info";
     public static final byte RESUMABLE = 1;
     public static final byte DYNAMIC = -1;
-    public static final byte NON_RESUMEABLE = 0;
-    public static final byte UNKNOWN = -2;
+    public static final byte NON_RESUMEABLE = -2;
+    public static final byte UNKNOWN = 0;
     public byte type = UNKNOWN;
 
     private int id;
@@ -65,6 +65,8 @@ public class Download {
     private int connections = 1; //min
     private boolean complete;
     private String url_name;
+    
+    private List<Part> parts;
 
     private DownloadControl downloadControl;
     private final PropertyChangeSupport propChangeSupport
@@ -76,8 +78,8 @@ public class Download {
 
     public void setType(byte type) {
         this.type = type;
+  
     }
-    private List<Part> parts;
 
     public Download() {
         this.logMsgs = new ArrayList();
@@ -97,17 +99,16 @@ public class Download {
         this.parts = parts;
     }
 
-
-    public void initParts(byte type) {
-
-        switch (type) {
+    public void initParts() {
+        switch (getType()) {
+            case Download.UNKNOWN:
+                return;
             case Download.DYNAMIC:
             case Download.NON_RESUMEABLE: {
                 Part part = new Part();
                 part.setSize(this.getFileSize());
                 part.setPartFileName(this.getName());
                 part.setCurrentSize(0);
-                part.setType(type);
                 part.setId(0);
                 parts.add(part);
                 break;
@@ -121,7 +122,6 @@ public class Download {
                     part.setEndByte(i * Part.partSize + (Part.partSize - 1));
                     part.setSize(Part.partSize);
                     part.setPartFileName(this.getName() + ".part" + i);
-                    part.setType(type);
                     part.setId(i);
                     parts.add(part);
                 }
@@ -131,17 +131,15 @@ public class Download {
                     part.setSize(last_length);
                     part.setEndByte(x * Part.partSize + last_length - 1);
                     part.setPartFileName(this.getName() + ".part" + x);
-                    part.setType(type);
                     part.setId((int) x);
                     parts.add(part);
                 }
-                DaoSqlite db = new DaoSqlite();
-                db.insertParts(this.getId(), this.getParts());
                 break;
             default:
                 break;
-
         }
+        DaoSqlite db = new DaoSqlite();
+        db.insertParts(this.getId(), this.getParts());
 
     }
 
