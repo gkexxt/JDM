@@ -97,11 +97,6 @@ public class Download {
         this.parts = parts;
     }
 
-    public void display() {
-        for (int i = 0; i < parts.size(); i++) {
-            System.err.println(parts.get(i).getStartByte());
-        }
-    }
 
     public void initParts(byte type) {
 
@@ -115,7 +110,6 @@ public class Download {
                 part.setType(type);
                 part.setId(0);
                 parts.add(part);
-
                 break;
             }
             case Download.RESUMABLE:
