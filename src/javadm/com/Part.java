@@ -31,11 +31,30 @@ public class Part {
 
     private long startByte;
     private long endByte;
+
+    public byte getType() {
+        return type;
+    }
+
+    public void setType(byte type) {
+        this.type = type;
+    }
     private long currentSize =0;
     private long size;
     private String partFileName;
     private boolean completed;
     public static long partSize = 5000000; //default 5Mb
+    private byte type;
+    private int id;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
 
     public long getSize() {
         return size;

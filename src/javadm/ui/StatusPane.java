@@ -36,7 +36,6 @@ import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
 import java.util.List;
 import javadm.com.Download;
-import javadm.com.Data;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
@@ -52,7 +51,7 @@ public class StatusPane extends JPanel {
 
         super(new GridLayout(1, 1));
         this.dm = downloadManager;
-        currentSelected.setData(new Data());
+        currentSelected = new Download();
         errorView.setForeground(Color.RED);
         errorView.setEditable(false);;
 
@@ -78,7 +77,7 @@ public class StatusPane extends JPanel {
         } else if (!dm.getSelectedDownload().toString().equals(downloadInstance)) {
             currentSelected = dm.getSelectedDownload();
             downloadInstance = currentSelected.toString();//
-            errorView.setText("Error Log : " + currentSelected.getData().getName() + "\n\n");
+            errorView.setText("Error Log : " + currentSelected.getName() + "\n\n");
             if (currentSelected.getLogMsgs().size() > 0) {
                 for (int i = 0; i < currentSelected.getLogMsgs().size() - 1; i++) {
                     errorView.setText(errorView.getText() + i + " : " + currentSelected.getLogMsgs().get(i)[0] + "\n"

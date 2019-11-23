@@ -32,7 +32,7 @@ import javadm.com.Download;
 import java.util.*;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import javadm.com.Data;
+import javadm.com.Download;
 import javadm.com.DaoSqlite;
 import javadm.ui.DownloadControl;
 import javax.swing.*;
@@ -86,23 +86,23 @@ public class DwnTable extends RowTableModel<Download> {
 
         switch (column) {
             case 0:
-                return downnload.getData().getId();
+                return downnload.getId();
             case 1:
-                return downnload.getData().getName();
+                return downnload.getName();
             case 2:
-                return downnload.getData().getCreatedDate();
+                return downnload.getCreatedDate();
             case 3:
-                return downnload.getData().getDirectory();
+                return downnload.getDirectory();
             case 4:
-                return downnload.getData().getUrl();
+                return downnload.getUrl();
             case 5:
                 return downnload.getDownloadControl().getLblControl();
             case 6:
                 return downnload.getDownloadControl().getProgressbar();
             case 7:
-                return downnload.getData().getFileSize();
+                return downnload.getFileSize();
             case 8:
-                return downnload.getData().getDoneSize();
+                return downnload.getDoneSize();
             case 9:
                 return downnload.getDownloadControl().isRowlocked();
             default:
@@ -141,10 +141,10 @@ public class DwnTable extends RowTableModel<Download> {
                     break;
                 case 7:
 
-                    download.getData().setFileSize(Long.parseLong(value.toString()));
+                    download.setFileSize(Long.parseLong(value.toString()));
                     break;
                 case 8:
-                    download.getData().setDoneSize(Long.parseLong(value.toString()));
+                    download.setDoneSize(Long.parseLong(value.toString()));
                 case 9:
                     download.getDownloadControl().setRowlocked(Boolean.parseBoolean(value.toString()));
                     break;
@@ -179,7 +179,7 @@ public class DwnTable extends RowTableModel<Download> {
             //table.get
             //String upper = table.getModel().getValueAt(row, 8)+"";
             //String lower = table.getModel().getValueAt(row, 7)+"";
-            //System.out.println("JavaDM.Data.DwnTable.ProgresRenderer.getTableCellRendererComponent()")
+            //System.out.println("JavaDM.Download.DwnTable.ProgresRenderer.getTableCellRendererComponent()")
             //System.out.println(DwnTable.this.modelData.get(row).getData().getId());
 
             return DwnTable.this.modelData.get(row).getDownloadControl().getProgressbar();
@@ -203,25 +203,12 @@ public class DwnTable extends RowTableModel<Download> {
         DaoSqlite db = new DaoSqlite();
 
         //System.out.println();
-        List<Data> datas = new ArrayList<>();
-        datas.addAll(db.getAllDownloadData());
-        List<Download> downloads = new ArrayList<>();
-        //DownloadTableData dtb = 
-        //dtb.a
-        //System.err.println(datas.get(0).getLblControl().toString());
-        for (int i = 0; i < datas.size(); i++) {
-            //String arg = args[i];
-            Data data = datas.get(i);
-            Download download = new Download();
-            download.setData(data);
-            download.setDownloadControl(new DownloadControl());
+        List<Download> downloads = db.getAllDownload();
 
-            int value = (int) (double) ((100.0 * download.getData().getDoneSize())
-                    / download.getData().getFileSize());
+        for (Download download : downloads) {
+            int value = (int) (double) ((100.0 * download.getDoneSize())
+                    / download.getFileSize());
             download.getDownloadControl().setProgressBar(value);
-
-            downloads.add(download);
-            //lstdtb.add(new Download().setDdata(datas.get(i)));
             model.addRow(download);
 
         }
@@ -252,15 +239,15 @@ public class DwnTable extends RowTableModel<Download> {
             @Override
             public void run() {
 
-                //studentSet.get(0).setDoneSize(datas.get(0).getDoneSize()+1);
+                //studentSet.get(0).setDoneSize(downloads.get(0).getDoneSize()+1);
                 //downloads.get(0).setProgressBar();
                 Download downloadx;
                 downloadx = downloads.get(1);
-                downloadx.getData().setDoneSize(downloadx.getData().getDoneSize() + 1);
+                downloadx.setDoneSize(downloadx.getDoneSize() + 1);
                 //model.fireTableRowsUpdated(0, table.getRowCount() - 1);
                 //downloadx.setDownloadtableui(new DownloadControl());
-                int value = (int) (double) ((100.0 * downloadx.getData().getDoneSize())
-                        / downloadx.getData().getFileSize());
+                int value = (int) (double) ((100.0 * downloadx.getDoneSize())
+                        / downloadx.getFileSize());
                 //System.out.println(value);
                 downloadx.getDownloadControl().setProgressBar(value);
                 model.fireTableRowsUpdated(0, model.getRowCount() - 1);

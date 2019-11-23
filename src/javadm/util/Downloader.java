@@ -50,7 +50,7 @@ public class Downloader {
         RandomAccessFile raf = null;
       try {
             // open Http connection to URL
-            URL url = new URL(download.getData().getUrl());
+            URL url = new URL(download.getUrl());
             
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Macintosh; U;"
@@ -64,12 +64,12 @@ public class Downloader {
             if (responsecode / 100 == 2) {
                 
                 //set download size
-                download.getData().setFileSize(conn.getContentLengthLong());
+                download.setFileSize(conn.getContentLengthLong());
                 // get the input stream
                 in = new BufferedInputStream(conn.getInputStream());
 
                 // open the output file and seek to the start location
-                fname = download.getData().getDirectory() + "/" + download.getData().getName();
+                fname = download.getDirectory() + "/" + download.getName();
                 raf = new RandomAccessFile(fname, "rw");
 
                 byte data[] = new byte[BUFFER_SIZE];
@@ -89,7 +89,7 @@ public class Downloader {
 
                 }
                 //if download is still instart mode and loop ended set complete
-                download.getData().setComplete(download.isStart());
+                download.setComplete(download.isStart());
 
             } else {
                 download.addLogMsg(new String []{"protocol Error"," http Response error - code : " + responsecode});

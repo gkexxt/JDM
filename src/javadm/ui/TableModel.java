@@ -70,23 +70,23 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
 
         switch (column) {
             case 0:
-                return downnload.getData().getId();
+                return downnload.getId();
             case 1:
-                return downnload.getData().getName();
+                return downnload.getName();
             case 2:
-                return downnload.getData().getCreatedDate();
+                return downnload.getCreatedDate();
             case 3:
-                return downnload.getData().getDirectory();
+                return downnload.getDirectory();
             case 4:
-                return downnload.getData().getUrl();
+                return downnload.getUrl();
             case 5:
                 return downnload.getDownloadControl().getLblControl();
             case 6:
                 return downnload.getDownloadControl().getProgressbar();
             case 7:
-                return downnload.getData().getFileSize();
+                return downnload.getFileSize();
             case 8:
-                return downnload.getData().getDoneSize();
+                return downnload.getDoneSize();
             default:
                 return null;
         }
@@ -117,16 +117,16 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                 case 0:
                     break;
                 case 1:
-                    download.getData().setName(value.toString());
+                    download.setName(value.toString());
                     break;
                 case 2:
-                     download.getData().setCreatedDate(value.toString());
+                     download.setCreatedDate(value.toString());
                     break;
                 case 3:
-                     download.getData().setDirectory(value.toString());
+                     download.setDirectory(value.toString());
                     break;
                 case 4:
-                     download.getData().setUrl(value.toString());
+                     download.setUrl(value.toString());
                     break;
                 case 5:
                     download.setStart(!download.isStart());
@@ -135,10 +135,10 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                     break;
                 case 7:
 
-                    download.getData().setFileSize(Long.parseLong(value.toString()));
+                    download.setFileSize(Long.parseLong(value.toString()));
                     break;
                 case 8:
-                    download.getData().setDoneSize(Long.parseLong(value.toString()));
+                    download.setDoneSize(Long.parseLong(value.toString()));
 
                 //break;
                 default:

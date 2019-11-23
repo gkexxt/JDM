@@ -42,7 +42,7 @@ import java.util.TimerTask;
 import javadm.app.App;
 import javadm.com.Download;
 import javadm.com.Setting;
-import javadm.com.Data;
+import javadm.com.Download;
 import javadm.com.DaoSqlite;
 import javax.swing.*;
 import javax.swing.event.*;
@@ -224,14 +224,13 @@ public class DownloadManager extends JFrame
 
     public void loadall() {
         DaoSqlite db = new DaoSqlite();
-        java.util.List<Data> datas = new ArrayList<>();
-        datas.addAll(db.getAllDownloadData());
-
-        for (int i = 0; i < datas.size(); i++) {
-            Data data = datas.get(i);
-            Download download = new Download();
-            download.setData(data);
-            download.setProgress(download.getData().getDoneSize());
+        java.util.List<Download> downloads = db.getAllDownload();
+        
+        for (Download download : downloads) {
+            
+       
+            download.setParts(db.getParts(download.getId()));
+            download.setProgress(download.getDoneSize());
             model.addRow(download);
             download.addPropertyChangeListener(model);
             download.addPropertyChangeListener(this);
@@ -317,7 +316,7 @@ public class DownloadManager extends JFrame
         model.removeRows(table.getSelectedRow());
         model.addTableModelListener(table);//add it back
         DaoSqlite db = new DaoSqlite();
-        db.deleteDownloadData(rmDownload.getData().getId());
+        db.deleteDownload(rmDownload.getId());
         toolbar.refreshToolBar();
         statusPane.setVisible(false);
         model.fireTableDataChanged();
@@ -346,8 +345,8 @@ public class DownloadManager extends JFrame
                 "Redownload", JOptionPane.QUESTION_MESSAGE) > 0) {
             return;
         }
-        getSelectedDownload().getData().setComplete(false);
-        getSelectedDownload().getData().setDoneSize(0);
+        getSelectedDownload().setComplete(false);
+        getSelectedDownload().setDoneSize(0);
         getSelectedDownload().setStart(true);
     }
 
@@ -358,14 +357,13 @@ public class DownloadManager extends JFrame
      */
     public void addDownload(Download download) {
         try {
-            Download tempd = download;
             DaoSqlite db = new DaoSqlite();
-            db.insertDownloadData(tempd.getData());
-            tempd.setData(db.getLastDownloadData());
-            model.addRow(tempd);
-            tempd.addPropertyChangeListener(this);
+            db.insertDownload(download);
+            download = db.getLastDownload();
+            model.addRow(download);
+            download.addPropertyChangeListener(this);
             if (setting.isAutoStart()) {
-                tempd.setStart(true);
+                download.setStart(true);
             }
         } catch (Exception e) {
         }
@@ -377,9 +375,8 @@ public class DownloadManager extends JFrame
      * @param download
      */
     public void updateDownload(Download download) {
-        model.getRow(table.getSelectedRow()).setData(download.getData());
         DaoSqlite db = new DaoSqlite();
-        db.updateDownloadData(download.getData());
+        db.updateDownload(download);
         model.fireTableRowsUpdated(0, model.getRowCount());
     }
 
@@ -473,11 +470,10 @@ public class DownloadManager extends JFrame
     private void clipMonitorParse(String url) {
         if (Download.isUrlOK(url)) {
             Download dwn = new Download();
-            dwn.setData(new Data());
-            dwn.getData().setUrl(url);
-            dwn.getData().setName(Download.getUrl_name(url));
-            dwn.getData().setDirectory(setting.getDirectory());
-            dwn.getData().setConnections(setting.getConnectionCount());
+            dwn.setUrl(url);
+            dwn.setName(Download.getUrl_name(url));
+            dwn.setDirectory(setting.getDirectory());
+            dwn.setConnections(setting.getConnectionCount());
             if (setting.getMonitorMode() == 1) {
                 OptionMenu newdwnmenu = new OptionMenu(this, dwn, true, true);
 

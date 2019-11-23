@@ -26,6 +26,7 @@ package javadm.com;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.net.URL;
+import static java.time.LocalDateTime.now;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,7 +39,6 @@ import javadm.ui.DownloadControl;
  */
 public class Download {
 
-    private Data data;
     private boolean start;
     private String userAgent;
     private final List<String[]> logMsgs;
@@ -46,16 +46,46 @@ public class Download {
     public static final String WARNING = "Warning";
     public static final String DEBUG = "Debug";
     public static final String INFO = "Info";
+    public static final byte RESUMABLE = 1;
+    public static final byte DYNAMIC = -1;
+    public static final byte NON_RESUMEABLE = 0;
+    public static final byte UNKNOWN = -2;
+    public byte type = UNKNOWN;
+
+    private int id;
+
+    private String name = "";
+    private String url = "";
+    private String directory = "";
+    private long fileSize;
+    private long doneSize;
+    private String createdDate = now().toString();
+    private String lastDate;
+    private String completeDate;
+    private int connections = 1; //min
+    private boolean complete;
+    private String url_name;
+
     private DownloadControl downloadControl;
     private final PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
+
+    public byte getType() {
+        return type;
+    }
+
+    public void setType(byte type) {
+        this.type = type;
+    }
     private List<Part> parts;
 
     public Download() {
         this.logMsgs = new ArrayList();
+        this.userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0";
         this.userAgent = "Mozilla/5.0 (Macintosh; U;"
                 + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
         this.downloadControl = new DownloadControl();// instace of control
+
         parts = new ArrayList<>();
     }
 
@@ -73,35 +103,50 @@ public class Download {
         }
     }
 
-    public void initParts() {
+    public void initParts(byte type) {
 
-        if (getData().getFileSize() < Part.partSize) { //no multipdart
-            Part part = new Part();
-            part.setStartByte(0);
-            part.setEndByte(getData().getFileSize() - 1);
-            part.setSize(getData().getFileSize());
-            part.setPartFileName(getData().getName());
-            parts.add(part);
+        switch (type) {
+            case Download.DYNAMIC:
+            case Download.NON_RESUMEABLE: {
+                Part part = new Part();
+                part.setSize(this.getFileSize());
+                part.setPartFileName(this.getName());
+                part.setCurrentSize(0);
+                part.setType(type);
+                part.setId(0);
+                parts.add(part);
 
-        } else {
-            long x = getData().getFileSize() / Part.partSize;
-            long last_length = getData().getFileSize() - x * Part.partSize;
-            for (int i = 0; i < x; i++) {
-                Part part = new Part();
-                part.setStartByte(i * Part.partSize);
-                part.setEndByte(i * Part.partSize + (Part.partSize - 1));
-                part.setSize(Part.partSize);
-                part.setPartFileName(getData().getName() + ".part" + i);
-                parts.add(part);
+                break;
             }
-            if (last_length > 0) {
-                Part part = new Part();
-                part.setStartByte(x * Part.partSize);
-                part.setSize(last_length);
-                part.setEndByte(x * Part.partSize + last_length - 1);
-                part.setPartFileName(getData().getName() + ".part" + x);
-                parts.add(part);
-            }
+            case Download.RESUMABLE:
+                long x = this.getFileSize() / Part.partSize;
+                long last_length = this.getFileSize() - x * Part.partSize;
+                for (int i = 0; i < x; i++) {
+                    Part part = new Part();
+                    part.setStartByte(i * Part.partSize);
+                    part.setEndByte(i * Part.partSize + (Part.partSize - 1));
+                    part.setSize(Part.partSize);
+                    part.setPartFileName(this.getName() + ".part" + i);
+                    part.setType(type);
+                    part.setId(i);
+                    parts.add(part);
+                }
+                if (last_length > 0) {
+                    Part part = new Part();
+                    part.setStartByte(x * Part.partSize);
+                    part.setSize(last_length);
+                    part.setEndByte(x * Part.partSize + last_length - 1);
+                    part.setPartFileName(this.getName() + ".part" + x);
+                    part.setType(type);
+                    part.setId((int) x);
+                    parts.add(part);
+                }
+                DaoSqlite db = new DaoSqlite();
+                db.insertParts(this.getId(), this.getParts());
+                break;
+            default:
+                break;
+
         }
 
     }
@@ -151,14 +196,6 @@ public class Download {
         this.downloadControl = downloadControl;
     }
 
-    public synchronized Data getData() {
-        return data;
-    }
-
-    public void setData(Data data) {
-        this.data = data;
-    }
-
     public boolean isStart() {
         return start;
     }
@@ -179,31 +216,27 @@ public class Download {
 
     public synchronized void setProgress(long buffersize) {
         try {
-            data.setDoneSize(data.getDoneSize() + buffersize);
-            int value = (int) (double) ((100.0 * data.getDoneSize())
-                    / data.getFileSize());
+            this.setDoneSize(doneSize + buffersize);
+            int value = (int) (double) ((100.0 * doneSize)
+                    / this.getFileSize());
             this.downloadControl.getProgressbar().setValue(value);
-            propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
         } catch (Exception ex) {
-            this.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
+            this.downloadControl.getProgressbar().setValue(0);
         }
+        propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
     }
 
-    public void setStart(boolean startx) {
+    public void setStart(boolean start) {
         //propChangeSupport.firePropertyChange("Startxxxxxxxxxx", startDownloader, startDownloader);
         boolean oldstart = this.start;
-        this.start = startx;
+        this.start = start;
         //System.out.println("javadm.data.Download.setStart()");
         //System.out.println(startDownloader);
         this.downloadControl.setLblControl(start);
         this.downloadControl.setRowlocked(start);
         if (start) {
-
-            //StartDownload();
-            //getData().setFileSize(getcontentLength());
             new Downloader(this).startDownloader();
         } else {
-
             StopDownload();
         }
 
@@ -212,19 +245,107 @@ public class Download {
     }
 
     public void setDownloadSize(long fsize) {
-        this.data.setFileSize(fsize);
-        if (start) {
-            //System.out.println("javadm.com.Download.setDownloadSize()");
-            // new DownloadWorker(this).startDownloader();
-        }
-    }
-
-    private void StartDownload() {
-
+        this.setFileSize(fsize);
     }
 
     private void StopDownload() {
-        //System.out.println("JavaDM.Data.Data.StopDownload()");
+        boolean allPartComplete = true;
+        for (Part part : parts) {
+            if (!part.isCompleted()) {
+                allPartComplete = false;
+            }
+        }
+        setComplete(allPartComplete);
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getDirectory() {
+        return directory;
+    }
+
+    public void setDirectory(String directory) {
+        this.directory = directory;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
+        //System.out.println("javadm.com.Download.setFileSize()");
+    }
+
+    public long getDoneSize() {
+        return doneSize;
+    }
+
+    public void setDoneSize(long doneSize) {
+        this.doneSize = doneSize;
+    }
+
+    public String getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public String getLastDate() {
+        return lastDate;
+    }
+
+    public void setLastDate(String lastDate) {
+        this.lastDate = lastDate;
+    }
+
+    public String getCompleteDate() {
+        return completeDate;
+    }
+
+    public void setCompleteDate(String completeDate) {
+        this.completeDate = completeDate;
+    }
+
+    public int getConnections() {
+        return connections;
+    }
+
+    public void setConnections(int connections) {
+        this.connections = connections;
+    }
+
+    public boolean isComplete() {
+        return complete;
+    }
+
+    public synchronized void setComplete(boolean complete) {
+        this.complete = complete;
+        //System.out.println("javadm.data.Download.setComplete()");
     }
 
     /**

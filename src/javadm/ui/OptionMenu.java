@@ -24,7 +24,7 @@
 package javadm.ui;
 
 import javadm.com.Download;
-import javadm.com.Data;
+import javadm.com.Download;
 import javax.swing.JOptionPane;
 
 /**
@@ -58,8 +58,8 @@ public class OptionMenu extends javax.swing.JDialog {
 
         } else {
             initComponents();
-            SpinConnNCount.setValue(selectedDownload.getData().getConnections());
-            if (selectedDownload.getData().getDoneSize() > 0) {
+            SpinConnNCount.setValue(selectedDownload.getConnections());
+            if (selectedDownload.getDoneSize() > 0) {
                 txtDirectory.setEnabled(false);
                 btnDirectory.setEnabled(false);
                 txtName.setEnabled(false);
@@ -98,8 +98,13 @@ public class OptionMenu extends javax.swing.JDialog {
         setModal(true);
 
         txtName.setFont(txtName.getFont().deriveFont((float)14));
-        txtName.setText(selectedDownload.getData().getName());
+        txtName.setText(selectedDownload.getName());
         txtName.setMinimumSize(null);
+        txtName.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                txtNameActionPerformed(evt);
+            }
+        });
 
         jLabel1.setFont(jLabel1.getFont().deriveFont((float)14));
         jLabel1.setText("Name");
@@ -108,7 +113,7 @@ public class OptionMenu extends javax.swing.JDialog {
         jLabel2.setText("Url");
 
         txtUrl.setFont(txtUrl.getFont().deriveFont((float)14));
-        txtUrl.setText(selectedDownload.getData().getUrl());
+        txtUrl.setText(selectedDownload.getUrl());
 
         btnDirectory.setFont(btnDirectory.getFont());
         btnDirectory.setText("Select");
@@ -119,7 +124,7 @@ public class OptionMenu extends javax.swing.JDialog {
         });
 
         txtDirectory.setFont(txtDirectory.getFont().deriveFont((float)14));
-        txtDirectory.setText(selectedDownload.getData().getDirectory());
+        txtDirectory.setText(selectedDownload.getDirectory());
 
         jLabel3.setFont(jLabel3.getFont().deriveFont((float)14));
         jLabel3.setText("Directory");
@@ -226,7 +231,7 @@ public class OptionMenu extends javax.swing.JDialog {
                     .addComponent(btnRemove)
                     .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(btnCancel))
-                .addContainerGap(12, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -263,6 +268,10 @@ public class OptionMenu extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_btnOKActionPerformed
 
+    private void txtNameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtNameActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_txtNameActionPerformed
+
     private boolean updateData() {
         String url = txtUrl.getText().trim();
         String fname = selectedDownload.getUrl_name(url);
@@ -280,10 +289,10 @@ public class OptionMenu extends javax.swing.JDialog {
             } else if (txtName.isEditable() && txtName.getText().isBlank()) {
                 throw new IllegalArgumentException("field file name is blank");
             } else {
-                selectedDownload.getData().setConnections((int) SpinConnNCount.getValue());
-                selectedDownload.getData().setUrl(url);
-                selectedDownload.getData().setDirectory(txtDirectory.getText());
-                selectedDownload.getData().setName(txtName.getText());
+                selectedDownload.setConnections((int) SpinConnNCount.getValue());
+                selectedDownload.setUrl(url);
+                selectedDownload.setDirectory(txtDirectory.getText());
+                selectedDownload.setName(txtName.getText());
                 if (isNewDownload) {
                     dm.addDownload(selectedDownload);
                 } else {

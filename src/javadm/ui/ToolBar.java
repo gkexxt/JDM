@@ -42,7 +42,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
-import javadm.com.Data;
 import javadm.com.Download;
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
@@ -189,7 +188,7 @@ public class ToolBar extends JPanel
             btnGraph.setVisible(false);
             btnSchedule.setVisible(false);
             return;
-        } else if (selectedDownload.getData().isComplete()) {
+        } else if (selectedDownload.isComplete()) {
             btnRestart.setVisible(true);
             btnStop.setVisible(false);
             btnStart.setVisible(false);
@@ -252,9 +251,8 @@ public class ToolBar extends JPanel
                 case ADD:
                     // second button clicked 
                     Download dwn = new Download();
-                    dwn.setData(new Data());
-                    dwn.getData().setDirectory(dm.getSetting().getDirectory());
-                    dwn.getData().setConnections(dm.getSetting().getConnectionCount());
+                    dwn.setDirectory(dm.getSetting().getDirectory());
+                    dwn.setConnections(dm.getSetting().getConnectionCount());
                     new OptionMenu(dm, dwn, true, true);
 
                     break;

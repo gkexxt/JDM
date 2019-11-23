@@ -33,18 +33,23 @@ import javadm.com.Setting;
  */
 public interface DaoAPI {
 
-    Data getDownloadData(int id);
+    Download getDownload(int id);
 
-    Data getLastDownloadData();
+    Download getLastDownload();
 
-    List<Data> getAllDownloadData();
+    List<Download> getAllDownload();
 
     //User getUserByUserNameAndPassword(String user, String pass);
-    boolean insertDownloadData(Data downloadData);
+    boolean insertDownload(Download downloadData);
 
-    boolean updateDownloadData(Data downloadData);
+    boolean updateDownload(Download downloadData);
 
-    boolean deleteDownloadData(int id);
+    /**
+     *remove download from db
+     * @param id
+     * @return
+     */
+    boolean deleteDownload(int id);
 
     Setting getSetting();
 

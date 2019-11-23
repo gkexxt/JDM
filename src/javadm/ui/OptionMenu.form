@@ -110,12 +110,15 @@
           </FontInfo>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="selectedDownload.getData().getName()" type="code"/>
+          <Connection code="selectedDownload.getName()" type="code"/>
         </Property>
         <Property name="minimumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="null"/>
         </Property>
       </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="txtNameActionPerformed"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel1">
       <Properties>
@@ -145,7 +148,7 @@
           </FontInfo>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="selectedDownload.getData().getUrl()" type="code"/>
+          <Connection code="selectedDownload.getUrl()" type="code"/>
         </Property>
       </Properties>
     </Component>
@@ -170,7 +173,7 @@
           </FontInfo>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="selectedDownload.getData().getDirectory()" type="code"/>
+          <Connection code="selectedDownload.getDirectory()" type="code"/>
         </Property>
       </Properties>
     </Component>
