@@ -192,17 +192,21 @@ public class ToolBar extends JPanel
             btnRestart.setVisible(true);
             btnStop.setVisible(false);
             btnStart.setVisible(false);
+            btnRemove.setVisible(true);
 
         } else if (selectedDownload.isStart()) {
             btnRestart.setVisible(false);
             btnStop.setVisible(true);
             btnStart.setVisible(false);
+            btnRemove.setVisible(false);
         } else {
+            
             btnRestart.setVisible(false);
             btnStop.setVisible(false);
             btnStart.setVisible(true);
+            btnRemove.setVisible(true);
         }
-        btnRemove.setVisible(true);
+        
         btnSetting.setVisible(true);
         btnGraph.setVisible(true);
         btnSchedule.setVisible(true);

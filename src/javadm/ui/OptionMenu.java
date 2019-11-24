@@ -24,10 +24,7 @@
 package javadm.ui;
 
 import javadm.com.Download;
-import javadm.com.Download;
 import javax.swing.JOptionPane;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 
 /**
  *
@@ -62,24 +59,16 @@ public class OptionMenu extends javax.swing.JDialog {
             txtuagent.setText(dm.getSetting().getUserAgent());
             cburl.setSelected(true);
             txtUrl.setEnabled(true);
-            
 
         } else {
             initComponents();
-            SpinConnNCount.setValue(selectedDownload.getConnections());
-            if (selectedDownload.getDoneSize() > 0) {
-                txtDirectory.setEnabled(false);
-                btnDirectory.setEnabled(false);
-                txtuagent.setText(selectedDownload.getUserAgent());
-                txtName.setEnabled(false);
-            }
+
         }
 
         //txtName.setEditable(false);
         this.setLocation(dm.getLocation().x - (this.getWidth() - dm.getWidth()) / 2, dm.getLocation().y - (this.getHeight() - dm.getHeight()) / 2);
         this.setVisible(true);
 
-   
     }
 
     /**
@@ -166,11 +155,13 @@ public class OptionMenu extends javax.swing.JDialog {
             }
         });
 
+        txtuagent.setText(selectedDownload.getUserAgent());
         txtuagent.setEnabled(false);
 
         jLabel4.setText("No. of Connections");
 
         SpinConnNCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
+        SpinConnNCount.setValue(selectedDownload.getConnections());
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -344,13 +335,20 @@ public class OptionMenu extends javax.swing.JDialog {
     }//GEN-LAST:event_cbUagentActionPerformed
 
     private boolean updateData() {
+        
         String url = txtUrl.getText().trim();
-        String fname = selectedDownload.getUrl_name(url);
+        String fname;
+        if (txtName.getText().isBlank()) {
+            fname = selectedDownload.getUrl_name(url);
+        } else {
+            fname = txtName.getText();
+        }
+
         String directory = txtDirectory.getText().trim();
         txtName.setText(fname);
         try {
 
-            if (directory.isBlank() || url.isBlank()  || txtuagent.getText().isBlank() ) {
+            if (directory.isBlank() || url.isBlank() || txtuagent.getText().isBlank()) {
                 throw new IllegalArgumentException("blank fields");
             } else if (!selectedDownload.isUrlOK(url)) {
                 throw new IllegalArgumentException("invalid url");

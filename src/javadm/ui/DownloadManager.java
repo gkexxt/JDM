@@ -52,7 +52,7 @@ public class DownloadManager extends JFrame
     //private final DataManager dm = new DataManager();//data manager handle items data
     private JSplitPane splitPaneHortizontal;
     private JSplitPane splitPaneVertical;
-    private final JList list = new JList(); //hold download items data
+    private final JList list = new JList(); //hold downloadx items data
     private DownloadTable table;
     private TableModel model;
     private JSplitPane mainsplitpane;
@@ -233,6 +233,7 @@ public class DownloadManager extends JFrame
         //recalculate size based on saved part data if some bastard kill the app
         for (Download download : downloads) {
             download.setParts(db.getParts(download.getId()));
+            //System.err.println(download.getUserAgent());
             if (!download.isComplete()) {
                 long recalculated_size = 0;
                 for (Part part : download.getParts()) {
@@ -256,7 +257,7 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * refresh download table by timer
+     * refresh downloadx table by timer
      */
     public void refreshTable() {
         java.util.Timer t = new java.util.Timer();
@@ -302,7 +303,7 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * return reference of currently selected download object on list
+     * return reference of currently selected downloadx object on list
      *
      * @return Download
      */
@@ -316,7 +317,7 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * remove selected download from the list
+     * remove selected downloadx from the list
      */
     public void removeDownload() {
         if (showChoice("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
@@ -335,21 +336,21 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * start selected download
+     * start selected downloadx
      */
     public void startDownload() {
         getSelectedDownload().setStart(true);
     }
 
     /**
-     * stop selected download
+     * stop selected downloadx
      */
     public void stopDownload() {
         getSelectedDownload().setStart(false);
     }
 
     /**
-     * remove data and reboot the download
+     * remove data and reboot the downloadx
      */
     public void restartDownload() {
         if (showChoice("Are you sure !!! \n"
@@ -358,26 +359,27 @@ public class DownloadManager extends JFrame
             return;
         }
         
-        Download download = getSelectedDownload();
-        download.setComplete(false);
-        download.setDoneSize(0);
-        download.setType(Download.UNKNOWN);
-        download.setFileSize(0);
-        download.setProgress(0);
+        Download downloadx = getSelectedDownload();
+        downloadx.setComplete(false);
+        downloadx.setDoneSize(0);
+        downloadx.setType(Download.UNKNOWN);
+        downloadx.setFileSize(0);
+        downloadx.setProgress(0);
         DaoSqlite db = new DaoSqlite();       
-        db.updateDownload(download);
-        db.deleteParts(download.getId());
-        download.setStart(true);
+        db.updateDownload(downloadx);
+        db.deleteParts(downloadx.getId());
+        downloadx.setStart(true);
 
     }
 
     /**
-     * add new download to the list/table
+     * add new downloadx to the list/table
      *
      * @param download
      */
     public void addDownload(Download download) {
         try {
+            download.setName(download.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", ""));
             DaoSqlite db = new DaoSqlite();
             db.insertDownload(download);
             download = db.getLastDownload();
@@ -391,11 +393,12 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * update existing download
+     * update existing downloadx
      *
      * @param download
      */
     public void updateDownload(Download download) {
+        download.setName(download.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", ""));
         DaoSqlite db = new DaoSqlite();
         db.updateDownload(download);
         model.fireTableRowsUpdated(0, model.getRowCount());
