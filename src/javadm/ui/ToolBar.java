@@ -251,8 +251,11 @@ public class ToolBar extends JPanel
                 case ADD:
                     // second button clicked 
                     Download dwn = new Download();
-                    dwn.setDirectory(dm.getSetting().getDirectory());
-                    dwn.setConnections(dm.getSetting().getConnectionCount());
+                    //dwn.setDirectory(dm.getSetting().getDirectory());
+                    //System.err.println(dwn.getDirectory());
+//                    if(true){
+//                    return;}
+                    //dwn.setConnections(dm.getSetting().getConnectionCount());
                     new OptionMenu(dm, dwn, true, true);
 
                     break;

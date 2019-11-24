@@ -25,11 +25,22 @@ package javadm.com;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.RandomAccessFile;
 import java.net.URL;
+import java.nio.file.Files;
 import static java.time.LocalDateTime.now;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javadm.ui.DownloadControl;
 
 /**
@@ -62,7 +73,15 @@ public class Download {
     private String completeDate;
     private int connections = 1; //min
     private boolean complete;
-    
+    private int retry = 3;
+
+    public int getRetry() {
+        return retry;
+    }
+
+    public void setRetry(int retry) {
+        this.retry = retry;
+    }
     private List<Part> parts;
 
     private DownloadControl downloadControl;
@@ -75,7 +94,7 @@ public class Download {
 
     public void setType(byte type) {
         this.type = type;
-  
+
     }
 
     public Download() {
@@ -217,14 +236,15 @@ public class Download {
         this.start = start;
         //System.out.println("javadm.data.Download.setStart()");
         //System.out.println(startDownloader);
-        this.downloadControl.setLblControl(start);
-        this.downloadControl.setRowlocked(start);
-        if (start) {
+
+        if (start && !isComplete()) {
             new Downloader(this).startDownloader();
-        } else {
+        } else if (!start && !isComplete()) {
+
             StopDownload();
         }
-
+        this.downloadControl.setLblControl(start);
+        this.downloadControl.setRowlocked(start);
         propChangeSupport.firePropertyChange("setStart", oldstart, start);
 
     }
@@ -234,13 +254,47 @@ public class Download {
     }
 
     private void StopDownload() {
+        DaoSqlite db = new DaoSqlite();
+        
         boolean allPartComplete = true;
         for (Part part : parts) {
             if (!part.isCompleted()) {
                 allPartComplete = false;
             }
         }
-        setComplete(allPartComplete);
+        if (allPartComplete) {
+            setComplete(true);
+            setCompleteDate(now().toString());
+
+            db.deleteParts(this.getId());
+
+            if (this.getType() == RESUMABLE) {
+                RandomAccessFile raf = null;
+
+                try {
+                    raf = new RandomAccessFile(this.getDirectory() + "/" + this.getName(), "rw");
+
+                    for (Part part : this.parts) {
+                        File file = new File(this.getDirectory() + "/" + part.getPartFileName());
+                        byte[] fileContent = Files.readAllBytes(file.toPath());
+                        raf.seek(raf.length());
+                        raf.write(fileContent);
+                        file.deleteOnExit();
+
+                    }
+                } catch (Exception ex) {
+                    this.addLogMsg(new String[]{Download.ERROR, ex.toString()});
+                }
+                try {
+                    if (raf != null) {
+                        raf.close();
+                    }
+                } catch (IOException ex) {
+                    this.addLogMsg(new String[]{Download.ERROR, ex.toString()});
+                }
+            }
+        }
+        db.updateDownload(this);
     }
 
     public int getId() {
@@ -330,7 +384,7 @@ public class Download {
 
     public synchronized void setComplete(boolean complete) {
         this.complete = complete;
-        //System.out.println("javadm.data.Download.setComplete()");
+
     }
 
     /**

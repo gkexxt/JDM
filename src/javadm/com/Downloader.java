@@ -49,9 +49,10 @@ public class Downloader implements Runnable, PropertyChangeListener {
     public static final long CONERR = -2;
     private volatile boolean stopWorker;
     private volatile boolean downloading = false;
-    private volatile boolean workerConnected;
     private int workerThreadCount = 0;
-    private long errorCount = 0;
+    private int retryCount = 0;
+    private int errorCount = 0;
+    private volatile boolean workerDownloading = true;
 
     public Downloader(Download download) {
         this.download = download;
@@ -88,16 +89,43 @@ public class Downloader implements Runnable, PropertyChangeListener {
         if (download.getType() == Download.UNKNOWN) {
             String accept_ranges = "";
             try {
+
                 URL urlTemp;
+                
                 urlTemp = new URL(download.getUrl());
                 HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
                 conn.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
                 conn.setConnectTimeout(3000);
                 conn.setReadTimeout(3000);
+                System.err.println(download.getUrl());
                 conn.connect();
+                
                 accept_ranges = conn.getHeaderField("Accept-Ranges");
-                download.setDownloadSize(conn.getContentLengthLong());
+                System.err.println("get header");
+                download.setFileSize(conn.getContentLengthLong());
+                System.err.println("getfilesize");
                 conn.disconnect();
+                System.err.println("disconnect");
+                //shit server may return diffrent content-length on every connectionn
+                if (accept_ranges != null && accept_ranges.equalsIgnoreCase("bytes")) {
+                    //open a second connection to check the file length again
+                    urlTemp = new URL(download.getUrl());
+                    HttpURLConnection conn2 = (HttpURLConnection) urlTemp.openConnection();
+                    conn2.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
+                    conn2.setConnectTimeout(3000);
+                    conn2.setReadTimeout(3000);
+                    conn2.connect();
+                    long fsize2 = conn2.getContentLengthLong();
+                    conn.disconnect();
+
+                    //server returning difrent file length make the download Download.DYNAMIC
+                    if (download.getFileSize() != fsize2) {
+                        accept_ranges = null;
+                        download.setFileSize(-1);
+
+                    }
+                }
+
             } catch (Exception ex) {
                 download.setDownloadSize(Downloader.CONERR);
                 download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
@@ -116,8 +144,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
             download.addLogMsg(new String[]{Download.INFO, "Initializing - New Download"});
         }
 
-
-
         this.downloadParts = download.getParts();
         for (int i = 0; i < downloadParts.size(); i++) {
             if (!downloadParts.get(i).isCompleted()) {
@@ -128,19 +154,21 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         if (xCompletePart.size() < 1) {
             download.addLogMsg(new String[]{Download.INFO, "No parts to download"});
+            download.setStart(false);
             return;
         }
 
         stopWorker = false;
         downloading = true;
+        System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
         while (true) {
 
-            if (!downloading || !download.isStart() || errorCount > 200) {
+            if (!downloading || !download.isStart() || retryCount > download.getRetry() * download.getConnections()-1) {
                 System.out.println("javadm.com.DownloadWorker.downloader exit");
                 stopWorker = true;
                 if (getWorkerThreadCount() < 1) {
                     download.setStart(false);
-                    if (errorCount > 200) {
+                    if (retryCount > 10 * download.getConnections()) {
                         download.addLogMsg(new String[]{Download.ERROR, "Stopping download - too many gummy bears"});
                     }
                     break;
@@ -154,7 +182,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 }
 
                 if (workerThreadCount < download.getConnections() && inQuePart.size() > 0) {
-                    workerConnected = false;
                     System.out.println("Spawning new thread");
                     workerThreadCount = workerThreadCount + 1;
                     DownloadWorker dt = new DownloadWorker(inQuePart.get(0), workerThreadCount);
@@ -181,32 +208,70 @@ public class Downloader implements Runnable, PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
 
         rpart = (Part) evt.getNewValue();
-        if (download.getType() == Download.RESUMABLE) {
-            if (rpart.getCurrentSize() < rpart.getSize()) {
-                if (rpart.getCurrentSize() > 0) {
-                    DaoSqlite db = new DaoSqlite();
-                    db.updatePart(download.getId(), rpart);
+        //update part data
+        DaoSqlite db = new DaoSqlite();
+        db.updatePart(download.getId(), rpart);
+        switch (download.getType()) {
+
+            case Download.RESUMABLE:
+
+                if (rpart.getCurrentSize() < rpart.getSize()) {
+                    errorCount++;
+                    //server only acceppt single connection
+                    if (workerDownloading && errorCount >= download.getRetry() * download.getConnections()) {
+                        retryCount = 0;
+                        download.setConnections(1);
+                    } else {
+                        retryCount++;
+                    }
                     inQuePart.add(rpart);
+                } else {
+                    rpart.setCompleted(true);
+                    retryCount = 0;
+                    //check if all parts are completed if true flag exit downloader
+                    boolean completeParts = true;
+                    for (int i = 0; i < allxCompletePart.size(); i++) {
+                        if (!allxCompletePart.get(i).isCompleted()) {
+                            completeParts = false;
+                        }
+                    }
+                    //flag exit downloader
+                    downloading = !completeParts;
                 }
-            } else {
-                rpart.setCompleted(true);
-                DaoSqlite db = new DaoSqlite();
-                db.updatePart(download.getId(), rpart);
-            }
-            decThreacount();
-            //System.err.println("rpart : " + rpart.getPartFileName() + " : " + rpart.getCurrentSize());
-        } else {
-            downloading = false; // size -1 download error.
+
+                break;
+
+            case Download.DYNAMIC:
+
+                //part size is 0 retry till max count
+                if (rpart.getCurrentSize() < 1) {
+                    rpart.setCurrentSize(0); //redownload the file
+                    inQuePart.add(rpart);
+                    retryCount++;
+                } else {
+                    rpart.setCompleted(true);
+                    downloading = false;
+                }
+
+                break;
+
+            case Download.NON_RESUMEABLE:
+                //download error file size is smaller
+                if (rpart.getCurrentSize() < rpart.getSize()) {
+                    rpart.setCurrentSize(0); //redownload the file
+                    inQuePart.add(rpart);
+                    retryCount++;
+                } else {
+                    rpart.setCompleted(true);
+                    downloading = false;
+                }
+
+                break;
+
         }
 
-        boolean completeParts = true;
-        for (int i = 0; i < allxCompletePart.size(); i++) {
-            if (!allxCompletePart.get(i).isCompleted()) {
-                completeParts = false;
-            }
-        }
+        decThreacount();
 
-        downloading = !completeParts;
         //System.err.println("Downloading : " + downloading);
         //System.err.println("complete : " + completeParts);
     }
@@ -289,13 +354,11 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     byte data[] = new byte[BUFFER_SIZE];
                     int numRead;
                     //System.out.println("javadm.com.DownloadWorker.Downloader.run() + after connect ");
-                    workerConnected = true;
                     download.addLogMsg(new String[]{Download.INFO, "File : "
                         + part.getPartFileName() + " downloading"});
 
                     while (!stopWorker && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
-                        // write to buffer
-                        errorCount = 0;
+                        workerDownloading = true;
                         raf.write(data, 0, numRead);
                         part.setCurrentSize(part.getCurrentSize() + numRead);
 
@@ -319,7 +382,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                         + connection_id + " Connection Error - code : " + responsecode});
                     propChangeSupport.firePropertyChange("error", "error :" + responsecode, part);
-                    errorCount++;
                 }
             } catch (Exception ex) {
 
@@ -332,7 +394,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                     + connection_id + " " + ex.toString()});
                 propChangeSupport.firePropertyChange("error", ex.toString(), part);
-                errorCount++;
             } finally {
 
                 if (raf != null) {

@@ -26,6 +26,8 @@ package javadm.ui;
 import javadm.com.Download;
 import javadm.com.Download;
 import javax.swing.JOptionPane;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  *
@@ -36,6 +38,7 @@ public class OptionMenu extends javax.swing.JDialog {
     private final Download selectedDownload;
     private final boolean isNewDownload;
     private final DownloadManager dm;
+
     /**
      * Creates new OptionDialog
      *
@@ -49,12 +52,17 @@ public class OptionMenu extends javax.swing.JDialog {
         this.dm = downloadManager;
         this.isNewDownload = isNewdownload;
         this.selectedDownload = download;
-        if (isNewDownload) {            
+
+        if (isNewDownload) {
             initComponents();
             btnRemove.setVisible(false);
             btnSave.setVisible(false);
             txtDirectory.setText(dm.getSetting().getDirectory());
             SpinConnNCount.setValue(dm.getSetting().getConnectionCount());
+            txtuagent.setText(dm.getSetting().getUserAgent());
+            cburl.setSelected(true);
+            txtUrl.setEnabled(true);
+            
 
         } else {
             initComponents();
@@ -62,13 +70,16 @@ public class OptionMenu extends javax.swing.JDialog {
             if (selectedDownload.getDoneSize() > 0) {
                 txtDirectory.setEnabled(false);
                 btnDirectory.setEnabled(false);
+                txtuagent.setText(selectedDownload.getUserAgent());
                 txtName.setEnabled(false);
             }
         }
 
-        txtName.setEditable(false);
+        //txtName.setEditable(false);
         this.setLocation(dm.getLocation().x - (this.getWidth() - dm.getWidth()) / 2, dm.getLocation().y - (this.getHeight() - dm.getHeight()) / 2);
         this.setVisible(true);
+
+   
     }
 
     /**
@@ -80,70 +91,144 @@ public class OptionMenu extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        txtName = new javax.swing.JTextField();
-        jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
+        jCheckBox3 = new javax.swing.JCheckBox();
+        jPanel1 = new javax.swing.JPanel();
+        cburl = new javax.swing.JCheckBox();
         txtUrl = new javax.swing.JTextField();
-        btnDirectory = new javax.swing.JButton();
+        cbname = new javax.swing.JCheckBox();
+        txtName = new javax.swing.JTextField();
+        cbdir = new javax.swing.JCheckBox();
         txtDirectory = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
+        cbUagent = new javax.swing.JCheckBox();
+        btnDirectory = new javax.swing.JButton();
+        txtuagent = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         SpinConnNCount = new javax.swing.JSpinner();
-        btnSave = new javax.swing.JButton();
         btnRemove = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         btnOK = new javax.swing.JButton();
+        btnSave = new javax.swing.JButton();
+
+        jCheckBox3.setText("URL");
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setModal(true);
 
-        txtName.setFont(txtName.getFont().deriveFont((float)14));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Download Option"));
+
+        cburl.setText("URL");
+        cburl.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cburlActionPerformed(evt);
+            }
+        });
+
+        txtUrl.setText(selectedDownload.getUrl());
+        txtUrl.setEnabled(false);
+
+        cbname.setText("Name");
+        cbname.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbnameActionPerformed(evt);
+            }
+        });
+
         txtName.setText(selectedDownload.getName());
-        txtName.setMinimumSize(null);
+        txtName.setEnabled(false);
         txtName.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 txtNameActionPerformed(evt);
             }
         });
 
-        jLabel1.setFont(jLabel1.getFont().deriveFont((float)14));
-        jLabel1.setText("Name");
+        cbdir.setText("Directory");
+        cbdir.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbdirActionPerformed(evt);
+            }
+        });
 
-        jLabel2.setFont(jLabel2.getFont().deriveFont((float)14));
-        jLabel2.setText("Url");
+        txtDirectory.setText(selectedDownload.getDirectory());
+        txtDirectory.setEnabled(false);
 
-        txtUrl.setFont(txtUrl.getFont().deriveFont((float)14));
-        txtUrl.setText(selectedDownload.getUrl());
+        cbUagent.setText("User Agent");
+        cbUagent.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbUagentActionPerformed(evt);
+            }
+        });
 
-        btnDirectory.setFont(btnDirectory.getFont());
         btnDirectory.setText("Select");
+        btnDirectory.setEnabled(false);
         btnDirectory.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 btnDirectoryActionPerformed(evt);
             }
         });
 
-        txtDirectory.setFont(txtDirectory.getFont().deriveFont((float)14));
-        txtDirectory.setText(selectedDownload.getDirectory());
+        txtuagent.setEnabled(false);
 
-        jLabel3.setFont(jLabel3.getFont().deriveFont((float)14));
-        jLabel3.setText("Directory");
-
-        jLabel4.setFont(jLabel4.getFont().deriveFont((float)14));
         jLabel4.setText("No. of Connections");
 
-        SpinConnNCount.setFont(SpinConnNCount.getFont().deriveFont((float)14));
         SpinConnNCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
 
-        btnSave.setFont(btnSave.getFont());
-        btnSave.setText("Save");
-        btnSave.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                btnSaveActionPerformed(evt);
-            }
-        });
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cbname, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cbdir, javax.swing.GroupLayout.PREFERRED_SIZE, 124, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cbUagent, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(cburl, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(txtuagent)
+                            .addComponent(txtName)
+                            .addComponent(txtUrl)
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel1Layout.createSequentialGroup()
+                                .addComponent(txtDirectory)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addContainerGap())))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(cburl)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtUrl, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cbname)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cbdir)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(btnDirectory)
+                    .addComponent(txtDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cbUagent)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(txtuagent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(13, Short.MAX_VALUE))
+        );
 
-        btnRemove.setFont(btnRemove.getFont());
         btnRemove.setText("Remove");
         btnRemove.setFocusPainted(false);
         btnRemove.addActionListener(new java.awt.event.ActionListener() {
@@ -152,7 +237,6 @@ public class OptionMenu extends javax.swing.JDialog {
             }
         });
 
-        btnCancel.setFont(btnCancel.getFont());
         btnCancel.setText("Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -160,7 +244,6 @@ public class OptionMenu extends javax.swing.JDialog {
             }
         });
 
-        btnOK.setFont(btnOK.getFont());
         btnOK.setText("OK");
         btnOK.setMinimumSize(new java.awt.Dimension(40, 33));
         btnOK.addActionListener(new java.awt.event.ActionListener() {
@@ -169,68 +252,39 @@ public class OptionMenu extends javax.swing.JDialog {
             }
         });
 
+        btnSave.setText("Save");
+        btnSave.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnSaveActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 157, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnRemove)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnCancel)
-                        .addGap(0, 27, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addComponent(txtDirectory)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(btnDirectory))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(18, 18, 18)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(txtUrl, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(txtName, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))))
+                .addContainerGap(327, Short.MAX_VALUE)
+                .addComponent(btnRemove)
+                .addGap(18, 18, 18)
+                .addComponent(btnSave, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(btnCancel)
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtUrl))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(txtDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnDirectory))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnSave)
                     .addComponent(btnRemove)
+                    .addComponent(btnCancel)
                     .addComponent(btnOK, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(btnCancel))
+                    .addComponent(btnSave))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -272,6 +326,23 @@ public class OptionMenu extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtNameActionPerformed
 
+    private void cburlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cburlActionPerformed
+        txtUrl.setEnabled(cburl.isSelected());
+    }//GEN-LAST:event_cburlActionPerformed
+
+    private void cbnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbnameActionPerformed
+        txtName.setEnabled(cbname.isSelected());
+    }//GEN-LAST:event_cbnameActionPerformed
+
+    private void cbdirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbdirActionPerformed
+        txtDirectory.setEnabled(cbdir.isSelected());
+        btnDirectory.setEnabled(cbdir.isSelected());
+    }//GEN-LAST:event_cbdirActionPerformed
+
+    private void cbUagentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbUagentActionPerformed
+        txtuagent.setEnabled(cbUagent.isSelected());
+    }//GEN-LAST:event_cbUagentActionPerformed
+
     private boolean updateData() {
         String url = txtUrl.getText().trim();
         String fname = selectedDownload.getUrl_name(url);
@@ -279,8 +350,8 @@ public class OptionMenu extends javax.swing.JDialog {
         txtName.setText(fname);
         try {
 
-            if (directory.isBlank() || url.isBlank()) {
-                throw new IllegalArgumentException("fields cant be left blank");
+            if (directory.isBlank() || url.isBlank()  || txtuagent.getText().isBlank() ) {
+                throw new IllegalArgumentException("blank fields");
             } else if (!selectedDownload.isUrlOK(url)) {
                 throw new IllegalArgumentException("invalid url");
             } else if (!txtName.isEditable() && txtName.getText().isBlank()) {
@@ -293,6 +364,7 @@ public class OptionMenu extends javax.swing.JDialog {
                 selectedDownload.setUrl(url);
                 selectedDownload.setDirectory(txtDirectory.getText());
                 selectedDownload.setName(txtName.getText());
+                selectedDownload.setUserAgent(txtuagent.getText());
                 if (isNewDownload) {
                     dm.addDownload(selectedDownload);
                 } else {
@@ -316,12 +388,16 @@ public class OptionMenu extends javax.swing.JDialog {
     private javax.swing.JButton btnOK;
     private javax.swing.JButton btnRemove;
     private javax.swing.JButton btnSave;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
+    private javax.swing.JCheckBox cbUagent;
+    private javax.swing.JCheckBox cbdir;
+    private javax.swing.JCheckBox cbname;
+    private javax.swing.JCheckBox cburl;
+    private javax.swing.JCheckBox jCheckBox3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JTextField txtDirectory;
     private javax.swing.JTextField txtName;
     private javax.swing.JTextField txtUrl;
+    private javax.swing.JTextField txtuagent;
     // End of variables declaration//GEN-END:variables
 }

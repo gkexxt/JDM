@@ -43,8 +43,8 @@ public class SettingMenu extends javax.swing.JDialog {
     public SettingMenu(DownloadManager downloadManager, boolean modal) {
         super(downloadManager, modal);
         this.dm = downloadManager;
-        initComponents();
         this.setting = dm.getSetting();
+        initComponents();        
         txtDirectory.setText(setting.getDirectory());
         cbAutostart.setSelected(setting.isAutoStart());
         spConnCount.setValue(setting.getConnectionCount());
@@ -159,6 +159,7 @@ public class SettingMenu extends javax.swing.JDialog {
         jLabel4.setFont(jLabel4.getFont().deriveFont(jLabel4.getFont().getSize()+3f));
         jLabel4.setText("Settings");
 
+        txtUagent.setText(setting.getUserAgent());
         txtUagent.setEnabled(cbUAgent.isSelected());
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

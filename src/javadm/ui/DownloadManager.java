@@ -42,6 +42,7 @@ import javadm.app.App;
 import javadm.com.Setting;
 import javadm.com.Download;
 import javadm.com.DaoSqlite;
+import javadm.com.Part;
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -80,11 +81,11 @@ public class DownloadManager extends JFrame
      */
     public void showMe() {
         DefaultListModel listModel = new DefaultListModel();
-         String[] category = {"All","Active","Inactive","Completed"};
+        String[] category = {"All", "Active", "Inactive", "Completed"};
         for (String item : category) {
             listModel.addElement(item);
         }
-        
+
         list.setModel(listModel);
         list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         list.setSelectedIndex(0);
@@ -228,10 +229,19 @@ public class DownloadManager extends JFrame
     public void loadall() {
         DaoSqlite db = new DaoSqlite();
         java.util.List<Download> downloads = db.getAllDownload();
-        
-        for (Download download : downloads) {       
+
+        //recalculate size based on saved part data if some bastard kill the app
+        for (Download download : downloads) {
             download.setParts(db.getParts(download.getId()));
-            download.setProgress(download.getDoneSize());
+            if (!download.isComplete()) {
+                long recalculated_size = 0;
+                for (Part part : download.getParts()) {
+                    recalculated_size = recalculated_size + part.getCurrentSize();
+                }
+                download.setDoneSize(recalculated_size);
+            }
+
+            download.setProgress(0);
             model.addRow(download);
             download.addPropertyChangeListener(model);
             download.addPropertyChangeListener(this);
@@ -318,6 +328,7 @@ public class DownloadManager extends JFrame
         model.addTableModelListener(table);//add it back
         DaoSqlite db = new DaoSqlite();
         db.deleteDownload(rmDownload.getId());
+        db.deleteParts(rmDownload.getId());
         toolbar.refreshToolBar();
         statusPane.setVisible(false);
         model.fireTableDataChanged();
@@ -346,9 +357,18 @@ public class DownloadManager extends JFrame
                 "Redownload", JOptionPane.QUESTION_MESSAGE) > 0) {
             return;
         }
-        getSelectedDownload().setComplete(false);
-        getSelectedDownload().setDoneSize(0);
-        getSelectedDownload().setStart(true);
+        
+        Download download = getSelectedDownload();
+        download.setComplete(false);
+        download.setDoneSize(0);
+        download.setType(Download.UNKNOWN);
+        download.setFileSize(0);
+        download.setProgress(0);
+        DaoSqlite db = new DaoSqlite();       
+        db.updateDownload(download);
+        db.deleteParts(download.getId());
+        download.setStart(true);
+
     }
 
     /**
