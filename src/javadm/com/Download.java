@@ -236,37 +236,18 @@ public class Download {
         propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
     }
 
-    public synchronized void setStart(boolean start) {
-        //propChangeSupport.firePropertyChange("Startxxxxxxxxxx", startDownloader, startDownloader);
-        boolean oldstart = this.start;
-        this.start = start;
-        //System.out.println("javadm.data.Download.setStart()");
-        //System.out.println(startDownloader);
 
-        if (start && !isComplete()) {
-            running = true;
-
-        } else if (!start && !isComplete()) {
-            stopDownload();
-            running = false;
-        } else if (isComplete()) {
-            this.start = false;
-            running = false;
-        }
-
-        propChangeSupport.firePropertyChange("setStart", oldstart, this.start);
-
-    }
 
     public void setDownloadSize(long fsize) {
         this.setFileSize(fsize);
     }
 
-    private void startDownload() {
+    public void startDownload() {
         if (!isComplete()) {
             this.downloadControl.setLblControl(true);
             this.downloadControl.setRowlocked(true);
             new Downloader(this).startDownloader();
+            running = true;
 
         } else {
             addLogMsg(new String[]{Download.ERROR, "Download already completed"});
@@ -274,7 +255,18 @@ public class Download {
 
     }
 
-    private synchronized void stopDownload() {
+    public void stopDownload() {
+        if (!isComplete()) {
+            this.downloadControl.setLblControl(false);
+            this.downloadControl.setRowlocked(false);
+            running = false;
+
+        } else {
+            addLogMsg(new String[]{Download.ERROR, "Download should not be started if complete fuck i got bug"});
+        }
+    }
+
+    public void updateDownload() {
         System.out.println(xxxx);
         xxxx++;
         if (!isComplete()) {
@@ -291,6 +283,7 @@ public class Download {
                     allPartComplete = false;
                 }
             }
+
             System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
             DaoSqlite db = new DaoSqlite();
             parts.forEach((part) -> {
@@ -307,7 +300,7 @@ public class Download {
                     buildfile();
                 }
             }
-            
+
             db.updateDownload(this);
             this.downloadControl.setLblControl(false);
             this.downloadControl.setRowlocked(false);
