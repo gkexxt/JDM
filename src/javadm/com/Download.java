@@ -50,7 +50,6 @@ import javadm.ui.DownloadControl;
  */
 public class Download {
 
-    private boolean start;
     private String userAgent;
     private final List<String[]> logMsgs;
     public static final String ERROR = "Error";
@@ -63,9 +62,6 @@ public class Download {
     public static final byte UNKNOWN = 0;
     private int xxxx = 0;
 
-    public boolean isRunning() {
-        return running;
-    }
     public byte type = UNKNOWN;
     private int id;
     private String name = "";
@@ -89,6 +85,10 @@ public class Download {
         this.logMsgs = new ArrayList();
         this.downloadControl = new DownloadControl();// instace of control
         parts = new ArrayList<>();
+    }
+
+    public boolean isRunning() {
+        return running;
     }
 
     public int getRetry() {
@@ -206,10 +206,6 @@ public class Download {
         this.downloadControl = downloadControl;
     }
 
-    public boolean isStart() {
-        return start;
-    }
-
     /**
      * get filename from url
      *
@@ -235,8 +231,6 @@ public class Download {
         }
         propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
     }
-
-
 
     public void setDownloadSize(long fsize) {
         this.setFileSize(fsize);
