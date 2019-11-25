@@ -242,7 +242,7 @@ public class Download {
             this.downloadControl.setRowlocked(true);
             new Downloader(this).startDownloader();
             running = true;
-
+            propChangeSupport.firePropertyChange("running", false, true);
         } else {
             addLogMsg(new String[]{Download.ERROR, "Download already completed"});
         }
@@ -254,10 +254,12 @@ public class Download {
             this.downloadControl.setLblControl(false);
             this.downloadControl.setRowlocked(false);
             running = false;
+            propChangeSupport.firePropertyChange("running", true, false);
 
         } else {
             addLogMsg(new String[]{Download.ERROR, "Download should not be started if complete fuck i got bug"});
         }
+
     }
 
     public void updateDownload() {
