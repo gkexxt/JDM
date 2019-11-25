@@ -25,22 +25,15 @@ package javadm.com;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.BufferedInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.URL;
 import java.nio.file.Files;
 import static java.time.LocalDateTime.now;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javadm.ui.DownloadControl;
 
 /**
@@ -52,14 +45,24 @@ public class Download {
 
     private String userAgent;
     private final List<String[]> logMsgs;
+    //Download states
+    public static final String STCOMPLETE = "Complete";
+    public static final String STERROR = "Error";
+    public static final String STDOWNLOADING = "Downloading";
+    public static final String STFINISHED = "Finished";
+    public static final String STUNKNOWN = "Unknown";
+    public static final String STSTOPED = "Stoped";
+    //error log types
     public static final String ERROR = "Error";
     public static final String WARNING = "Warning";
     public static final String DEBUG = "Debug";
     public static final String INFO = "Info";
+    //download types
     public static final byte RESUMABLE = 1;
     public static final byte DYNAMIC = -1;
     public static final byte NON_RESUMEABLE = -2;
     public static final byte UNKNOWN = 0;
+
     private int xxxx = 0;
     private volatile boolean needupdate = false;
     public byte type = UNKNOWN;
@@ -67,11 +70,20 @@ public class Download {
     private String name = "";
     private String url = "";
     private String directory = "";
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
     private long fileSize;
     private long doneSize;
     private String createdDate = now().toString();
     private String lastDate;
     private String completeDate;
+    private String state;
 
     public synchronized boolean isNeedupdate() {
         return needupdate;
@@ -129,7 +141,7 @@ public class Download {
             case Download.NON_RESUMEABLE: {
                 Part part = new Part();
                 part.setSize(this.getFileSize());
-                part.setPartFileName(this.getName());
+                part.setPartFileName(this.getId() + "-" + this.getName() + 0);
                 part.setCurrentSize(0);
                 part.setId(0);
                 parts.add(part);
@@ -143,7 +155,7 @@ public class Download {
                     part.setStartByte(i * Part.partSize);
                     part.setEndByte(i * Part.partSize + (Part.partSize - 1));
                     part.setSize(Part.partSize);
-                    part.setPartFileName(this.getId()+"-"+this.getName() + ".part" + i);
+                    part.setPartFileName(this.getId() + "-" + this.getName() + ".part" + i);
                     part.setId(i);
                     parts.add(part);
                 }
@@ -152,7 +164,7 @@ public class Download {
                     part.setStartByte(x * Part.partSize);
                     part.setSize(last_length);
                     part.setEndByte(x * Part.partSize + last_length - 1);
-                    part.setPartFileName(this.getId()+"-"+this.getName() + ".part" + x);
+                    part.setPartFileName(this.getId() + "-" + this.getName() + ".part" + x);
                     part.setId((int) x);
                     parts.add(part);
                 }
@@ -244,6 +256,7 @@ public class Download {
         if (!isComplete()) {
             this.downloadControl.setLblControl(true);
             this.downloadControl.setRowlocked(true);
+            setState(Download.STDOWNLOADING);
             new Downloader(this).startDownloader();
             this.needupdate = true;
             this.running = true;
@@ -258,6 +271,7 @@ public class Download {
         if (!isComplete()) {
             this.downloadControl.setLblControl(false);
             this.downloadControl.setRowlocked(false);
+            setState(Download.STSTOPED);
             this.running = false;
             propChangeSupport.firePropertyChange("running", true, false);
 
@@ -275,7 +289,7 @@ public class Download {
         boolean allPartComplete = true;
         for (Part part : this.parts) {
             System.err.println(part.getSize() + " : " + part.getCurrentSize());
-            if (part.getCurrentSize() >= part.getSize()) {
+            if (part.getCurrentSize() >= part.getSize() && part.getCurrentSize() >0) {
                 part.setCompleted(true);
             }
 
@@ -284,7 +298,7 @@ public class Download {
             }
         }
 
-        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+        //upate parts @ db
         DaoSqlite db = new DaoSqlite();
         parts.forEach((part) -> {
             db.updatePart(this.getId(), part);
@@ -292,13 +306,11 @@ public class Download {
 
         if (allPartComplete) {
             setComplete(true);
+            setState(Download.STCOMPLETE);
             setCompleteDate(now().toString());
-
             db.deleteParts(this.getId());
+            buildfile();
 
-            if (this.getType() == RESUMABLE) {
-                buildfile();
-            }
         }
 
         db.updateDownload(this);
@@ -323,7 +335,7 @@ public class Download {
                 break;
             }
         }
-        
+
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(this.getDirectory() + "/" + this.getName(), "rw");

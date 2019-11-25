@@ -234,7 +234,7 @@ public class DownloadManager extends JFrame
             download.setParts(db.getParts(download.getId()));
             for (Part part : download.getParts()) {
                 //System.err.println(part.getSize()+" : "+part.getCurrentSize());
-                
+
             }
             download.setProgress(0);
             model.addRow(download);
@@ -263,7 +263,7 @@ public class DownloadManager extends JFrame
                             alldownloadsStoped = false;
                             download.stopDownload();
                         }
-                        
+
                     }
                     if (alldownloadsStoped) {
                         System.exit(0);
@@ -338,15 +338,35 @@ public class DownloadManager extends JFrame
 
     /**
      * remove selected downloadx from the list
+     * @param trash
      */
-    public void removeDownload() {
-        if (showChoice("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
-            return;
-        }
+    public void removeDownload(boolean trash) {
+//        if (showChoice("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
+//            return;
+//        }
         Download rmDownload = getSelectedDownload();
+        for (int i = 0; i < downloads.size(); i++) {
+            if(downloads.get(i).getId() == rmDownload.getId()){
+                downloads.remove(i);
+            }
+        }
         model.removeTableModelListener(table);//remove table listner before delete from model
         model.removeRows(table.getSelectedRow());
         model.addTableModelListener(table);//add it back
+
+        if (trash) {
+            try {
+                File file = new File(rmDownload.getDirectory() + "/" + rmDownload.getName());
+                file.delete();
+            } catch (Exception ex) {
+            }
+        }
+
+        for (Part part : rmDownload.getParts()) {
+            File file = new File(rmDownload.getDirectory() + "/" + part.getPartFileName());
+            file.delete();
+        }
+
         DaoSqlite db = new DaoSqlite();
         db.deleteDownload(rmDownload.getId());
         db.deleteParts(rmDownload.getId());
@@ -390,9 +410,8 @@ public class DownloadManager extends JFrame
         DaoSqlite db = new DaoSqlite();
         db.updateDownload(downloadx);
         db.deleteParts(downloadx.getId());
-        
-        //downloadx.setStart(true);
 
+        //downloadx.setStart(true);
     }
 
     /**
@@ -400,7 +419,7 @@ public class DownloadManager extends JFrame
      *
      * @param download
      */
-    public void addDownload(Download download) {
+    public void addDownload(Download download, Boolean autoStart) {
         try {
             download.setName(download.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", ""));
             DaoSqlite db = new DaoSqlite();
@@ -409,7 +428,7 @@ public class DownloadManager extends JFrame
             downloads.add(download);
             model.addRow(download);
             download.addPropertyChangeListener(this);
-            if (setting.isAutoStart()) {
+            if (autoStart) {
                 download.startDownload();
             }
         } catch (Exception e) {
@@ -520,11 +539,12 @@ public class DownloadManager extends JFrame
             dwn.setName(Download.getUrl_name(url));
             dwn.setDirectory(setting.getDirectory());
             dwn.setConnections(setting.getConnectionCount());
+            dwn.setUserAgent(setting.getUserAgent());
             if (setting.getMonitorMode() == 1) {
                 OptionMenu newdwnmenu = new OptionMenu(this, dwn, true, true);
 
             } else if (setting.getMonitorMode() == 2) {
-                addDownload(dwn);
+                addDownload(dwn,setting.isAutoStart());
             }
         }
     }
@@ -535,10 +555,11 @@ public class DownloadManager extends JFrame
         toolbar.refreshToolBar();
         if (evt.getPropertyName().equals("addErrorMessage")) {
             statusPane.updateErrorView();
-        } else if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0) {
-            System.err.println(evt.getNewValue().toString());
-            System.err.println(evt.getOldValue().toString());
-            //clipedUrl = evt.getNewValue().toString();
+        } else if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0 &&
+                !evt.getNewValue().toString().equals(clipedUrl)) {
+            //System.err.println(evt.getNewValue().toString());
+            //System.err.println(evt.getOldValue().toString());
+            clipedUrl = evt.getNewValue().toString();
             clipMonitorParse(evt.getNewValue().toString());
 
         }

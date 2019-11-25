@@ -58,15 +58,19 @@ public class OptionMenu extends javax.swing.JDialog {
             SpinConnNCount.setValue(dm.getSetting().getConnectionCount());
             txtuagent.setText(dm.getSetting().getUserAgent());
             cburl.setSelected(true);
-            txtUrl.setEnabled(true);
+            cbAuto.setSelected(dm.getSetting().isAutoStart());
+            setTitle("New Download");
 
         } else {
             initComponents();
+            cbAuto.setVisible(false);
+            setTitle("Download Option");
 
         }
 
         //txtName.setEditable(false);
         this.setLocation(dm.getLocation().x - (this.getWidth() - dm.getWidth()) / 2, dm.getLocation().y - (this.getHeight() - dm.getHeight()) / 2);
+
         this.setVisible(true);
 
     }
@@ -93,6 +97,7 @@ public class OptionMenu extends javax.swing.JDialog {
         txtuagent = new javax.swing.JTextField();
         jLabel4 = new javax.swing.JLabel();
         SpinConnNCount = new javax.swing.JSpinner();
+        cbAuto = new javax.swing.JCheckBox();
         btnRemove = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
         btnOK = new javax.swing.JButton();
@@ -103,12 +108,14 @@ public class OptionMenu extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setModal(true);
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Download Option"));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(setBorderTitile()
+
+        ));
 
         cburl.setText("URL");
-        cburl.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cburlActionPerformed(evt);
+        cburl.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                cburlStateChanged(evt);
             }
         });
 
@@ -116,9 +123,9 @@ public class OptionMenu extends javax.swing.JDialog {
         txtUrl.setEnabled(false);
 
         cbname.setText("Name");
-        cbname.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbnameActionPerformed(evt);
+        cbname.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                cbnameStateChanged(evt);
             }
         });
 
@@ -131,9 +138,9 @@ public class OptionMenu extends javax.swing.JDialog {
         });
 
         cbdir.setText("Directory");
-        cbdir.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbdirActionPerformed(evt);
+        cbdir.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                cbdirStateChanged(evt);
             }
         });
 
@@ -141,9 +148,9 @@ public class OptionMenu extends javax.swing.JDialog {
         txtDirectory.setEnabled(false);
 
         cbUagent.setText("User Agent");
-        cbUagent.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cbUagentActionPerformed(evt);
+        cbUagent.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                cbUagentStateChanged(evt);
             }
         });
 
@@ -162,6 +169,8 @@ public class OptionMenu extends javax.swing.JDialog {
 
         SpinConnNCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
         SpinConnNCount.setValue(selectedDownload.getConnections());
+
+        cbAuto.setText("Auto Start");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -185,7 +194,10 @@ public class OptionMenu extends javax.swing.JDialog {
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(cbAuto)
+                                .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
                                 .addComponent(txtDirectory)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -216,7 +228,8 @@ public class OptionMenu extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(cbAuto))
                 .addContainerGap(13, Short.MAX_VALUE))
         );
 
@@ -269,8 +282,9 @@ public class OptionMenu extends javax.swing.JDialog {
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnRemove)
                     .addComponent(btnCancel)
@@ -295,7 +309,7 @@ public class OptionMenu extends javax.swing.JDialog {
 
     private void btnRemoveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRemoveActionPerformed
         // TODO add your handling code here:
-        dm.removeDownload();
+        new RemoveMenu(dm, true);
         this.dispose();
 
 
@@ -317,25 +331,38 @@ public class OptionMenu extends javax.swing.JDialog {
         // TODO add your handling code here:
     }//GEN-LAST:event_txtNameActionPerformed
 
-    private void cburlActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cburlActionPerformed
-        txtUrl.setEnabled(cburl.isSelected());
-    }//GEN-LAST:event_cburlActionPerformed
+    private void cbUagentStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_cbUagentStateChanged
+        // TODO add your handling code here:
+        txtuagent.setEnabled(cbUagent.isSelected());
+    }//GEN-LAST:event_cbUagentStateChanged
 
-    private void cbnameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbnameActionPerformed
-        txtName.setEnabled(cbname.isSelected());
-    }//GEN-LAST:event_cbnameActionPerformed
-
-    private void cbdirActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbdirActionPerformed
+    private void cbdirStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_cbdirStateChanged
+        // TODO add your handling code here:
         txtDirectory.setEnabled(cbdir.isSelected());
         btnDirectory.setEnabled(cbdir.isSelected());
-    }//GEN-LAST:event_cbdirActionPerformed
+    }//GEN-LAST:event_cbdirStateChanged
 
-    private void cbUagentActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbUagentActionPerformed
-        txtuagent.setEnabled(cbUagent.isSelected());
-    }//GEN-LAST:event_cbUagentActionPerformed
+    private void cbnameStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_cbnameStateChanged
+        // TODO add your handling code here:
+        txtName.setEnabled(cbname.isSelected());
+    }//GEN-LAST:event_cbnameStateChanged
+
+    private void cburlStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_cburlStateChanged
+        // TODO add your handling code here:
+        txtUrl.setEnabled(cburl.isSelected());
+    }//GEN-LAST:event_cburlStateChanged
+
+    private String setBorderTitile() {
+
+        if (isNewDownload) {
+            return "New Download";
+        } else {
+            return selectedDownload.getName();
+        }
+    }
 
     private boolean updateData() {
-        
+
         String url = txtUrl.getText().trim();
         String fname;
         if (txtName.getText().isBlank()) {
@@ -364,7 +391,7 @@ public class OptionMenu extends javax.swing.JDialog {
                 selectedDownload.setName(txtName.getText());
                 selectedDownload.setUserAgent(txtuagent.getText());
                 if (isNewDownload) {
-                    dm.addDownload(selectedDownload);
+                    dm.addDownload(selectedDownload,cbAuto.isSelected());
                 } else {
                     dm.updateDownload(selectedDownload);
 
@@ -386,6 +413,7 @@ public class OptionMenu extends javax.swing.JDialog {
     private javax.swing.JButton btnOK;
     private javax.swing.JButton btnRemove;
     private javax.swing.JButton btnSave;
+    private javax.swing.JCheckBox cbAuto;
     private javax.swing.JCheckBox cbUagent;
     private javax.swing.JCheckBox cbdir;
     private javax.swing.JCheckBox cbname;

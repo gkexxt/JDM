@@ -32,21 +32,22 @@ import java.util.*;
 import javax.swing.table.*;
 
 /**
- *  A TableModel that better supports the processing of rows of data. That
- *  is, the data is treated more like a row than an individual cell. Hopefully
- *  this class can be used as a parent class instead of extending the
- *  AbstractTableModel when you need custom models that contain row related
- *  data.
+ *  A TableModel that better supports the processing of rows of data.That
+  is, the data is treated more like a row than an individual cell. Hopefully
+  this class can be used as a parent class instead of extending the
+  AbstractTableModel when you need custom models that contain row related
+  data.
+
+  A few methods have also been added to make it easier to customize
+  properties of the model, such as the column class and column editability.
+
+  Any class that extends this class must make sure to invoke the
+  setRowClass() and setDataAndColumnNames() methods either directly,
+  by using the various constructors, or indirectly.
  *
- *  A few methods have also been added to make it easier to customize
- *  properties of the model, such as the column class and column editability.
- *
- *  Any class that extends this class must make sure to invoke the
- *  setRowClass() and setDataAndColumnNames() methods either directly,
- *  by using the various constructors, or indirectly.
- *
+ * @param <T>
  */
-abstract public class RowTableModel<T> extends AbstractTableModel
+ public abstract  class RowTableModel<T> extends AbstractTableModel
 {
 	protected List<T> modelData;
 	protected List<String> columnNames;
@@ -175,6 +176,7 @@ abstract public class RowTableModel<T> extends AbstractTableModel
 	 *  @param column  the column being queried
 	 *  @return the Class of the column being queried
 	*/
+        @Override
 	public Class getColumnClass(int column)
 	{
 		Class columnClass = null;
@@ -197,6 +199,7 @@ abstract public class RowTableModel<T> extends AbstractTableModel
 	 *
 	 * @return the number of columns in the model
 	 */
+        @Override
 	public int getColumnCount()
 	{
 		return columnNames.size();
@@ -210,6 +213,7 @@ abstract public class RowTableModel<T> extends AbstractTableModel
 	 * <code>columnNames</code> does not have an entry for this index
 	 * then the default name provided by the superclass is returned
 	 */
+        @Override
 	public String getColumnName(int column)
 	{
 		Object columnName = null;
@@ -227,6 +231,7 @@ abstract public class RowTableModel<T> extends AbstractTableModel
 	 *
 	 * @return the number of rows in the model
 	 */
+        @Override
 	public int getRowCount()
 	{
 		return modelData.size();
@@ -340,12 +345,9 @@ abstract public class RowTableModel<T> extends AbstractTableModel
 	 */
 	public void insertRows(int row, T[] rowArray)
 	{
-		List<T> rowList = new ArrayList<T>(rowArray.length);
+		List<T> rowList = new ArrayList<>(rowArray.length);
 
-		for (int i = 0; i < rowArray.length; i++)
-		{
-			rowList.add( rowArray[i] );
-		}
+                rowList.addAll(Arrays.asList(rowArray));
 
 		insertRows(row, rowList);
 	}
@@ -409,7 +411,7 @@ abstract public class RowTableModel<T> extends AbstractTableModel
 
 		//  Save references to the rows that are about to be moved
 
-		ArrayList<T> temp = new ArrayList<T>(rowsMoved);
+		ArrayList<T> temp = new ArrayList<>(rowsMoved);
 
 		for (int i = start; i < end + 1; i++)
 		{
@@ -545,7 +547,7 @@ abstract public class RowTableModel<T> extends AbstractTableModel
 	{
 		if (columnName.length() < 3) return columnName;
 
-		StringBuffer buffer = new StringBuffer( columnName );
+		StringBuilder buffer = new StringBuilder( columnName );
 		boolean isPreviousLowerCase = false;
 
 		for (int i = 1; i < buffer.length(); i++)

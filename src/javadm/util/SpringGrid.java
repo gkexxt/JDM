@@ -21,13 +21,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package javadm.misc;
+package javadm.util;
 
 /**
  *
  * @author gk
  */
-import javadm.misc.SpringUtilities;
 import javax.swing.*;
 import java.awt.*;
 

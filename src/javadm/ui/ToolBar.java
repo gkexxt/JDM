@@ -193,21 +193,23 @@ public class ToolBar extends JPanel
             btnStop.setVisible(false);
             btnStart.setVisible(false);
             btnRemove.setVisible(true);
+            btnSetting.setVisible(true);
 
         } else if (selectedDownload.isRunning()) {
+            btnSetting.setVisible(false);
             btnRestart.setVisible(false);
             btnStop.setVisible(true);
             btnStart.setVisible(false);
             btnRemove.setVisible(false);
         } else {
-            
+            btnSetting.setVisible(true);
             btnRestart.setVisible(true);
             btnStop.setVisible(false);
             btnStart.setVisible(true);
             btnRemove.setVisible(true);
         }
         
-        btnSetting.setVisible(true);
+        
         btnGraph.setVisible(true);
         btnSchedule.setVisible(true);
     }
@@ -264,7 +266,8 @@ public class ToolBar extends JPanel
 
                     break;
                 case REMOVE:
-                    dm.removeDownload();
+                    new RemoveMenu(dm, true);
+                    
                     break;
                 case START:
                     dm.startDownload();

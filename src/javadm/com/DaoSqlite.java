@@ -55,6 +55,7 @@ public class DaoSqlite implements DaoAPI {
         download.setUserAgent(rs.getString("user_agent"));
         download.setComplete(rs.getBoolean("complete"));
         download.setConnections(rs.getInt("connection"));
+        download.setState(rs.getString("state"));
         return download;
     }
 
@@ -115,7 +116,7 @@ public class DaoSqlite implements DaoAPI {
     public boolean insertDownload(Download download) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO downloaddata VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO downloaddata VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?)");
             ps.setString(1, download.getName());
             ps.setString(2, download.getUrl());
             ps.setString(3, download.getDirectory());
@@ -128,6 +129,7 @@ public class DaoSqlite implements DaoAPI {
             ps.setString(10, download.getUserAgent());
             ps.setBoolean(11, download.isComplete());
             ps.setInt(12, download.getConnections());
+            ps.setString(13, download.getState());
 
             int i = ps.executeUpdate();
             if (i == 1) {
@@ -146,7 +148,7 @@ public class DaoSqlite implements DaoAPI {
             PreparedStatement ps = connection.prepareStatement("UPDATE "
                     + "downloaddata SET name=?, url=?, directory=?, fsize=?, "
                     + "dnsize=?, crtdate=?, lstdate=?, cmpdate=?, type=?, "
-                    + "user_agent=?, complete=?, connection=? WHERE id=?");
+                    + "user_agent=?, complete=?, connection=?, state=? WHERE id=?");
             ps.setString(1, download.getName());
             ps.setString(2, download.getUrl());
             ps.setString(3, download.getDirectory());
@@ -159,7 +161,8 @@ public class DaoSqlite implements DaoAPI {
             ps.setString(10, download.getUserAgent());
             ps.setBoolean(11, download.isComplete());
             ps.setInt(12, download.getConnections());
-            ps.setInt(13, download.getId());
+            ps.setString(13, download.getState());
+            ps.setInt(14, download.getId());
 
             int i = ps.executeUpdate();
             if (i == 1) {
@@ -200,6 +203,7 @@ public class DaoSqlite implements DaoAPI {
                 setting.setConnectionCount(rs.getInt("conncount"));
                 setting.setMonitorMode(rs.getInt("monmode"));
                 setting.setAutoStart(rs.getBoolean("automode"));
+                setting.setUserAgent(rs.getString("user_agent"));
                 return setting;
             }
 
@@ -213,12 +217,13 @@ public class DaoSqlite implements DaoAPI {
     public boolean setSetting(Setting setting) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE setting SET directory=?, conncount=?, monmode=?, automode=? WHERE id=?");
+            PreparedStatement ps = connection.prepareStatement("UPDATE setting SET directory=?, conncount=?, monmode=?, automode=?, user_agent=? WHERE id=?");
             ps.setString(1, setting.getDirectory());
             ps.setInt(2, setting.getConnectionCount());
             ps.setInt(3, setting.getMonitorMode());
             ps.setBoolean(4, setting.isAutoStart());
-            ps.setInt(5, 1);
+            ps.setString(5, setting.getUserAgent());
+            ps.setInt(6, 1);
             System.err.println(ps.toString());
             int i = ps.executeUpdate();
             if (i == 1) {

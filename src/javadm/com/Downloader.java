@@ -95,7 +95,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
             download.addLogMsg(new String[]{Download.ERROR, "Invalid Directory - " + download.getDirectory()});
             download.stopDownload();
         };
-        
+
         //if part is not initialized
         if (download.getType() == Download.UNKNOWN) {
 
@@ -168,9 +168,10 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         stopWorker = false;
         downloading = true;
-        //System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
+        System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
+        
         while (true) {
-
+            
             if (!downloading || !download.isRunning() || retryCount > download.getRetry() * download.getConnections() - 1) {
                 //System.out.println("javadm.com.DownloadWorker.downloader exit");
                 stopWorker = true;
@@ -258,6 +259,12 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
                 //part size is 0 retry till max count
                 if (rpart.getCurrentSize() < 1) {
+                    //remove old file
+                    try {
+                        File file = new File(download.getDirectory() + "/" + rpart.getPartFileName());
+                        file.delete();
+                    } catch (Exception ex) {
+                    }
                     rpart.setCurrentSize(0); //redownload the file
                     inQuePart.add(rpart);
                     retryCount++;
@@ -271,6 +278,12 @@ public class Downloader implements Runnable, PropertyChangeListener {
             case Download.NON_RESUMEABLE:
                 //download error file size is smaller
                 if (rpart.getCurrentSize() < rpart.getSize()) {
+                    //remove old file                   
+                    try {
+                        File file = new File(download.getDirectory() + "/" + rpart.getPartFileName());
+                        file.delete();
+                    } catch (Exception ex) {
+                    }
                     rpart.setCurrentSize(0); //redownload the file
                     inQuePart.add(rpart);
                     retryCount++;

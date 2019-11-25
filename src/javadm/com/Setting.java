@@ -33,7 +33,8 @@ public class Setting {
     private int connectionCount;
     private int monitorMode;
     private boolean autoStart;
-    private String userAgent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0";
+    public static final String DEF_UA = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0";
+    private String userAgent = DEF_UA;
     // this.userAgent = "Mozilla/5.0 (Macintosh; U;"
     //      + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
 
