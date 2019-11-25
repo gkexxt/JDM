@@ -245,16 +245,15 @@ public class Download {
 
         if (start && !isComplete()) {
             running = true;
-            new Downloader(this).startDownloader();
+
         } else if (!start && !isComplete()) {
             stopDownload();
             running = false;
-        } else if(isComplete()) {
+        } else if (isComplete()) {
             this.start = false;
             running = false;
         }
-        this.downloadControl.setLblControl(this.start);
-        this.downloadControl.setRowlocked(this.start);
+
         propChangeSupport.firePropertyChange("setStart", oldstart, this.start);
 
     }
@@ -263,59 +262,84 @@ public class Download {
         this.setFileSize(fsize);
     }
 
+    private void startDownload() {
+        if (!isComplete()) {
+            this.downloadControl.setLblControl(true);
+            this.downloadControl.setRowlocked(true);
+            new Downloader(this).startDownloader();
+
+        } else {
+            addLogMsg(new String[]{Download.ERROR, "Download already completed"});
+        }
+
+    }
+
     private synchronized void stopDownload() {
         System.out.println(xxxx);
         xxxx++;
-        boolean allPartComplete = true;
-        for (Part part : parts) {
-            System.err.println(part.getSize()+" : "+part.getCurrentSize());
-            if (part.getCurrentSize() >= part.getSize()) {
-                part.setCompleted(true);
-            }
+        if (!isComplete()) {
 
-            if (!part.isCompleted()) {
-                allPartComplete = false;
-            }
-        }
-        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
-        DaoSqlite db = new DaoSqlite();
-        parts.forEach((part) -> {
-            db.updatePart(this.getId(), part);
-        });
-        
-        if (allPartComplete) {
-            setComplete(true);
-            setCompleteDate(now().toString());
-
-            db.deleteParts(this.getId());
-
-            if (this.getType() == RESUMABLE) {
-                RandomAccessFile raf = null;
-
-                try {
-                    raf = new RandomAccessFile(this.getDirectory() + "/" + this.getName(), "rw");
-
-                    for (Part part : this.parts) {
-                        File file = new File(this.getDirectory() + "/" + part.getPartFileName());
-                        byte[] fileContent = Files.readAllBytes(file.toPath());
-                        raf.seek(raf.length());
-                        raf.write(fileContent);
-                        file.deleteOnExit();
-
-                    }
-                } catch (Exception ex) {
-                    this.addLogMsg(new String[]{Download.ERROR, ex.toString()});
+            //check if all part is complete
+            boolean allPartComplete = true;
+            for (Part part : parts) {
+                System.err.println(part.getSize() + " : " + part.getCurrentSize());
+                if (part.getCurrentSize() >= part.getSize()) {
+                    part.setCompleted(true);
                 }
-                try {
-                    if (raf != null) {
-                        raf.close();
-                    }
-                } catch (IOException ex) {
-                    this.addLogMsg(new String[]{Download.ERROR, ex.toString()});
+
+                if (!part.isCompleted()) {
+                    allPartComplete = false;
                 }
             }
+            System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+            DaoSqlite db = new DaoSqlite();
+            parts.forEach((part) -> {
+                db.updatePart(this.getId(), part);
+            });
+
+            if (allPartComplete) {
+                setComplete(true);
+                setCompleteDate(now().toString());
+
+                db.deleteParts(this.getId());
+
+                if (this.getType() == RESUMABLE) {
+                    buildfile();
+                }
+            }
+            
+            db.updateDownload(this);
+            this.downloadControl.setLblControl(false);
+            this.downloadControl.setRowlocked(false);
         }
-        db.updateDownload(this);
+    }
+
+    private boolean buildfile() {
+        RandomAccessFile raf = null;
+        try {
+            raf = new RandomAccessFile(this.getDirectory() + "/" + this.getName(), "rw");
+
+            for (Part part : this.parts) {
+                File file = new File(this.getDirectory() + "/" + part.getPartFileName());
+                byte[] fileContent = Files.readAllBytes(file.toPath());
+                raf.seek(raf.length());
+                raf.write(fileContent);
+                file.deleteOnExit();
+
+            }
+            return true;
+        } catch (Exception ex) {
+            this.addLogMsg(new String[]{Download.ERROR, ex.toString()});
+        }
+        try {
+            if (raf != null) {
+                raf.close();
+            }
+        } catch (IOException ex) {
+            this.addLogMsg(new String[]{Download.ERROR, ex.toString()});
+        }
+
+        return false;
     }
 
     public int getId() {
