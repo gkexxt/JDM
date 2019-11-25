@@ -36,7 +36,7 @@ public class ConnectionFactory {
     
     private static Connection c;
 
-    public static Connection getConnection(String dbName) {
+    public synchronized static Connection getConnection(String dbName) {
         try {
 
             if (c == null) {

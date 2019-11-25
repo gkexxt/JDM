@@ -61,6 +61,7 @@ public class DownloadManager extends JFrame
     private ClipboardTextListener clplstn;
     private Setting setting;
     private String clipedUrl;
+    private java.util.List<Download> downloads;
 
     public DownloadManager() {
 
@@ -136,7 +137,7 @@ public class DownloadManager extends JFrame
         });
 
         //Create and set up the stage.
-        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        this.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         //Display stage.
         this.getContentPane().add(mainsplitpane);
         this.setLocationByPlatform(true);
@@ -228,20 +229,13 @@ public class DownloadManager extends JFrame
 
     public void loadall() {
         DaoSqlite db = new DaoSqlite();
-        java.util.List<Download> downloads = db.getAllDownload();
-
-        //recalculate size based on saved part data if some bastard kill the app
+        downloads = db.getAllDownload();
         for (Download download : downloads) {
             download.setParts(db.getParts(download.getId()));
-            //System.err.println(download.getUserAgent());
-            if (!download.isComplete()) {
-                long recalculated_size = 0;
-                for (Part part : download.getParts()) {
-                    recalculated_size = recalculated_size + part.getCurrentSize();
-                }
-                download.setDoneSize(recalculated_size);
+            for (Part part : download.getParts()) {
+                System.err.println(part.getSize()+" : "+part.getCurrentSize());
+                
             }
-
             download.setProgress(0);
             model.addRow(download);
             download.addPropertyChangeListener(model);
@@ -253,6 +247,31 @@ public class DownloadManager extends JFrame
         if (setting.getMonitorMode() > 0) {
             startClipListner();
         }
+
+        this.addWindowListener(new java.awt.event.WindowAdapter() {
+            boolean alldownloadsStoped = true;
+
+            @Override
+
+            public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+
+                while (true) {
+                    alldownloadsStoped = true;
+                    for (Download download : downloads) {
+                        if (download.isRunning()) {
+                            System.err.println("running");
+                            alldownloadsStoped = false;
+                            download.setStart(false);
+                        }
+                    }
+                    if (alldownloadsStoped) {
+                        System.exit(0);
+                    }
+
+                }
+
+            }
+        });
 
     }
 
@@ -358,17 +377,20 @@ public class DownloadManager extends JFrame
                 "Redownload", JOptionPane.QUESTION_MESSAGE) > 0) {
             return;
         }
-        
+
         Download downloadx = getSelectedDownload();
         downloadx.setComplete(false);
+        downloadx.setCompleteDate(null);
         downloadx.setDoneSize(0);
         downloadx.setType(Download.UNKNOWN);
         downloadx.setFileSize(0);
         downloadx.setProgress(0);
-        DaoSqlite db = new DaoSqlite();       
+        downloadx.setParts(null);
+        DaoSqlite db = new DaoSqlite();
         db.updateDownload(downloadx);
         db.deleteParts(downloadx.getId());
-        downloadx.setStart(true);
+        
+        //downloadx.setStart(true);
 
     }
 

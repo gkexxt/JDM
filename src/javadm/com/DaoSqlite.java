@@ -273,7 +273,7 @@ public class DaoSqlite implements DaoAPI {
         return new ArrayList<Part>();
     }
 
-    public boolean updatePart(long download_id, Part part) {
+    public synchronized boolean updatePart(long download_id, Part part) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE downloadpart SET current_size=?, completed=? WHERE download_id=? AND name=?");

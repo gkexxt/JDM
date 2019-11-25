@@ -61,6 +61,11 @@ public class Download {
     public static final byte DYNAMIC = -1;
     public static final byte NON_RESUMEABLE = -2;
     public static final byte UNKNOWN = 0;
+    private int xxxx = 0;
+
+    public boolean isRunning() {
+        return running;
+    }
     public byte type = UNKNOWN;
     private int id;
     private String name = "";
@@ -74,6 +79,17 @@ public class Download {
     private int connections = 1; //min
     private boolean complete;
     private int retry = 3;
+    private volatile boolean running;
+    private DownloadControl downloadControl;
+    private final PropertyChangeSupport propChangeSupport
+            = new PropertyChangeSupport(this);
+    private List<Part> parts;
+
+    public Download() {
+        this.logMsgs = new ArrayList();
+        this.downloadControl = new DownloadControl();// instace of control
+        parts = new ArrayList<>();
+    }
 
     public int getRetry() {
         return retry;
@@ -82,11 +98,6 @@ public class Download {
     public void setRetry(int retry) {
         this.retry = retry;
     }
-    private List<Part> parts;
-
-    private DownloadControl downloadControl;
-    private final PropertyChangeSupport propChangeSupport
-            = new PropertyChangeSupport(this);
 
     public byte getType() {
         return type;
@@ -95,12 +106,6 @@ public class Download {
     public void setType(byte type) {
         this.type = type;
 
-    }
-
-    public Download() {
-        this.logMsgs = new ArrayList();
-        this.downloadControl = new DownloadControl();// instace of control
-        parts = new ArrayList<>();
     }
 
     public List<Part> getParts() {
@@ -112,6 +117,7 @@ public class Download {
     }
 
     public void initParts() {
+        parts = new ArrayList<>();
         switch (getType()) {
             case Download.UNKNOWN:
                 return;
@@ -230,7 +236,7 @@ public class Download {
         propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
     }
 
-    public void setStart(boolean start) {
+    public synchronized void setStart(boolean start) {
         //propChangeSupport.firePropertyChange("Startxxxxxxxxxx", startDownloader, startDownloader);
         boolean oldstart = this.start;
         this.start = start;
@@ -238,14 +244,18 @@ public class Download {
         //System.out.println(startDownloader);
 
         if (start && !isComplete()) {
+            running = true;
             new Downloader(this).startDownloader();
         } else if (!start && !isComplete()) {
-
-            StopDownload();
+            stopDownload();
+            running = false;
+        } else if(isComplete()) {
+            this.start = false;
+            running = false;
         }
-        this.downloadControl.setLblControl(start);
-        this.downloadControl.setRowlocked(start);
-        propChangeSupport.firePropertyChange("setStart", oldstart, start);
+        this.downloadControl.setLblControl(this.start);
+        this.downloadControl.setRowlocked(this.start);
+        propChangeSupport.firePropertyChange("setStart", oldstart, this.start);
 
     }
 
@@ -253,15 +263,26 @@ public class Download {
         this.setFileSize(fsize);
     }
 
-    private void StopDownload() {
-        DaoSqlite db = new DaoSqlite();
-        
+    private synchronized void stopDownload() {
+        System.out.println(xxxx);
+        xxxx++;
         boolean allPartComplete = true;
         for (Part part : parts) {
+            System.err.println(part.getSize()+" : "+part.getCurrentSize());
+            if (part.getCurrentSize() >= part.getSize()) {
+                part.setCompleted(true);
+            }
+
             if (!part.isCompleted()) {
                 allPartComplete = false;
             }
         }
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+        DaoSqlite db = new DaoSqlite();
+        parts.forEach((part) -> {
+            db.updatePart(this.getId(), part);
+        });
+        
         if (allPartComplete) {
             setComplete(true);
             setCompleteDate(now().toString());

@@ -91,7 +91,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
             try {
 
                 URL urlTemp;
-                
+
                 urlTemp = new URL(download.getUrl());
                 HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
                 conn.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
@@ -99,7 +99,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 conn.setReadTimeout(3000);
                 System.err.println(download.getUrl());
                 conn.connect();
-                
+
                 accept_ranges = conn.getHeaderField("Accept-Ranges");
                 System.err.println("get header");
                 download.setFileSize(conn.getContentLengthLong());
@@ -145,14 +145,15 @@ public class Downloader implements Runnable, PropertyChangeListener {
         }
 
         this.downloadParts = download.getParts();
-        for (int i = 0; i < downloadParts.size(); i++) {
-            if (!downloadParts.get(i).isCompleted()) {
-                allxCompletePart.add(downloadParts.get(i));
-                xCompletePart.add(downloadParts.get(i));
-            }
+        
+        for (Part part : this.downloadParts) {
+            if(part.getCurrentSize()<part.getSize())
+                allxCompletePart.add(part);
+                xCompletePart.add(part);
+            
         }
 
-        if (xCompletePart.size() < 1) {
+        if (allxCompletePart.size() < 1) {
             download.addLogMsg(new String[]{Download.INFO, "No parts to download"});
             download.setStart(false);
             return;
@@ -163,8 +164,8 @@ public class Downloader implements Runnable, PropertyChangeListener {
         System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
         while (true) {
 
-            if (!downloading || !download.isStart() || retryCount > download.getRetry() * download.getConnections()-1) {
-                System.out.println("javadm.com.DownloadWorker.downloader exit");
+            if (!downloading || !download.isStart() || retryCount > download.getRetry() * download.getConnections() - 1) {
+                //System.out.println("javadm.com.DownloadWorker.downloader exit");
                 stopWorker = true;
                 if (getWorkerThreadCount() < 1) {
                     download.setStart(false);
@@ -192,6 +193,17 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
                 }
 
+                if (workerThreadCount < 1) {
+                    boolean completeParts = true;
+                    for (int i = 0; i < allxCompletePart.size(); i++) {
+                        if (!allxCompletePart.get(i).isCompleted()) {
+                            completeParts = false;
+                        }
+                    }
+                    //flag exit downloader
+                    downloading = !completeParts;
+                }
+
                 try {
                     Thread.sleep(20);
                 } catch (InterruptedException ex) {
@@ -209,8 +221,8 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         rpart = (Part) evt.getNewValue();
         //update part data
-        DaoSqlite db = new DaoSqlite();
-        db.updatePart(download.getId(), rpart);
+        //DaoSqlite db = new DaoSqlite();
+        //db.updatePart(download.getId(), rpart);
         switch (download.getType()) {
 
             case Download.RESUMABLE:
@@ -229,14 +241,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     rpart.setCompleted(true);
                     retryCount = 0;
                     //check if all parts are completed if true flag exit downloader
-                    boolean completeParts = true;
-                    for (int i = 0; i < allxCompletePart.size(); i++) {
-                        if (!allxCompletePart.get(i).isCompleted()) {
-                            completeParts = false;
-                        }
-                    }
-                    //flag exit downloader
-                    downloading = !completeParts;
+
                 }
 
                 break;
