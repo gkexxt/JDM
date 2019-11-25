@@ -233,7 +233,7 @@ public class DownloadManager extends JFrame
         for (Download download : downloads) {
             download.setParts(db.getParts(download.getId()));
             for (Part part : download.getParts()) {
-                System.err.println(part.getSize()+" : "+part.getCurrentSize());
+                //System.err.println(part.getSize()+" : "+part.getCurrentSize());
                 
             }
             download.setProgress(0);
@@ -258,11 +258,12 @@ public class DownloadManager extends JFrame
                 while (true) {
                     alldownloadsStoped = true;
                     for (Download download : downloads) {
-                        if (download.isRunning()) {
-                            System.err.println("running");
+                        if (download.isRunning() || download.isNeedupdate()) {
+                            //System.err.println("running");
                             alldownloadsStoped = false;
-                            download.setStart(false);
+                            download.stopDownload();
                         }
+                        
                     }
                     if (alldownloadsStoped) {
                         System.exit(0);
@@ -358,14 +359,14 @@ public class DownloadManager extends JFrame
      * start selected downloadx
      */
     public void startDownload() {
-        getSelectedDownload().setStart(true);
+        getSelectedDownload().startDownload();
     }
 
     /**
      * stop selected downloadx
      */
     public void stopDownload() {
-        getSelectedDownload().setStart(false);
+        getSelectedDownload().stopDownload();
     }
 
     /**
@@ -405,10 +406,11 @@ public class DownloadManager extends JFrame
             DaoSqlite db = new DaoSqlite();
             db.insertDownload(download);
             download = db.getLastDownload();
+            downloads.add(download);
             model.addRow(download);
             download.addPropertyChangeListener(this);
             if (setting.isAutoStart()) {
-                download.setStart(true);
+                download.startDownload();
             }
         } catch (Exception e) {
         }

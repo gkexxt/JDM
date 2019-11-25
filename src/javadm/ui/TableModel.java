@@ -35,7 +35,8 @@ import javax.swing.JProgressBar;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class TableModel extends RowTableModel<Download> implements PropertyChangeListener{
+public class TableModel extends RowTableModel<Download> implements PropertyChangeListener {
+
     //private static int  xxx = 0;
     private static final String[] COLUMN_NAMES
             = {
@@ -120,16 +121,20 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                     download.setName(value.toString());
                     break;
                 case 2:
-                     download.setCreatedDate(value.toString());
+                    download.setCreatedDate(value.toString());
                     break;
                 case 3:
-                     download.setDirectory(value.toString());
+                    download.setDirectory(value.toString());
                     break;
                 case 4:
-                     download.setUrl(value.toString());
+                    download.setUrl(value.toString());
                     break;
                 case 5:
-                    download.setStart(!download.isStart());
+                    if (!download.isRunning()) {
+                        download.startDownload();
+                    } else {
+                        download.stopDownload();
+                    }
                     //download.getDownloadtableui().setLblControl(download.isStart());
                     //System.out.println("javadm.com.DownloadTableModel.setValueAt()");
                     break;
@@ -147,7 +152,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
             //fireTableCellUpdated(row, column);
             this.fireTableRowsUpdated(0, this.getRowCount());
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null,e.getMessage() + "\n" + e.toString(), "InfoBox: "
+            JOptionPane.showMessageDialog(null, e.getMessage() + "\n" + e.toString(), "InfoBox: "
                     + "error update db", JOptionPane.INFORMATION_MESSAGE);
         }
 

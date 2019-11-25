@@ -61,7 +61,7 @@ public class Download {
     public static final byte NON_RESUMEABLE = -2;
     public static final byte UNKNOWN = 0;
     private int xxxx = 0;
-
+    private volatile boolean needupdate = false;
     public byte type = UNKNOWN;
     private int id;
     private String name = "";
@@ -72,6 +72,10 @@ public class Download {
     private String createdDate = now().toString();
     private String lastDate;
     private String completeDate;
+
+    public synchronized boolean isNeedupdate() {
+        return needupdate;
+    }
     private int connections = 1; //min
     private boolean complete;
     private int retry = 3;
@@ -87,7 +91,7 @@ public class Download {
         parts = new ArrayList<>();
     }
 
-    public boolean isRunning() {
+    public synchronized boolean isRunning() {
         return running;
     }
 
@@ -139,7 +143,7 @@ public class Download {
                     part.setStartByte(i * Part.partSize);
                     part.setEndByte(i * Part.partSize + (Part.partSize - 1));
                     part.setSize(Part.partSize);
-                    part.setPartFileName(this.getName() + ".part" + i);
+                    part.setPartFileName(this.getId()+"-"+this.getName() + ".part" + i);
                     part.setId(i);
                     parts.add(part);
                 }
@@ -148,7 +152,7 @@ public class Download {
                     part.setStartByte(x * Part.partSize);
                     part.setSize(last_length);
                     part.setEndByte(x * Part.partSize + last_length - 1);
-                    part.setPartFileName(this.getName() + ".part" + x);
+                    part.setPartFileName(this.getId()+"-"+this.getName() + ".part" + x);
                     part.setId((int) x);
                     parts.add(part);
                 }
@@ -241,7 +245,8 @@ public class Download {
             this.downloadControl.setLblControl(true);
             this.downloadControl.setRowlocked(true);
             new Downloader(this).startDownloader();
-            running = true;
+            this.needupdate = true;
+            this.running = true;
             propChangeSupport.firePropertyChange("running", false, true);
         } else {
             addLogMsg(new String[]{Download.ERROR, "Download already completed"});
@@ -253,7 +258,7 @@ public class Download {
         if (!isComplete()) {
             this.downloadControl.setLblControl(false);
             this.downloadControl.setRowlocked(false);
-            running = false;
+            this.running = false;
             propChangeSupport.firePropertyChange("running", true, false);
 
         } else {
@@ -265,45 +270,60 @@ public class Download {
     public void updateDownload() {
         System.out.println(xxxx);
         xxxx++;
-        if (!isComplete()) {
 
-            //check if all part is complete
-            boolean allPartComplete = true;
-            for (Part part : parts) {
-                System.err.println(part.getSize() + " : " + part.getCurrentSize());
-                if (part.getCurrentSize() >= part.getSize()) {
-                    part.setCompleted(true);
-                }
-
-                if (!part.isCompleted()) {
-                    allPartComplete = false;
-                }
+        //check if all part is complete
+        boolean allPartComplete = true;
+        for (Part part : this.parts) {
+            System.err.println(part.getSize() + " : " + part.getCurrentSize());
+            if (part.getCurrentSize() >= part.getSize()) {
+                part.setCompleted(true);
             }
 
-            System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
-            DaoSqlite db = new DaoSqlite();
-            parts.forEach((part) -> {
-                db.updatePart(this.getId(), part);
-            });
-
-            if (allPartComplete) {
-                setComplete(true);
-                setCompleteDate(now().toString());
-
-                db.deleteParts(this.getId());
-
-                if (this.getType() == RESUMABLE) {
-                    buildfile();
-                }
+            if (!part.isCompleted()) {
+                allPartComplete = false;
             }
-
-            db.updateDownload(this);
-            this.downloadControl.setLblControl(false);
-            this.downloadControl.setRowlocked(false);
         }
+
+        System.out.println("+++++++++++++++++++++++++++++++++++++++++++");
+        DaoSqlite db = new DaoSqlite();
+        parts.forEach((part) -> {
+            db.updatePart(this.getId(), part);
+        });
+
+        if (allPartComplete) {
+            setComplete(true);
+            setCompleteDate(now().toString());
+
+            db.deleteParts(this.getId());
+
+            if (this.getType() == RESUMABLE) {
+                buildfile();
+            }
+        }
+
+        db.updateDownload(this);
+        this.downloadControl.setLblControl(false);
+        this.downloadControl.setRowlocked(false);
+        needupdate = false;
+
     }
 
     private boolean buildfile() {
+        //check if file exist anf rename to something else
+        int append = 1;
+        String tempname = getName();
+        while (true) {
+            File tmpfile = new File(getDirectory() + "/" + getName());
+            if (tmpfile.exists()) {
+                addLogMsg(new String[]{Download.WARNING, "File with same name exist - " + getName()});
+                setName(tempname + "-" + append);
+                addLogMsg(new String[]{Download.WARNING, "renaming file to - " + getName()});
+                append++;
+            } else {
+                break;
+            }
+        }
+        
         RandomAccessFile raf = null;
         try {
             raf = new RandomAccessFile(this.getDirectory() + "/" + this.getName(), "rw");
@@ -313,7 +333,7 @@ public class Download {
                 byte[] fileContent = Files.readAllBytes(file.toPath());
                 raf.seek(raf.length());
                 raf.write(fileContent);
-                file.deleteOnExit();
+                file.delete();
 
             }
             return true;
