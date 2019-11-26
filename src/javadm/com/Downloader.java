@@ -169,16 +169,16 @@ public class Downloader implements Runnable, PropertyChangeListener {
         stopWorker = false;
         downloading = true;
         System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
-        
+
         while (true) {
-            
+
             if (!downloading || !download.isRunning() || retryCount > download.getRetry() * download.getConnections() - 1) {
                 //System.out.println("javadm.com.DownloadWorker.downloader exit");
                 stopWorker = true;
                 if (getWorkerThreadCount() < 1) {
                     download.stopDownload();
                     download.updateDownload();
-                    if (retryCount > 10 * download.getConnections()) {
+                    if (retryCount > download.getRetry() * download.getConnections() - 1) {
                         download.addLogMsg(new String[]{Download.ERROR, "Stopping download - too many gummy bears"});
                     }
                     break;
@@ -404,22 +404,23 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     //System.err.println(part.getPartFileName() + " - done_size : " + part.getCurrentSize());
 
                 } else {
+                    workerDownloading = false;
                     Thread.sleep(2000);
                     download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                         + connection_id + " Connection Error - code : " + responsecode});
                     propChangeSupport.firePropertyChange("error", "error :" + responsecode, part);
+
                 }
             } catch (Exception ex) {
-
+                workerDownloading = false;
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ex1) {
-
                 }
-
                 download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                     + connection_id + " " + ex.toString()});
                 propChangeSupport.firePropertyChange("error", ex.toString(), part);
+
             } finally {
 
                 if (raf != null) {

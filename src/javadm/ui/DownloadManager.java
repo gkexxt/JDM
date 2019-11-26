@@ -33,12 +33,9 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.TimerTask;
-import javadm.app.App;
 import javadm.com.Setting;
 import javadm.com.Download;
 import javadm.com.DaoSqlite;
@@ -132,6 +129,7 @@ public class DownloadManager extends JFrame
         splitPaneHortizontal.setDividerSize(6);
         splitPaneVertical.setDividerSize(6);
         splitPaneVertical.setDividerLocation(400);
+        splitPaneVertical.setPreferredSize(new Dimension(600, 400));
 
         table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
             toolbar.refreshToolBar();
@@ -165,7 +163,8 @@ public class DownloadManager extends JFrame
         DaoSqlite db = new DaoSqlite();
         boolean settingok = db.isTableExists("setting");
         boolean dataok = db.isTableExists("downloaddata");
-        if (!dataok || !settingok) {
+        boolean partok = db.isTableExists("downloadpart");
+        if (!dataok || !settingok || !partok) {
 
             if (!dataok) {
                 if (showChoice("Initialize new Data Table?\nClicking No will exit the app",
@@ -183,20 +182,29 @@ public class DownloadManager extends JFrame
                     System.exit(0);
                 }
             }
+
+            if (!partok) {
+                if (showChoice("Initalize new Part Table?\nClicking No will exit the app",
+                        "Setting Table Error", JOptionPane.ERROR_MESSAGE) < 1) {
+                    newSettingTable();
+                } else {
+                    System.exit(0);
+                }
+            }
             //here after tables are repaired
             settingok = db.isTableExists("setting");
             dataok = db.isTableExists("downloaddata");
-            if (settingok && dataok) {
+            partok = db.isTableExists("downloadpart");
+            if (settingok && dataok && partok) {
                 showInfo("Tables Initialized", "JDM", JOptionPane.INFORMATION_MESSAGE);
-                loadall();
-                return;
+                setupDownloads();
             } else {
-                showInfo("Error Initializing Tables\nApp will exit", "JDM Error", JOptionPane.ERROR_MESSAGE);
+                showInfo("Error Initializing Tables\nJDM will Exit", "JDM Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
 
         } else if (settingok && dataok) {
-            loadall();
+            setupDownloads();
         }
     }
 
@@ -208,15 +216,11 @@ public class DownloadManager extends JFrame
         System.out.println("javadm.ui.DownloadManager.newDataTable()");
     }
 
-    public void loadall() {
+    public void setupDownloads() {
         DaoSqlite db = new DaoSqlite();
         downloads = db.getAllDownload();
         for (Download download : downloads) {
-            download.setParts(db.getParts(download.getId()));
-            for (Part part : download.getParts()) {
-                //System.err.println(part.getSize()+" : "+part.getCurrentSize());
-
-            }
+            download.setParts(db.getParts(download.getId()));     
             download.setProgress(0);
             model.addRow(download);
             download.addPropertyChangeListener(model);
@@ -233,18 +237,15 @@ public class DownloadManager extends JFrame
             boolean alldownloadsStoped = true;
 
             @Override
-
+            //stopping running download beforw closing
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-
                 while (true) {
                     alldownloadsStoped = true;
                     for (Download download : downloads) {
                         if (download.isRunning() || download.isNeedupdate()) {
-                            //System.err.println("running");
                             alldownloadsStoped = false;
                             download.stopDownload();
                         }
-
                     }
                     if (alldownloadsStoped) {
                         System.exit(0);
@@ -322,11 +323,10 @@ public class DownloadManager extends JFrame
      *
      * @param trash
      */
-    public void removeDownload(boolean trash) {
-//        if (showChoice("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
-//            return;
-//        }
+    public void removeDownload(boolean trash) {        
+        
         Download download = getSelectedDownload();
+        //removing from download list
         for (int i = 0; i < downloads.size(); i++) {
             if (downloads.get(i).getId() == download.getId()) {
                 downloads.remove(i);
@@ -335,7 +335,8 @@ public class DownloadManager extends JFrame
         model.removeTableModelListener(table);//remove table listner before delete from model
         model.removeRows(table.getSelectedRow());
         model.addTableModelListener(table);//add it back
-
+        
+        //remove file
         if (trash) {
             try {
                 File file = new File(download.getDirectory() + "/" + download.getName());
@@ -343,12 +344,14 @@ public class DownloadManager extends JFrame
             } catch (Exception ex) {
             }
         }
-
+        
+        //remove parts
         for (Part part : download.getParts()) {
             File file = new File(download.getDirectory() + "/" + part.getPartFileName());
             file.delete();
         }
-
+        
+        //remove from db
         DaoSqlite db = new DaoSqlite();
         db.deleteDownload(download.getId());
         db.deleteParts(download.getId());
@@ -373,16 +376,12 @@ public class DownloadManager extends JFrame
 
     /**
      * remove data and reboot the download
+     * @param trash
+     * @param autoStart
      */
     public void restartDownload(boolean trash, boolean autoStart) {
-//        if (showChoice("Are you sure !!! \n"
-//                + "This Download is complete this will destroy all data and start again",
-//                "Redownload", JOptionPane.QUESTION_MESSAGE) > 0) {
-//            return;
-//        }
 
         Download download = getSelectedDownload();
-
         if (trash) {
             try {
                 File file = new File(download.getDirectory() + "/" + download.getName());
@@ -408,16 +407,15 @@ public class DownloadManager extends JFrame
         if (autoStart) {
             download.startDownload();
         }
-        //downloadx.setStart(true);
     }
 
     /**
      * add new download to the list/table
      *
      * @param download
+     * @param autoStart
      */
     public void addDownload(Download download, Boolean autoStart) {
-        try {
             download.setName(download.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", ""));
             DaoSqlite db = new DaoSqlite();
             db.insertDownload(download);
@@ -427,9 +425,7 @@ public class DownloadManager extends JFrame
             download.addPropertyChangeListener(this);
             if (autoStart) {
                 download.startDownload();
-            }
-        } catch (Exception e) {
-        }
+            }       
     }
 
     /**
@@ -508,16 +504,10 @@ public class DownloadManager extends JFrame
         JFileChooser chooser = new JFileChooser();
         chooser.setCurrentDirectory(new java.io.File("."));
         chooser.setDialogTitle("Save to");
-
         chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         chooser.setFileHidingEnabled(true);
-        //
-        // disable the "All files" option.
-        //
         chooser.setAcceptAllFileFilterUsed(false);
-        //    
         if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
             return (chooser.getSelectedFile().toString());
         }
         return "";
@@ -539,7 +529,6 @@ public class DownloadManager extends JFrame
             dwn.setUserAgent(setting.getUserAgent());
             if (setting.getMonitorMode() == 1) {
                 OptionMenu newdwnmenu = new OptionMenu(this, dwn, true, true);
-
             } else if (setting.getMonitorMode() == 2) {
                 addDownload(dwn, setting.isAutoStart());
             }
@@ -554,8 +543,6 @@ public class DownloadManager extends JFrame
             statusPane.updateErrorView();
         } else if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0
                 && !evt.getNewValue().toString().equals(clipedUrl)) {
-            //System.err.println(evt.getNewValue().toString());
-            //System.err.println(evt.getOldValue().toString());
             clipedUrl = evt.getNewValue().toString();
             clipMonitorParse(evt.getNewValue().toString());
 
