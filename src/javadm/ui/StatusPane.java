@@ -35,25 +35,19 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
-import java.util.List;
 import javadm.com.Download;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableCellRenderer;
 
 public class StatusPane extends JPanel {
 
     private final DownloadManager dm;
     private final JTable errorView = new JTable();
     private JLabel progressView = new JLabel();
-    private Download currentSelected = new Download();
     private String downloadInstance = "";
-    private DefaultTableModel errmodel;
-    private Object[] columnNames = {"Type", "Message"};
-    private String[][] rowData;
+    private final DefaultTableModel errmodel;
 
     private int last_line = 0;
 
@@ -107,21 +101,22 @@ public class StatusPane extends JPanel {
             String rst = (String) value;
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             c.setForeground(Color.BLACK);
-            if (rst.equals(Download.ERROR)) {
-                c.setBackground(Color.red);
-                return c;
-            } else if (rst.equals(Download.DEBUG)) {
-                c.setBackground(Color.BLUE);
-                return c;
-            } else if (rst.equals(Download.INFO)) {
-                c.setBackground(Color.GREEN);
-                return c;
-            } else if (rst.equals(Download.WARNING)) {
-                c.setBackground(Color.orange);
-                return c;
-            } else {
-                c.setBackground(Color.white);
-                return c;
+            switch (rst) {
+                case Download.ERROR:
+                    c.setBackground(Color.red);
+                    return c;
+                case Download.DEBUG:
+                    c.setBackground(Color.BLUE);
+                    return c;
+                case Download.INFO:
+                    c.setBackground(Color.GREEN);
+                    return c;
+                case Download.WARNING:
+                    c.setBackground(Color.orange);
+                    return c;
+                default:
+                    c.setBackground(Color.white);
+                    return c;
             }
 
         }
@@ -132,7 +127,6 @@ public class StatusPane extends JPanel {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 
-            String rst = (String) value;
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             c.setBackground(Color.lightGray);
             return c;
