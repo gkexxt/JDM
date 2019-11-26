@@ -102,18 +102,20 @@ public class DownloadManager extends JFrame
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //table.setRowSelectionInterval(0, 0);
         table.setOpaque(false);
-
-        JScrollPane downloadPane = new JScrollPane(table);
-        splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
-                downloadPane, statusPane);
-        splitPaneVertical.setBorder(null);//need for nesting panel - remove double border
-        splitPaneVertical.setOpaque(false);
-        //HORIZONTAL_SPLIT panels - categorypane+splitPaneVertical(nested)
         JScrollPane categoryPane = new JScrollPane(list);
-        splitPaneHortizontal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                categoryPane, splitPaneVertical);
+        JScrollPane downloadPane = new JScrollPane(table);
 
-        mainsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, toolbar, splitPaneHortizontal);
+        splitPaneHortizontal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+                categoryPane, downloadPane);
+
+        splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+                splitPaneHortizontal, statusPane);
+
+        splitPaneHortizontal.setBorder(null);//need for nesting panel - remove double border
+        splitPaneHortizontal.setOpaque(false);
+        //HORIZONTAL_SPLIT panels - categorypane+splitPaneVertical(nested)
+
+        mainsplitpane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, toolbar, splitPaneVertical);
         mainsplitpane.setEnabled(false);
         mainsplitpane.setDividerSize(1);
         mainsplitpane.setBackground(Color.WHITE);
@@ -403,9 +405,9 @@ public class DownloadManager extends JFrame
         DaoSqlite db = new DaoSqlite();
         db.updateDownload(download);
         db.deleteParts(download.getId());
-           if (autoStart) {
-                download.startDownload();
-            }
+        if (autoStart) {
+            download.startDownload();
+        }
         //downloadx.setStart(true);
     }
 

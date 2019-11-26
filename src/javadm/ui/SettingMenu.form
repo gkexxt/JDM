@@ -87,7 +87,7 @@
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="spConnCount" min="-2" pref="36" max="-2" attributes="0"/>
+                                  <Component id="spConnCount" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
                                   <Component id="jLabel3" min="-2" max="-2" attributes="0"/>
@@ -231,7 +231,7 @@
                 <Font component="jLabel2" property="font" relativeSize="true" size="0"/>
               </FontInfo>
             </Property>
-            <Property name="text" type="java.lang.String" value="No. Connection :"/>
+            <Property name="text" type="java.lang.String" value="Connection :"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel1">

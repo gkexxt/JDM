@@ -95,15 +95,15 @@
                               <Component id="txtName" alignment="0" max="32767" attributes="0"/>
                               <Component id="txtUrl" alignment="0" max="32767" attributes="0"/>
                               <Group type="102" attributes="0">
-                                  <Component id="jLabel4" min="-2" pref="129" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="jLabel4" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                   <Component id="SpinConnNCount" min="-2" pref="52" max="-2" attributes="0"/>
                                   <EmptySpace type="separate" max="-2" attributes="0"/>
                                   <Component id="cbAuto" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
-                                  <Component id="txtDirectory" max="32767" attributes="0"/>
+                                  <Component id="txtDirectory" pref="578" max="32767" attributes="0"/>
                                   <EmptySpace min="-2" max="-2" attributes="0"/>
                                   <Component id="btnDirectory" min="-2" pref="76" max="-2" attributes="0"/>
                               </Group>
@@ -226,7 +226,7 @@
         </Component>
         <Component class="javax.swing.JLabel" name="jLabel4">
           <Properties>
-            <Property name="text" type="java.lang.String" value="No. of Connections"/>
+            <Property name="text" type="java.lang.String" value="Connections"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JSpinner" name="SpinConnNCount">

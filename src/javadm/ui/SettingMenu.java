@@ -125,7 +125,7 @@ public class SettingMenu extends javax.swing.JDialog {
         spConnCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
 
         jLabel2.setFont(jLabel2.getFont());
-        jLabel2.setText("No. Connection :");
+        jLabel2.setText("Connection :");
 
         jLabel1.setFont(jLabel1.getFont());
         jLabel1.setText("Directory :");
@@ -163,7 +163,7 @@ public class SettingMenu extends javax.swing.JDialog {
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(spConnCount, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(spConnCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addComponent(jLabel3)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

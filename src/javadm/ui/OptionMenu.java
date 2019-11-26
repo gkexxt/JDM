@@ -167,7 +167,7 @@ public class OptionMenu extends javax.swing.JDialog {
         txtuagent.setText(selectedDownload.getUserAgent());
         txtuagent.setEnabled(false);
 
-        jLabel4.setText("No. of Connections");
+        jLabel4.setText("Connections");
 
         SpinConnNCount.setModel(new javax.swing.SpinnerNumberModel(1, 1, 15, 1));
         SpinConnNCount.setValue(selectedDownload.getConnections());
@@ -194,14 +194,14 @@ public class OptionMenu extends javax.swing.JDialog {
                             .addComponent(txtName)
                             .addComponent(txtUrl)
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 129, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel4)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(SpinConnNCount, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(18, 18, 18)
                                 .addComponent(cbAuto)
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addGroup(jPanel1Layout.createSequentialGroup()
-                                .addComponent(txtDirectory)
+                                .addComponent(txtDirectory, javax.swing.GroupLayout.DEFAULT_SIZE, 578, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(btnDirectory, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addContainerGap())))

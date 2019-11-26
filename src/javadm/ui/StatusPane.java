@@ -29,32 +29,42 @@ package javadm.ui;
  * @author gk
  */
 import java.awt.Color;
+import java.awt.Component;
 import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.List;
 import javadm.com.Download;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 
 public class StatusPane extends JPanel {
 
     private final DownloadManager dm;
-    private final JTextArea errorView = new JTextArea();
+    private final JTable errorView = new JTable();
     private JLabel progressView = new JLabel();
     private Download currentSelected = new Download();
     private String downloadInstance = "";
+    private DefaultTableModel errmodel;
+    private Object[] columnNames = {"Type", "Message"};
+    private String[][] rowData;
+
+    private int last_line = 0;
 
     public StatusPane(DownloadManager downloadManager) {
 
         super(new GridLayout(1, 1));
         this.dm = downloadManager;
-        currentSelected = new Download();
-        errorView.setForeground(Color.RED);
-        errorView.setEditable(false);;
 
+        //currentSelected = new Download();
+        //errorView.setForeground(Color.RED);
+        //errorView.setEditable(false);;
         //create tabbedpane
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("Info", new JScrollPane(errorView));
@@ -69,29 +79,97 @@ public class StatusPane extends JPanel {
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
+        errmodel = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        errorView.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
+        errmodel.addColumn("Type");
+        errmodel.addColumn("Message");
+        errorView.setModel(errmodel);
+        errorView.setVisible(true);
+        typeRenderor typernderer = new typeRenderor();
+        msgRenderer msgrenderer = new msgRenderer();
+        errorView.getColumn("Type").setCellRenderer(typernderer);
+        errorView.getColumn("Message").setCellRenderer(msgrenderer);
+        errorView.getColumn("Type").setPreferredWidth(90);
+        errorView.getColumn("Message").setPreferredWidth(1000);
+
+    }
+
+    private class typeRenderor extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+            String rst = (String) value;
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            c.setForeground(Color.BLACK);
+            if (rst.equals(Download.ERROR)) {
+                c.setBackground(Color.red);
+                return c;
+            } else if (rst.equals(Download.DEBUG)) {
+                c.setBackground(Color.BLUE);
+                return c;
+            } else if (rst.equals(Download.INFO)) {
+                c.setBackground(Color.GREEN);
+                return c;
+            } else if (rst.equals(Download.WARNING)) {
+                c.setBackground(Color.orange);
+                return c;
+            } else {
+                c.setBackground(Color.white);
+                return c;
+            }
+
+        }
+    }
+
+    private class msgRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+
+            String rst = (String) value;
+            Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            c.setBackground(Color.lightGray);
+            return c;
+
+        }
     }
 
     public void updateErrorView() {
+
+        //List <String[]> error_log = dm.getSelectedDownload().getLogMsgs();
         if (dm.getSelectedDownload() == null) {
             this.setVisible(false);
-        } else if (!dm.getSelectedDownload().toString().equals(downloadInstance)) {
-            currentSelected = dm.getSelectedDownload();
-            downloadInstance = currentSelected.toString();//
-            errorView.setText("Error Log : " + currentSelected.getName() + "\n\n");
-            if (currentSelected.getLogMsgs().size() > 0) {
-                for (int i = 0; i < currentSelected.getLogMsgs().size() - 1; i++) {
-                    errorView.setText(errorView.getText() + i + " : " + currentSelected.getLogMsgs().get(i)[0] + "\n"
-                            + currentSelected.getLogMsgs().get(i)[1] + "\n");
-                }
-            }
-        } else {
-            List<String[]> errLog = dm.getSelectedDownload().getLogMsgs();
-            int lastLine = errLog.size() - 1;
-            if (lastLine > -1) {
-                errorView.setText(errorView.getText() + lastLine + " : " + errLog.get(lastLine)[0] + "\n"
-                        + errLog.get(lastLine)[1] + "\n");
-            }
+            return;
         }
+
+        if (dm.getSelectedDownload().getLogMsgs().size() < 1) {
+            downloadInstance = dm.getSelectedDownload().toString();
+            errmodel.setRowCount(0);
+            return;
+        }
+
+        if (!dm.getSelectedDownload().toString().equals(downloadInstance)) {
+            System.out.println("change");
+            errmodel.setRowCount(0);
+            downloadInstance = dm.getSelectedDownload().toString();
+            for (String[] msg : dm.getSelectedDownload().getLogMsgs()) {
+                errmodel.addRow(msg);
+            }
+            last_line = dm.getSelectedDownload().getLogMsgs().size();
+
+        } else if (dm.getSelectedDownload().toString().equals(downloadInstance) && dm.getSelectedDownload().getLogMsgs().size() != last_line) {
+
+            last_line = dm.getSelectedDownload().getLogMsgs().size();
+            errmodel.addRow(dm.getSelectedDownload().getLogMsgs().get(last_line - 1));
+
+        }
+//
     }
 
 }
