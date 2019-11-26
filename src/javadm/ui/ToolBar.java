@@ -276,7 +276,7 @@ public class ToolBar extends JPanel
                     dm.stopDownload();
                     break;
                 case RESTART:
-                    dm.restartDownload();
+                    new ReDownloadMenu(dm, true);
                     break;
                 case SETTING:
                      new OptionMenu(dm, dm.getSelectedDownload(), true, false);

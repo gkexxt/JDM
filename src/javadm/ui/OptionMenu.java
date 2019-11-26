@@ -64,6 +64,8 @@ public class OptionMenu extends javax.swing.JDialog {
         } else {
             initComponents();
             cbAuto.setVisible(false);
+            btnOK.setEnabled(!selectedDownload.isComplete());
+            btnSave.setEnabled(!selectedDownload.isComplete());
             setTitle("Download Option");
 
         }
@@ -391,7 +393,7 @@ public class OptionMenu extends javax.swing.JDialog {
                 selectedDownload.setName(txtName.getText());
                 selectedDownload.setUserAgent(txtuagent.getText());
                 if (isNewDownload) {
-                    dm.addDownload(selectedDownload,cbAuto.isSelected());
+                    dm.addDownload(selectedDownload, cbAuto.isSelected());
                 } else {
                     dm.updateDownload(selectedDownload);
 

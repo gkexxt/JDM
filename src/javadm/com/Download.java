@@ -141,7 +141,7 @@ public class Download {
             case Download.NON_RESUMEABLE: {
                 Part part = new Part();
                 part.setSize(this.getFileSize());
-                part.setPartFileName(this.getId() + "-" + this.getName() + 0);
+                part.setPartFileName(this.getName() + "-" + this.getId() + 0);
                 part.setCurrentSize(0);
                 part.setId(0);
                 parts.add(part);
@@ -155,7 +155,7 @@ public class Download {
                     part.setStartByte(i * Part.partSize);
                     part.setEndByte(i * Part.partSize + (Part.partSize - 1));
                     part.setSize(Part.partSize);
-                    part.setPartFileName(this.getId() + "-" + this.getName() + ".part" + i);
+                    part.setPartFileName(this.getName() + "-" + this.getId() + ".part" + i);
                     part.setId(i);
                     parts.add(part);
                 }
@@ -164,7 +164,7 @@ public class Download {
                     part.setStartByte(x * Part.partSize);
                     part.setSize(last_length);
                     part.setEndByte(x * Part.partSize + last_length - 1);
-                    part.setPartFileName(this.getId() + "-" + this.getName() + ".part" + x);
+                    part.setPartFileName(this.getName() + "-" + this.getId() + ".part" + x);
                     part.setId((int) x);
                     parts.add(part);
                 }
@@ -289,7 +289,7 @@ public class Download {
         boolean allPartComplete = true;
         for (Part part : this.parts) {
             System.err.println(part.getSize() + " : " + part.getCurrentSize());
-            if (part.getCurrentSize() >= part.getSize() && part.getCurrentSize() >0) {
+            if (part.getCurrentSize() >= part.getSize() && part.getCurrentSize() > 0) {
                 part.setCompleted(true);
             }
 

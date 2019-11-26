@@ -52,7 +52,7 @@ public class DownloadManager extends JFrame
     //private final DataManager dm = new DataManager();//data manager handle items data
     private JSplitPane splitPaneHortizontal;
     private JSplitPane splitPaneVertical;
-    private final JList list = new JList(); //hold downloadx items data
+    private final JList list = new JList(); //hold download items data
     private DownloadTable table;
     private TableModel model;
     private JSplitPane mainsplitpane;
@@ -198,27 +198,6 @@ public class DownloadManager extends JFrame
         }
     }
 
-    public void restartApplication() throws IOException, URISyntaxException {
-        final String javaBin = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";
-        final File currentJar = new File(App.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-
-        /* is it a jar file? */
-        if (!currentJar.getName().endsWith(".jar")) {
-            return;
-        }
-
-        /* Build command: java -jar application.jar */
-        final ArrayList<String> command = new ArrayList<>();
-        command.add(javaBin);
-        command.add("-jar");
-        command.add(currentJar.getPath());
-
-        final ProcessBuilder builder = new ProcessBuilder(command);
-        builder.start();
-        System.out.println("javadm.ui.DownloadManager.restartApplication()");
-        System.exit(0);
-    }
-
     private void newSettingTable() {
         System.out.println("javadm.ui.DownloadManager.newSettingTable()");
     }
@@ -277,7 +256,7 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * refresh downloadx table by timer
+     * refresh download table by timer
      */
     public void refreshTable() {
         java.util.Timer t = new java.util.Timer();
@@ -323,7 +302,7 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * return reference of currently selected downloadx object on list
+     * return reference of currently selected download object on list
      *
      * @return Download
      */
@@ -337,16 +316,17 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * remove selected downloadx from the list
+     * remove selected download from the list
+     *
      * @param trash
      */
     public void removeDownload(boolean trash) {
 //        if (showChoice("Remove this download?", "Removing", JOptionPane.QUESTION_MESSAGE) > 0) {
 //            return;
 //        }
-        Download rmDownload = getSelectedDownload();
+        Download download = getSelectedDownload();
         for (int i = 0; i < downloads.size(); i++) {
-            if(downloads.get(i).getId() == rmDownload.getId()){
+            if (downloads.get(i).getId() == download.getId()) {
                 downloads.remove(i);
             }
         }
@@ -356,66 +336,81 @@ public class DownloadManager extends JFrame
 
         if (trash) {
             try {
-                File file = new File(rmDownload.getDirectory() + "/" + rmDownload.getName());
+                File file = new File(download.getDirectory() + "/" + download.getName());
                 file.delete();
             } catch (Exception ex) {
             }
         }
 
-        for (Part part : rmDownload.getParts()) {
-            File file = new File(rmDownload.getDirectory() + "/" + part.getPartFileName());
+        for (Part part : download.getParts()) {
+            File file = new File(download.getDirectory() + "/" + part.getPartFileName());
             file.delete();
         }
 
         DaoSqlite db = new DaoSqlite();
-        db.deleteDownload(rmDownload.getId());
-        db.deleteParts(rmDownload.getId());
+        db.deleteDownload(download.getId());
+        db.deleteParts(download.getId());
         toolbar.refreshToolBar();
         statusPane.setVisible(false);
         model.fireTableDataChanged();
     }
 
     /**
-     * start selected downloadx
+     * start selected download
      */
     public void startDownload() {
         getSelectedDownload().startDownload();
     }
 
     /**
-     * stop selected downloadx
+     * stop selected download
      */
     public void stopDownload() {
         getSelectedDownload().stopDownload();
     }
 
     /**
-     * remove data and reboot the downloadx
+     * remove data and reboot the download
      */
-    public void restartDownload() {
-        if (showChoice("Are you sure !!! \n"
-                + "This Download is complete this will destroy all data and start again",
-                "Redownload", JOptionPane.QUESTION_MESSAGE) > 0) {
-            return;
+    public void restartDownload(boolean trash, boolean autoStart) {
+//        if (showChoice("Are you sure !!! \n"
+//                + "This Download is complete this will destroy all data and start again",
+//                "Redownload", JOptionPane.QUESTION_MESSAGE) > 0) {
+//            return;
+//        }
+
+        Download download = getSelectedDownload();
+
+        if (trash) {
+            try {
+                File file = new File(download.getDirectory() + "/" + download.getName());
+                file.delete();
+            } catch (Exception ex) {
+            }
         }
 
-        Download downloadx = getSelectedDownload();
-        downloadx.setComplete(false);
-        downloadx.setCompleteDate(null);
-        downloadx.setDoneSize(0);
-        downloadx.setType(Download.UNKNOWN);
-        downloadx.setFileSize(0);
-        downloadx.setProgress(0);
-        downloadx.setParts(null);
+        for (Part part : download.getParts()) {
+            File file = new File(download.getDirectory() + "/" + part.getPartFileName());
+            file.delete();
+        }
+        download.setComplete(false);
+        download.setCompleteDate(null);
+        download.setDoneSize(0);
+        download.setType(Download.UNKNOWN);
+        download.setFileSize(0);
+        download.setProgress(0);
+        download.setParts(new ArrayList<>());
         DaoSqlite db = new DaoSqlite();
-        db.updateDownload(downloadx);
-        db.deleteParts(downloadx.getId());
-
+        db.updateDownload(download);
+        db.deleteParts(download.getId());
+           if (autoStart) {
+                download.startDownload();
+            }
         //downloadx.setStart(true);
     }
 
     /**
-     * add new downloadx to the list/table
+     * add new download to the list/table
      *
      * @param download
      */
@@ -436,7 +431,7 @@ public class DownloadManager extends JFrame
     }
 
     /**
-     * update existing downloadx
+     * update existing download
      *
      * @param download
      */
@@ -544,7 +539,7 @@ public class DownloadManager extends JFrame
                 OptionMenu newdwnmenu = new OptionMenu(this, dwn, true, true);
 
             } else if (setting.getMonitorMode() == 2) {
-                addDownload(dwn,setting.isAutoStart());
+                addDownload(dwn, setting.isAutoStart());
             }
         }
     }
@@ -555,8 +550,8 @@ public class DownloadManager extends JFrame
         toolbar.refreshToolBar();
         if (evt.getPropertyName().equals("addErrorMessage")) {
             statusPane.updateErrorView();
-        } else if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0 &&
-                !evt.getNewValue().toString().equals(clipedUrl)) {
+        } else if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0
+                && !evt.getNewValue().toString().equals(clipedUrl)) {
             //System.err.println(evt.getNewValue().toString());
             //System.err.println(evt.getOldValue().toString());
             clipedUrl = evt.getNewValue().toString();

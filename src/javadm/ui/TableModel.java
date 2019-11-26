@@ -40,7 +40,6 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
     //private static int  xxx = 0;
     private static final String[] COLUMN_NAMES
             = {
-                "ID",
                 "Name",
                 "Date",
                 "Path",
@@ -54,11 +53,11 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
         super(Arrays.asList(COLUMN_NAMES));
         setRowClass(Download.class);
 
-        setColumnClass(5, Boolean.class);
+        setColumnClass(4, Boolean.class);
         //setColumnClass(2, JLabel.class);
-        setColumnClass(6, JProgressBar.class);
+        setColumnClass(5, JProgressBar.class);
+        setColumnClass(6, String.class);
         setColumnClass(7, String.class);
-        setColumnClass(8, String.class);
         //setColumnEditable(0, false);
         //setColumnEditable(6, false);
         //setColumnClass(6, JProgressBar.class);
@@ -71,22 +70,20 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
 
         switch (column) {
             case 0:
-                return downnload.getId();
-            case 1:
                 return downnload.getName();
-            case 2:
+            case 1:
                 return downnload.getCreatedDate();
-            case 3:
+            case 2:
                 return downnload.getDirectory();
-            case 4:
+            case 3:
                 return downnload.getUrl();
-            case 5:
+            case 4:
                 return downnload.getDownloadControl().getLblControl();
-            case 6:
+            case 5:
                 return downnload.getDownloadControl().getProgressbar();
-            case 7:
+            case 6:
                 return downnload.getFileSize();
-            case 8:
+            case 7:
                 return downnload.getDoneSize();
             default:
                 return null;
@@ -116,20 +113,18 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
         try {
             switch (column) {
                 case 0:
-                    break;
-                case 1:
                     download.setName(value.toString());
                     break;
-                case 2:
+                case 1:
                     download.setCreatedDate(value.toString());
                     break;
-                case 3:
+                case 2:
                     download.setDirectory(value.toString());
                     break;
-                case 4:
+                case 3:
                     download.setUrl(value.toString());
                     break;
-                case 5:
+                case 4:
                     if (!download.isRunning()) {
                         download.startDownload();
                     } else {
@@ -138,11 +133,11 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                     //download.getDownloadtableui().setLblControl(download.isStart());
                     //System.out.println("javadm.com.DownloadTableModel.setValueAt()");
                     break;
-                case 7:
+                case 6:
 
                     download.setFileSize(Long.parseLong(value.toString()));
                     break;
-                case 8:
+                case 7:
                     download.setDoneSize(Long.parseLong(value.toString()));
 
                 //break;

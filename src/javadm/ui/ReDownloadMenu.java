@@ -27,17 +27,19 @@ package javadm.ui;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class RemoveMenu extends javax.swing.JDialog {
+public class ReDownloadMenu extends javax.swing.JDialog {
 
     private DownloadManager dm;
 
     /* Creates new form RemoveMenu
      */
-    public RemoveMenu(DownloadManager parent, boolean modal) {
+    public ReDownloadMenu(DownloadManager parent, boolean modal) {
         super(parent, modal);
         this.dm = parent;
         initComponents();
         this.setLocation(dm.getLocation().x - (this.getWidth() - dm.getWidth()) / 2, dm.getLocation().y - (this.getHeight() - dm.getHeight()) / 2);
+        
+        cbAutoStart.setSelected(dm.getSetting().isAutoStart());
         this.setVisible(true);
     }
 
@@ -51,16 +53,18 @@ public class RemoveMenu extends javax.swing.JDialog {
     private void initComponents() {
 
         jPanel1 = new javax.swing.JPanel();
-        cbTrash = new javax.swing.JCheckBox();
+        cbKeep = new javax.swing.JCheckBox();
         btnok = new javax.swing.JButton();
         btnCancel = new javax.swing.JButton();
+        cbAutoStart = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Remove Download");
+        setTitle("Re-Download");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(dm.getSelectedDownload().getName()));
 
-        cbTrash.setText("Trash Download Data");
+        cbKeep.setSelected(true);
+        cbKeep.setText("Keep Download Data");
 
         btnok.setText("OK");
         btnok.addActionListener(new java.awt.event.ActionListener() {
@@ -76,6 +80,8 @@ public class RemoveMenu extends javax.swing.JDialog {
             }
         });
 
+        cbAutoStart.setText("Auto Start");
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -87,15 +93,18 @@ public class RemoveMenu extends javax.swing.JDialog {
                         .addComponent(btnok)
                         .addGap(18, 18, 18)
                         .addComponent(btnCancel))
-                    .addComponent(cbTrash))
-                .addGap(0, 33, Short.MAX_VALUE))
+                    .addComponent(cbKeep)
+                    .addComponent(cbAutoStart))
+                .addGap(0, 144, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(26, 26, 26)
-                .addComponent(cbTrash)
-                .addGap(18, 18, 18)
+                .addContainerGap()
+                .addComponent(cbKeep)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(cbAutoStart)
+                .addGap(9, 9, 9)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(btnok)
                     .addComponent(btnCancel))
@@ -109,7 +118,7 @@ public class RemoveMenu extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(12, 12, 12))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -124,7 +133,7 @@ public class RemoveMenu extends javax.swing.JDialog {
 
     private void btnokActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnokActionPerformed
         // TODO add your handling code here:
-        dm.removeDownload(cbTrash.isSelected());
+        dm.restartDownload(!cbKeep.isSelected(),cbAutoStart.isSelected());
         this.dispose();
     }//GEN-LAST:event_btnokActionPerformed
 
@@ -141,7 +150,8 @@ public class RemoveMenu extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnok;
-    private javax.swing.JCheckBox cbTrash;
+    private javax.swing.JCheckBox cbAutoStart;
+    private javax.swing.JCheckBox cbKeep;
     private javax.swing.JPanel jPanel1;
     // End of variables declaration//GEN-END:variables
 }
