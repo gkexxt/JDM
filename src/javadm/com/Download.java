@@ -30,16 +30,12 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URL;
 import java.nio.file.Files;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import static java.time.LocalDateTime.now;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javadm.ui.DownloadControl;
 
 /**
@@ -87,14 +83,14 @@ public class Download {
     public static final byte DYNAMIC = -1;
     public static final byte NON_RESUMEABLE = -2;
     public static final byte UNKNOWN = 0;
-    private boolean scheduler_inhibit = false;
+    private boolean scheduled = false;
 
-    public boolean isScheduler_inhibit() {
-        return scheduler_inhibit;
+    public boolean isScheduled() {
+        return scheduled;
     }
 
-    public void setScheduler_inhibit(boolean scheduler_inhibit) {
-        this.scheduler_inhibit = scheduler_inhibit;
+    public void setScheduled(boolean scheduled) {
+        this.scheduled = scheduled;
     }
     private String scheduleStart = "";
     private String scheduleStop = "";
@@ -309,11 +305,12 @@ public class Download {
             this.downloadControl.setLblControl(false);
             this.downloadControl.setRowlocked(false);
             setState(Download.STSTOPED);
+            setScheduled(false);
             this.running = false;
             propChangeSupport.firePropertyChange("running", true, false);
 
         } else {
-            addLogMsg(new String[]{Download.ERROR, "Download should not be started if complete fuck i got bug"});
+            addLogMsg(new String[]{Download.ERROR, "Download should not be started if already completed!! fuck it got bug"});
         }
 
     }

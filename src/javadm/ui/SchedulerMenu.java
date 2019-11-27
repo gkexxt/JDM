@@ -57,7 +57,6 @@ public class SchedulerMenu extends javax.swing.JDialog {
             spStart.setValue(Download.formatter.parse(download.getScheduleStart()));
             cbStart.setEnabled(true);
             cbStart.setSelected(true);
-            
 
         } catch (Exception ex) {
             //Logger.getLogger(SchedulerMenu.class.getName()).log(Level.SEVERE, null, ex);
@@ -70,10 +69,13 @@ public class SchedulerMenu extends javax.swing.JDialog {
         } catch (Exception ex) {
             //Logger.getLogger(SchedulerMenu.class.getName()).log(Level.SEVERE, null, ex);
         }
-
-        cbStart.setEnabled(!download.isComplete());
-        cbStop.setEnabled(!download.isComplete());
+        
+        cbActive.setEnabled(!download.isComplete());
+        cbActive.setSelected(!download.isComplete() && download.isScheduled());
+        cbStart.setEnabled(cbActive.isSelected());
+        cbStop.setEnabled(cbActive.isSelected());
         btnOK.setEnabled(!download.isComplete());
+
         this.setLocation(dm.getLocation().x + (dm.getWidth() - this.getWidth()) / 2, dm.getLocation().y + (dm.getHeight() - this.getHeight()) / 2);
 
     }
@@ -92,6 +94,8 @@ public class SchedulerMenu extends javax.swing.JDialog {
         spStart = new javax.swing.JSpinner();
         cbStop = new javax.swing.JCheckBox();
         spStop = new javax.swing.JSpinner();
+        cbActive = new javax.swing.JCheckBox();
+        jSeparator1 = new javax.swing.JSeparator();
         btnCancel = new javax.swing.JButton();
         btnOK = new javax.swing.JButton();
 
@@ -120,25 +124,44 @@ public class SchedulerMenu extends javax.swing.JDialog {
         spStop.setModel(new javax.swing.SpinnerDateModel(new java.util.Date(), null, null, java.util.Calendar.HOUR));
         spStop.setEnabled(false);
 
+        cbActive.setText("Active");
+        cbActive.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                cbActiveStateChanged(evt);
+            }
+        });
+        cbActive.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cbActiveActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addComponent(jSeparator1)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(cbStart)
-                    .addComponent(cbStop, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(spStop)
-                    .addComponent(spStart))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(cbStart)
+                        .addComponent(cbStop, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(spStop)
+                        .addComponent(spStart))
+                    .addComponent(cbActive))
                 .addContainerGap(68, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(12, 12, 12)
+                .addContainerGap()
+                .addComponent(cbActive)
+                .addGap(13, 13, 13)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(cbStart)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(15, 15, 15)
                 .addComponent(spStart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(cbStop)
@@ -146,6 +169,8 @@ public class SchedulerMenu extends javax.swing.JDialog {
                 .addComponent(spStop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
+
+        cbActive.getAccessibleContext().setAccessibleDescription("");
 
         btnCancel.setText("Cancel");
         btnCancel.addActionListener(new java.awt.event.ActionListener() {
@@ -208,6 +233,7 @@ public class SchedulerMenu extends javax.swing.JDialog {
 
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
         // TODO add your handling code here:
+
         if (cbStart.isSelected()) {
             download.setScheduleStart(Download.formatter.format((Date) spStart.getValue()));
         } else {
@@ -216,14 +242,27 @@ public class SchedulerMenu extends javax.swing.JDialog {
         if (cbStop.isSelected()) {
             download.setScheduleStop(Download.formatter.format((Date) spStop.getValue()));
         } else {
-            download.setScheduleStart(null);
+            download.setScheduleStop(null);
         }
+        
+        download.setScheduled(cbActive.isSelected());
+        
 
         DaoSqlite db = new DaoSqlite();
         db.updateDownload(download);
         this.dispose();
 
     }//GEN-LAST:event_btnOKActionPerformed
+
+    private void cbActiveActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbActiveActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_cbActiveActionPerformed
+
+    private void cbActiveStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_cbActiveStateChanged
+        // TODO add your handling code here:
+        cbStart.setEnabled(cbActive.isSelected());
+        cbStop.setEnabled(cbActive.isSelected());
+    }//GEN-LAST:event_cbActiveStateChanged
 
     /**
      * @param args the command line arguments
@@ -232,9 +271,11 @@ public class SchedulerMenu extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnOK;
+    private javax.swing.JCheckBox cbActive;
     private javax.swing.JCheckBox cbStart;
     private javax.swing.JCheckBox cbStop;
     private javax.swing.JPanel jPanel1;
+    private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSpinner spStart;
     private javax.swing.JSpinner spStop;
     // End of variables declaration//GEN-END:variables

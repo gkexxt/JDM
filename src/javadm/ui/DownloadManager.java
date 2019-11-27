@@ -235,7 +235,7 @@ public class DownloadManager extends JFrame
         for (Download download : downloads) {
             //System.out.println("javadm.ui.DownloadManager.scheduller() : " + download.getName());
             try {
-                if (!download.isRunning() && !download.isScheduler_inhibit()
+                if (!download.isComplete() && !download.isRunning() && download.isScheduled()
                         && Download.formatter.parse(download.getScheduleStart()).compareTo(new Date()) < 0) {
                     System.out.println("Scheduler run : " + download.getName());
                     download.startDownload();
@@ -247,7 +247,7 @@ public class DownloadManager extends JFrame
             
 
             try {
-                if (!download.isRunning() 
+                if ( !download.isComplete() && download.isRunning() && download.isScheduled()
                         &&  Download.formatter.parse(download.getScheduleStop()).compareTo(new Date()) < 0) {
                     System.out.println("scheduler stop: " + download.getName());
                     download.stopDownload();

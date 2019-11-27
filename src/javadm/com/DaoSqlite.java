@@ -59,6 +59,7 @@ public class DaoSqlite implements DaoAPI {
         download.setState(rs.getString("state"));
         download.setScheduleStart(rs.getString("s_start"));
         download.setScheduleStop(rs.getString("s_stop"));
+        download.setScheduled(rs.getBoolean("scheduled"));
         return download;
     }
 
@@ -119,7 +120,7 @@ public class DaoSqlite implements DaoAPI {
     public boolean insertDownload(Download download) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
-            PreparedStatement ps = connection.prepareStatement("INSERT INTO downloaddata VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?)");
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO downloaddata VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?)");
             ps.setString(1, download.getName());
             ps.setString(2, download.getUrl());
             ps.setString(3, download.getDirectory());
@@ -135,6 +136,7 @@ public class DaoSqlite implements DaoAPI {
             ps.setString(13, download.getState());
             ps.setString(14, download.getScheduleStart());
             ps.setString(15, download.getScheduleStop());
+            ps.setBoolean(16, download.isScheduled());
             int i = ps.executeUpdate();
             if (i == 1) {
                 return true;
@@ -152,7 +154,7 @@ public class DaoSqlite implements DaoAPI {
             PreparedStatement ps = connection.prepareStatement("UPDATE "
                     + "downloaddata SET name=?, url=?, directory=?, fsize=?, "
                     + "dnsize=?, crtdate=?, lstdate=?, cmpdate=?, type=?, "
-                    + "user_agent=?, complete=?, connection=?, state=?, s_start=?, s_stop=? WHERE id=?");
+                    + "user_agent=?, complete=?, connection=?, state=?, s_start=?, s_stop=?, scheduled=? WHERE id=?");
             ps.setString(1, download.getName());
             ps.setString(2, download.getUrl());
             ps.setString(3, download.getDirectory());
@@ -168,7 +170,9 @@ public class DaoSqlite implements DaoAPI {
             ps.setString(13, download.getState());
             ps.setString(14, download.getScheduleStart());
             ps.setString(15, download.getScheduleStop());
-            ps.setInt(16, download.getId());
+            
+            ps.setBoolean(16, download.isScheduled());
+            ps.setInt(17, download.getId());
 
             int i = ps.executeUpdate();
             if (i == 1) {
