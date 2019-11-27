@@ -39,8 +39,12 @@ import java.net.URL;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.AffineTransform;
 import java.net.URI;
 import javadm.com.Download;
 import javax.swing.AbstractAction;
@@ -82,7 +86,7 @@ public class ToolBar extends JPanel
     public ToolBar(DownloadManager downloadManager) {
         super(new BorderLayout());
         this.dm = downloadManager;
-        toolBar = new JToolBar();
+        toolBar = new JToolBar() ;
         addButtons(toolBar);
         toolBar.setFloatable(false);
         toolBar.setRollover(false);
@@ -91,6 +95,28 @@ public class ToolBar extends JPanel
         add(toolBar, BorderLayout.PAGE_START);
         //mDialog = new ModalDialog(frm);
         refreshToolBar();
+
+//        final AffineTransform t = g.getTransform();
+//        final double scaling = t.getScaleX(); // Assuming square pixels :P
+//        t.setToScale(1, 1);
+//        g.setTransform(t);
+    }
+
+    public void setScale() {
+        final Graphics2D g = (Graphics2D) btnMenu.getGraphics();
+        final AffineTransform t = g.getTransform();
+        final double scaling = t.getScaleX(); // Assuming square pixels :P
+        System.err.println(scaling);
+
+        t.setToScale(0.3, 0.3);
+        g.setTransform(t);
+        btnMenu.repaint();
+
+        ImageIcon icon = (ImageIcon) btnAdd.getIcon();
+        Image img = icon.getImage();
+        //  icon.setImage(img.getScaledInstance(icon.getIconWidth()/1.25, icon.getIconHeight()/1.25,Image.SCALE_SMOOTH));
+        toolBar.repaint();
+
     }
 
     protected void addButtons(JToolBar toolBar) {
@@ -208,8 +234,7 @@ public class ToolBar extends JPanel
             btnStart.setVisible(true);
             btnRemove.setVisible(true);
         }
-        
-        
+
         btnGraph.setVisible(true);
         btnSchedule.setVisible(true);
     }
@@ -232,7 +257,7 @@ public class ToolBar extends JPanel
         } else {
             Font font = new Font(button.getFont().toString(), Font.BOLD, 20);
             button.setFont(font);                                   //no image found
-            button.setText(name);
+            //button.setText(name);
 
             System.err.println("Resource not found: "
                     + imgLocation);
@@ -267,7 +292,7 @@ public class ToolBar extends JPanel
                     break;
                 case REMOVE:
                     new RemoveMenu(dm, true);
-                    
+
                     break;
                 case START:
                     dm.startDownload();
@@ -279,7 +304,7 @@ public class ToolBar extends JPanel
                     new ReDownloadMenu(dm, true);
                     break;
                 case SETTING:
-                     new OptionMenu(dm, dm.getSelectedDownload(), true, false);
+                    new OptionMenu(dm, dm.getSelectedDownload(), true, false);
                     //seldownload.setTitle("Download Options- " + selectedDownload.getData().getName());
                     break;
                 case SCHEDULE:

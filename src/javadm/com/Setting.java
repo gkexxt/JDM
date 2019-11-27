@@ -35,8 +35,17 @@ public class Setting {
     private boolean autoStart;
     public static final String DEF_UA = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:70.0) Gecko/20100101 Firefox/70.0";
     private String userAgent = DEF_UA;
+    private boolean schedulerEnable;
     // this.userAgent = "Mozilla/5.0 (Macintosh; U;"
     //      + " Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2";
+
+    public boolean isSchedulerEnable() {
+        return schedulerEnable;
+    }
+
+    public void setSchedulerEnable(boolean schedulerEnable) {
+        this.schedulerEnable = schedulerEnable;
+    }
 
     public String getDirectory() {
         return directory;
@@ -77,4 +86,6 @@ public class Setting {
     public void setUserAgent(String userAgent) {
         this.userAgent = userAgent;
     }
+    
+    
 }

@@ -40,10 +40,12 @@ public class App {
      * @param args
      */
     public static void main(String[] args) {
+        System.setProperty("sun.java2d.uiScale", "1.0");
         SwingUtilities.invokeLater(() -> {
             if (lockInstance("lock")) {            
                 DownloadManager dm;
                 dm = new DownloadManager();
+                
                 dm.showMe();
             }else{
                 System.err.println("app instance is already running");

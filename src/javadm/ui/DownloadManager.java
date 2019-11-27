@@ -30,6 +30,7 @@ package javadm.ui;
  */
 import javadm.util.ClipboardTextListener;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
@@ -94,6 +95,7 @@ public class DownloadManager extends JFrame
 
         table.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
         toolbar = new ToolBar(this);
+
         //Vertical panels - downloadpane+StatusPane
         statusPane = new StatusPane(this);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -142,6 +144,14 @@ public class DownloadManager extends JFrame
         this.getContentPane().add(mainsplitpane);
         this.setLocationByPlatform(true);
         this.pack();
+        
+        final Graphics2D gx = (Graphics2D) toolbar.getGraphics();
+        final AffineTransform t = gx.getTransform();
+        final double scaling = t.getScaleX(); // Assuming square pixels :P
+        System.err.println(scaling);
+        t.setToScale(1, 1);
+        gx.setTransform(t);
+        toolbar.repaint();
         this.setVisible(true);
         //add lisner for the selection list --ide compalining when doit in constructor why?
         list.addListSelectionListener(this);
@@ -154,6 +164,7 @@ public class DownloadManager extends JFrame
         this.setIconImage(img.getImage());
         this.setTitle("JDM");
         checkDB();
+        toolbar.setScale();
         //SettingDaoSqlite dbx = new SettingDaoSqlite();
         //this.refreshTable();
         //ClipboardTextListener xxx = new ClipboardTextListener();
@@ -220,7 +231,7 @@ public class DownloadManager extends JFrame
         DaoSqlite db = new DaoSqlite();
         downloads = db.getAllDownload();
         for (Download download : downloads) {
-            download.setParts(db.getParts(download.getId()));     
+            download.setParts(db.getParts(download.getId()));
             download.setProgress(0);
             model.addRow(download);
             download.addPropertyChangeListener(model);
@@ -323,8 +334,8 @@ public class DownloadManager extends JFrame
      *
      * @param trash
      */
-    public void removeDownload(boolean trash) {        
-        
+    public void removeDownload(boolean trash) {
+
         Download download = getSelectedDownload();
         //removing from download list
         for (int i = 0; i < downloads.size(); i++) {
@@ -335,7 +346,7 @@ public class DownloadManager extends JFrame
         model.removeTableModelListener(table);//remove table listner before delete from model
         model.removeRows(table.getSelectedRow());
         model.addTableModelListener(table);//add it back
-        
+
         //remove file
         if (trash) {
             try {
@@ -344,13 +355,13 @@ public class DownloadManager extends JFrame
             } catch (Exception ex) {
             }
         }
-        
+
         //remove parts
         for (Part part : download.getParts()) {
             File file = new File(download.getDirectory() + "/" + part.getPartFileName());
             file.delete();
         }
-        
+
         //remove from db
         DaoSqlite db = new DaoSqlite();
         db.deleteDownload(download.getId());
@@ -376,6 +387,7 @@ public class DownloadManager extends JFrame
 
     /**
      * remove data and reboot the download
+     *
      * @param trash
      * @param autoStart
      */
@@ -416,16 +428,16 @@ public class DownloadManager extends JFrame
      * @param autoStart
      */
     public void addDownload(Download download, Boolean autoStart) {
-            download.setName(download.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", ""));
-            DaoSqlite db = new DaoSqlite();
-            db.insertDownload(download);
-            download = db.getLastDownload();
-            downloads.add(download);
-            model.addRow(download);
-            download.addPropertyChangeListener(this);
-            if (autoStart) {
-                download.startDownload();
-            }       
+        download.setName(download.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", ""));
+        DaoSqlite db = new DaoSqlite();
+        db.insertDownload(download);
+        download = db.getLastDownload();
+        downloads.add(download);
+        model.addRow(download);
+        download.addPropertyChangeListener(this);
+        if (autoStart) {
+            download.startDownload();
+        }
     }
 
     /**

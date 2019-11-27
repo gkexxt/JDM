@@ -204,6 +204,7 @@ public class DaoSqlite implements DaoAPI {
                 setting.setMonitorMode(rs.getInt("monmode"));
                 setting.setAutoStart(rs.getBoolean("automode"));
                 setting.setUserAgent(rs.getString("user_agent"));
+                setting.setSchedulerEnable(rs.getBoolean("scheduler"));
                 return setting;
             }
 
@@ -217,13 +218,14 @@ public class DaoSqlite implements DaoAPI {
     public boolean setSetting(Setting setting) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE setting SET directory=?, conncount=?, monmode=?, automode=?, user_agent=? WHERE id=?");
+            PreparedStatement ps = connection.prepareStatement("UPDATE setting SET directory=?, conncount=?, monmode=?, automode=?, user_agent=?, scheduler=? WHERE id=?");
             ps.setString(1, setting.getDirectory());
             ps.setInt(2, setting.getConnectionCount());
             ps.setInt(3, setting.getMonitorMode());
             ps.setBoolean(4, setting.isAutoStart());
             ps.setString(5, setting.getUserAgent());
-            ps.setInt(6, 1);
+            ps.setBoolean(6, setting.isSchedulerEnable());
+            ps.setInt(7, 1);
             System.err.println(ps.toString());
             int i = ps.executeUpdate();
             if (i == 1) {
