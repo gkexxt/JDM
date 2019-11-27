@@ -64,39 +64,38 @@ public class Download {
     public static final String DEBUG = "Debug";
     public static final String INFO = "Info";
     public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+    public static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     //download types
     public static final byte RESUMABLE = 1;
 
-    public Date getScheduleStart() {
-        try {
-            return formatter.parse(scheduleStart);
-        } catch (ParseException ex) {
-            Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+    public String getScheduleStart() {
+   
+        return scheduleStart;
     }
 
     public void setScheduleStart(String scheduleStart) {
-        this.scheduleStart = formatter.format(scheduleStart);
+        this.scheduleStart = scheduleStart;
     }
 
-    public Date getScheduleStop() {
-        try {
-            return formatter.parse(scheduleStop);
-        } catch (ParseException ex) {
-            Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return null;
+    public String getScheduleStop() {
+        return scheduleStop;
     }
 
-    public void setScheduleStop(Date scheduleStop) {
-        this.scheduleStop = formatter.format(scheduleStop);
+    public void setScheduleStop(String scheduleStop) {
+        this.scheduleStop = scheduleStop;
     }
     public static final byte DYNAMIC = -1;
     public static final byte NON_RESUMEABLE = -2;
     public static final byte UNKNOWN = 0;
-    private boolean scheduled = false;
+    private boolean scheduler_inhibit = false;
+
+    public boolean isScheduler_inhibit() {
+        return scheduler_inhibit;
+    }
+
+    public void setScheduler_inhibit(boolean scheduler_inhibit) {
+        this.scheduler_inhibit = scheduler_inhibit;
+    }
     private String scheduleStart = "";
     private String scheduleStop = "";
 

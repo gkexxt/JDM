@@ -35,10 +35,12 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
-import static java.time.LocalDateTime.now;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimerTask;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javadm.com.Setting;
 import javadm.com.Download;
 import javadm.com.DaoSqlite;
@@ -232,12 +234,25 @@ public class DownloadManager extends JFrame
     private void scheduller() {
         for (Download download : downloads) {
             //System.out.println("javadm.ui.DownloadManager.scheduller() : " + download.getName());
-            if (!download.isRunning() && download.getScheduleStart() != null && download.getScheduleStart().compareTo(new Date()) < 0) {
-                System.out.println("javadm.ui.DownloadManager.scheduller() : " + download.getName());
+            try {
+                if (!download.isRunning() && !download.isScheduler_inhibit()
+                        && Download.formatter.parse(download.getScheduleStart()).compareTo(new Date()) < 0) {
+                    System.out.println("Scheduler run : " + download.getName());
+                    download.startDownload();
+                }
+            } catch (Exception ex) {
+                
             }
+            
+            
 
-            if (!download.isRunning() && download.getScheduleStop() != null && download.getScheduleStop().compareTo(new Date()) < 0) {
-                System.out.println("javadm.ui.DownloadManager.scheduller() : " + download.getName());
+            try {
+                if (!download.isRunning() 
+                        &&  Download.formatter.parse(download.getScheduleStop()).compareTo(new Date()) < 0) {
+                    System.out.println("scheduler stop: " + download.getName());
+                    download.stopDownload();
+                }
+            } catch (Exception ex) {
             }
 
         }
@@ -282,7 +297,7 @@ public class DownloadManager extends JFrame
 
             }
         });
-       // refreshTable();
+        refreshTable();
 
     }
 

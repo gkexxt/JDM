@@ -23,8 +23,12 @@
  */
 package javadm.ui;
 
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javadm.com.DaoSqlite;
 import javadm.com.Download;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerDateModel;
@@ -49,6 +53,28 @@ public class SchedulerMenu extends javax.swing.JDialog {
 
         initComponents();
 
+        try {
+            spStart.setValue(Download.formatter.parse(download.getScheduleStart()));
+            cbStart.setEnabled(true);
+            cbStart.setSelected(true);
+            
+
+        } catch (Exception ex) {
+            //Logger.getLogger(SchedulerMenu.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        try {
+            spStop.setValue(Download.formatter.parse(download.getScheduleStop()));
+            cbStop.setEnabled(true);
+            cbStop.setSelected(true);
+        } catch (Exception ex) {
+            //Logger.getLogger(SchedulerMenu.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        cbStart.setEnabled(!download.isComplete());
+        cbStop.setEnabled(!download.isComplete());
+        btnOK.setEnabled(!download.isComplete());
+        this.setLocation(dm.getLocation().x + (dm.getWidth() - this.getWidth()) / 2, dm.getLocation().y + (dm.getHeight() - this.getHeight()) / 2);
 
     }
 
@@ -66,10 +92,11 @@ public class SchedulerMenu extends javax.swing.JDialog {
         spStart = new javax.swing.JSpinner();
         cbStop = new javax.swing.JCheckBox();
         spStop = new javax.swing.JSpinner();
-        jButton1 = new javax.swing.JButton();
-        jButton2 = new javax.swing.JButton();
+        btnCancel = new javax.swing.JButton();
+        btnOK = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle("Scheduler");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Schedule : "+download.getName()));
 
@@ -99,35 +126,40 @@ public class SchedulerMenu extends javax.swing.JDialog {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(cbStart)
-                    .addComponent(spStart, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(cbStop, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(spStop, javax.swing.GroupLayout.PREFERRED_SIZE, 136, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(222, Short.MAX_VALUE))
+                    .addComponent(spStop)
+                    .addComponent(spStart))
+                .addContainerGap(68, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(32, 32, 32)
+                .addGap(12, 12, 12)
                 .addComponent(cbStart)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(spStart, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(cbStop)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(spStop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(48, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        jButton1.setText("Cancel");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
+        btnCancel.setText("Cancel");
+        btnCancel.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
+                btnCancelActionPerformed(evt);
             }
         });
 
-        jButton2.setText("OK");
+        btnOK.setText("OK");
+        btnOK.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnOKActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -136,12 +168,12 @@ public class SchedulerMenu extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(jButton2)
+                        .addComponent(btnOK)
                         .addGap(18, 18, 18)
-                        .addComponent(jButton1)))
+                        .addComponent(btnCancel)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -149,10 +181,10 @@ public class SchedulerMenu extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jButton1)
-                    .addComponent(jButton2))
+                    .addComponent(btnCancel)
+                    .addComponent(btnOK))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -169,20 +201,39 @@ public class SchedulerMenu extends javax.swing.JDialog {
         spStop.setEnabled(cbStop.isSelected());
     }//GEN-LAST:event_cbStopStateChanged
 
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+    private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
         // TODO add your handling code here:
         this.dispose();
-    }//GEN-LAST:event_jButton1ActionPerformed
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
+        // TODO add your handling code here:
+        if (cbStart.isSelected()) {
+            download.setScheduleStart(Download.formatter.format((Date) spStart.getValue()));
+        } else {
+            download.setScheduleStart(null);
+        }
+        if (cbStop.isSelected()) {
+            download.setScheduleStop(Download.formatter.format((Date) spStop.getValue()));
+        } else {
+            download.setScheduleStart(null);
+        }
+
+        DaoSqlite db = new DaoSqlite();
+        db.updateDownload(download);
+        this.dispose();
+
+    }//GEN-LAST:event_btnOKActionPerformed
 
     /**
      * @param args the command line arguments
      */
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnCancel;
+    private javax.swing.JButton btnOK;
     private javax.swing.JCheckBox cbStart;
     private javax.swing.JCheckBox cbStop;
-    private javax.swing.JButton jButton1;
-    private javax.swing.JButton jButton2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JSpinner spStart;
     private javax.swing.JSpinner spStop;

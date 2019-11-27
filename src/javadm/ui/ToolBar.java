@@ -222,23 +222,24 @@ public class ToolBar extends JPanel
             btnStart.setVisible(false);
             btnRemove.setVisible(true);
             btnSetting.setVisible(true);
-
+            btnSchedule.setVisible(false);
         } else if (selectedDownload.isRunning()) {
             btnSetting.setVisible(false);
             btnRestart.setVisible(false);
             btnStop.setVisible(true);
             btnStart.setVisible(false);
             btnRemove.setVisible(false);
+             btnSchedule.setVisible(true);
         } else {
             btnSetting.setVisible(true);
             btnRestart.setVisible(true);
             btnStop.setVisible(false);
             btnStart.setVisible(true);
             btnRemove.setVisible(true);
+             btnSchedule.setVisible(true);
         }
 
         btnGraph.setVisible(true);
-        btnSchedule.setVisible(true);
     }
 
     protected JButton formatButton(String name, String toolTipText) {
