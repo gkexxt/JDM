@@ -49,12 +49,6 @@ public class SchedulerMenu extends javax.swing.JDialog {
 
         initComponents();
 
-        SpinnerDateModel model = new SpinnerDateModel(new Date(), null, null,
-                Calendar.DAY_OF_MONTH);
-        spStart = new JSpinner(model);
-        String format = "dd MMM yyyy";
-        JSpinner.DateEditor editor = new JSpinner.DateEditor(spStart, format);
-        spStart.setEditor(editor);
 
     }
 
@@ -72,6 +66,8 @@ public class SchedulerMenu extends javax.swing.JDialog {
         spStart = new javax.swing.JSpinner();
         cbStop = new javax.swing.JCheckBox();
         spStop = new javax.swing.JSpinner();
+        jButton1 = new javax.swing.JButton();
+        jButton2 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -88,6 +84,11 @@ public class SchedulerMenu extends javax.swing.JDialog {
         spStart.setEnabled(false);
 
         cbStop.setText("Stop");
+        cbStop.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                cbStopStateChanged(evt);
+            }
+        });
 
         spStop.setModel(new javax.swing.SpinnerDateModel(new java.util.Date(), null, null, java.util.Calendar.HOUR));
         spStop.setEnabled(false);
@@ -116,23 +117,43 @@ public class SchedulerMenu extends javax.swing.JDialog {
                 .addComponent(cbStop)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(spStop, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(58, Short.MAX_VALUE))
+                .addContainerGap(48, Short.MAX_VALUE))
         );
+
+        jButton1.setText("Cancel");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        jButton2.setText("OK");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(jButton2)
+                        .addGap(18, 18, 18)
+                        .addComponent(jButton1)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 81, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton1)
+                    .addComponent(jButton2))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -143,6 +164,16 @@ public class SchedulerMenu extends javax.swing.JDialog {
         spStart.setEnabled(cbStart.isSelected());
     }//GEN-LAST:event_cbStartStateChanged
 
+    private void cbStopStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_cbStopStateChanged
+        // TODO add your handling code here:
+        spStop.setEnabled(cbStop.isSelected());
+    }//GEN-LAST:event_cbStopStateChanged
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+        this.dispose();
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -150,6 +181,8 @@ public class SchedulerMenu extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox cbStart;
     private javax.swing.JCheckBox cbStop;
+    private javax.swing.JButton jButton1;
+    private javax.swing.JButton jButton2;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JSpinner spStart;
     private javax.swing.JSpinner spStop;
