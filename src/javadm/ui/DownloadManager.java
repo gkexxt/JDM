@@ -35,7 +35,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
+import static java.time.LocalDateTime.now;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.TimerTask;
 import javadm.com.Setting;
 import javadm.com.Download;
@@ -144,7 +146,7 @@ public class DownloadManager extends JFrame
         this.getContentPane().add(mainsplitpane);
         this.setLocationByPlatform(true);
         this.pack();
-        
+
         final Graphics2D gx = (Graphics2D) toolbar.getGraphics();
         final AffineTransform t = gx.getTransform();
         final double scaling = t.getScaleX(); // Assuming square pixels :P
@@ -227,6 +229,20 @@ public class DownloadManager extends JFrame
         System.out.println("javadm.ui.DownloadManager.newDataTable()");
     }
 
+    private void scheduller() {
+        for (Download download : downloads) {
+            //System.out.println("javadm.ui.DownloadManager.scheduller() : " + download.getName());
+            if (!download.isRunning() && download.getScheduleStart() != null && download.getScheduleStart().compareTo(new Date()) < 0) {
+                System.out.println("javadm.ui.DownloadManager.scheduller() : " + download.getName());
+            }
+
+            if (!download.isRunning() && download.getScheduleStop() != null && download.getScheduleStop().compareTo(new Date()) < 0) {
+                System.out.println("javadm.ui.DownloadManager.scheduller() : " + download.getName());
+            }
+
+        }
+    }
+
     public void setupDownloads() {
         DaoSqlite db = new DaoSqlite();
         downloads = db.getAllDownload();
@@ -266,6 +282,7 @@ public class DownloadManager extends JFrame
 
             }
         });
+       // refreshTable();
 
     }
 
@@ -281,10 +298,10 @@ public class DownloadManager extends JFrame
                 //updateUI();
                 //model.fireTableRowsUpdated(0, model.getRowCount() - 1);
                 //toolbar.refreshToolBar();
-                getSelectedDownload();
+                scheduller();
             }
         };
-        t.scheduleAtFixedRate(tt, 0, 100);
+        t.scheduleAtFixedRate(tt, 0, 1000);
     }
 
     /**

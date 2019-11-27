@@ -30,10 +30,16 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URL;
 import java.nio.file.Files;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import static java.time.LocalDateTime.now;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javadm.ui.DownloadControl;
 
 /**
@@ -57,11 +63,42 @@ public class Download {
     public static final String WARNING = "Warning";
     public static final String DEBUG = "Debug";
     public static final String INFO = "Info";
+    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     //download types
     public static final byte RESUMABLE = 1;
+
+    public Date getScheduleStart() {
+        try {
+            return formatter.parse(scheduleStart);
+        } catch (ParseException ex) {
+            Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public void setScheduleStart(String scheduleStart) {
+        this.scheduleStart = formatter.format(scheduleStart);
+    }
+
+    public Date getScheduleStop() {
+        try {
+            return formatter.parse(scheduleStop);
+        } catch (ParseException ex) {
+            Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public void setScheduleStop(Date scheduleStop) {
+        this.scheduleStop = formatter.format(scheduleStop);
+    }
     public static final byte DYNAMIC = -1;
     public static final byte NON_RESUMEABLE = -2;
     public static final byte UNKNOWN = 0;
+    private boolean scheduled = false;
+    private String scheduleStart = "";
+    private String scheduleStop = "";
 
     private int xxxx = 0;
     private volatile boolean needupdate = false;
@@ -101,6 +138,7 @@ public class Download {
         this.logMsgs = new ArrayList();
         this.downloadControl = new DownloadControl();// instace of control
         parts = new ArrayList<>();
+        this.scheduleStart = formatter.format(new Date());
     }
 
     public synchronized boolean isRunning() {

@@ -294,6 +294,7 @@ public class SettingMenu extends javax.swing.JDialog {
         setting.setAutoStart(cbAutostart.isSelected());
         setting.setDirectory(txtDirectory.getText());
         setting.setUserAgent(txtUagent.getText());
+        setting.setSchedulerEnable(cbScheduler.isSelected());
         if (rbCBsilent.isSelected()) {
             setting.setMonitorMode(2);
             dm.startClipListner();

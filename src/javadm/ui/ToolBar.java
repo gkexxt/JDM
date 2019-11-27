@@ -45,8 +45,10 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.net.URI;
 import javadm.com.Download;
+import javax.imageio.ImageTranscoder;
 import javax.swing.AbstractAction;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -308,6 +310,7 @@ public class ToolBar extends JPanel
                     //seldownload.setTitle("Download Options- " + selectedDownload.getData().getName());
                     break;
                 case SCHEDULE:
+                    new SchedulerMenu(dm, true, dm.getSelectedDownload()).setVisible(true);
                     //System.err.println(showChoice("wannaa bla bla", SCHEDULE));
                     break;
                 case GRAPH:
@@ -319,5 +322,7 @@ public class ToolBar extends JPanel
         }
 
     }
+    
+
 
 }
