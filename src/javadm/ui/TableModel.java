@@ -42,7 +42,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
             = {
                 "Name",
                 "Date",
-                "Path",
+                "rate",
                 "url",
                 "control",
                 "Progress",
@@ -74,7 +74,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
             case 1:
                 return downnload.getCreatedDate();
             case 2:
-                return downnload.getDirectory();
+                return downnload.getDownloadRate();
             case 3:
                 return downnload.getUrl();
             case 4:
@@ -119,7 +119,7 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
                     download.setCreatedDate(value.toString());
                     break;
                 case 2:
-                    download.setDirectory(value.toString());
+                    //download.setDirectory(value.toString());
                     break;
                 case 3:
                     download.setUrl(value.toString());

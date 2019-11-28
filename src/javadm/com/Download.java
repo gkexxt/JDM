@@ -63,9 +63,66 @@ public class Download {
     public static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
     //download types
     public static final byte RESUMABLE = 1;
+    public static final byte DYNAMIC = -1;
+    public static final byte NON_RESUMEABLE = -2;
+    public static final byte UNKNOWN = 0;
+    private boolean scheduled = false;
+    private String scheduleStart = "";
+    private String scheduleStop = "";
+    private int xxxx = 0;
+    private volatile boolean needupdate = false;
+    public byte type = UNKNOWN;
+    private int id;
+    private String name = "";
+    private String url = "";
+    private String directory = "";
+    private long fileSize;
+    private long doneSize;
+    private String createdDate = now().toString();
+    private String lastDate;
+    private String completeDate;
+    private String state;
+    private volatile double rate = 0;
+    private long last_data_time = 0;
+    private long current_data_time = 0;
+    private long last_data_size = 0;
+    private volatile String downloadRate;
+
+    private int connections = 1; //min
+    private boolean complete;
+    private int retry = 3;
+    private volatile boolean running;
+    private DownloadControl downloadControl;
+    private final PropertyChangeSupport propChangeSupport
+            = new PropertyChangeSupport(this);
+    private List<Part> parts;
+    List<Double> myList = new ArrayList<>();
+
+    public Download() {
+        this.logMsgs = new ArrayList();
+        this.downloadControl = new DownloadControl();// instace of control
+        parts = new ArrayList<>();
+        //this.scheduleStart = formatter.format(new Date());
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public boolean isScheduled() {
+        return scheduled;
+    }
+
+    public void setScheduled(boolean scheduled) {
+        this.scheduled = scheduled;
+    }
 
     public String getScheduleStart() {
-   
+
         return scheduleStart;
     }
 
@@ -80,60 +137,51 @@ public class Download {
     public void setScheduleStop(String scheduleStop) {
         this.scheduleStop = scheduleStop;
     }
-    public static final byte DYNAMIC = -1;
-    public static final byte NON_RESUMEABLE = -2;
-    public static final byte UNKNOWN = 0;
-    private boolean scheduled = false;
+    private int xxx=0;
 
-    public boolean isScheduled() {
-        return scheduled;
+    public synchronized String getDownloadRate() {
+        //System.err.println(rate);
+        current_data_time = new Date().getTime();
+
+        if (current_data_time - last_data_time > 1000) {
+            double ratex;
+            long xdone = this.doneSize;
+            ratex = (double) (xdone - last_data_size) / ((double) (current_data_time - last_data_time) / 1000);
+            //System.err.println(xdone);
+            //System.err.println(last_data_size);
+            //System.err.println(last_data_time);
+            //System.err.println(current_data_time);
+            last_data_size = xdone;
+            last_data_time = current_data_time;
+            //xxx++;
+
+            //System.err.println(ratex);
+            //System.err.println("------------------");
+
+            if (ratex > 0) {
+
+                xxx = (int) ratex;
+            }
+        }
+
+        if (xxx < 1) {
+            return "-";
+        } else if (xxx <= 1e+3) {
+            return (int)xxx + " Bps";
+        } else if (xxx <= 1e+6) {
+            return (int)(xxx / 1e+3) + " KBps";
+        } else if (xxx <= 1e+9) {
+            return (int)(xxx / 1e+6) + " MBps";
+        } else if (xxx <= 1e+12) {
+            return (int)(xxx / 1e+9) + " GBps";
+
+        } else {
+            return "-";
+        }
     }
-
-    public void setScheduled(boolean scheduled) {
-        this.scheduled = scheduled;
-    }
-    private String scheduleStart = "";
-    private String scheduleStop = "";
-
-    private int xxxx = 0;
-    private volatile boolean needupdate = false;
-    public byte type = UNKNOWN;
-    private int id;
-    private String name = "";
-    private String url = "";
-    private String directory = "";
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-    private long fileSize;
-    private long doneSize;
-    private String createdDate = now().toString();
-    private String lastDate;
-    private String completeDate;
-    private String state;
 
     public synchronized boolean isNeedupdate() {
         return needupdate;
-    }
-    private int connections = 1; //min
-    private boolean complete;
-    private int retry = 3;
-    private volatile boolean running;
-    private DownloadControl downloadControl;
-    private final PropertyChangeSupport propChangeSupport
-            = new PropertyChangeSupport(this);
-    private List<Part> parts;
-
-    public Download() {
-        this.logMsgs = new ArrayList();
-        this.downloadControl = new DownloadControl();// instace of control
-        parts = new ArrayList<>();
-        this.scheduleStart = formatter.format(new Date());
     }
 
     public synchronized boolean isRunning() {
@@ -286,11 +334,13 @@ public class Download {
     }
 
     public void startDownload() {
-        if (!isComplete()) {            
+        if (!isComplete()) {
             this.running = true;
             this.downloadControl.setLblControl(true);
             this.downloadControl.setRowlocked(true);
+            this.addLogMsg(new String[]{Download.INFO, "Download Started"});
             setState(Download.STDOWNLOADING);
+            last_data_time = new Date().getTime();
             new Downloader(this).startDownloader();
             this.needupdate = true;
             propChangeSupport.firePropertyChange("running", false, true);
@@ -304,6 +354,7 @@ public class Download {
         if (!isComplete()) {
             this.downloadControl.setLblControl(false);
             this.downloadControl.setRowlocked(false);
+            this.addLogMsg(new String[]{Download.INFO, "Download Stopped"});
             setState(Download.STSTOPED);
             setScheduled(false);
             this.running = false;

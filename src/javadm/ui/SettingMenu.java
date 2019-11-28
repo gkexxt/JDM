@@ -30,7 +30,7 @@ import javadm.com.Setting;
  * @author G.K #gkexxt@outlook.com
  */
 public class SettingMenu extends javax.swing.JDialog {
-    
+
     private DownloadManager dm;
     private Setting setting;
 
@@ -44,7 +44,7 @@ public class SettingMenu extends javax.swing.JDialog {
         super(downloadManager, modal);
         this.dm = downloadManager;
         this.setting = dm.getSetting();
-        initComponents();        
+        initComponents();
         txtDirectory.setText(setting.getDirectory());
         cbAutostart.setSelected(setting.isAutoStart());
         spConnCount.setValue(setting.getConnectionCount());
@@ -60,6 +60,7 @@ public class SettingMenu extends javax.swing.JDialog {
                 rbCBoff.setSelected(true);
                 break;
         }
+
         this.setLocation(downloadManager.getLocation().x + (downloadManager.getWidth() - this.getWidth()) / 2, downloadManager.getLocation().y + (downloadManager.getHeight() - this.getHeight()) / 2);
         setTitle("JDM Settings");
     }
@@ -307,6 +308,11 @@ public class SettingMenu extends javax.swing.JDialog {
             dm.stopClipListner();
         }
         dm.setSetting(setting);
+        if (cbScheduler.isSelected()) {
+            dm.scheduler_start();
+        } else {
+            dm.scheduler_stop();
+        }
         this.dispose();
 
     }//GEN-LAST:event_btnOKActionPerformed
@@ -320,7 +326,7 @@ public class SettingMenu extends javax.swing.JDialog {
         // TODO add your handling code here:
         btnReset.setEnabled(cbUAgent.isSelected());
         txtUagent.setEnabled(cbUAgent.isSelected());
-        
+
     }//GEN-LAST:event_cbUAgentStateChanged
 
     private void btnResetActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnResetActionPerformed

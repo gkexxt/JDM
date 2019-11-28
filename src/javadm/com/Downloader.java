@@ -161,9 +161,8 @@ public class Downloader implements Runnable, PropertyChangeListener {
         for (Part part : this.downloadParts) {
             if (part.getCurrentSize() < part.getSize()) {
                 allxCompletePart.add(part);
+                xCompletePart.add(part);
             }
-            xCompletePart.add(part);
-
         }
 
         stopWorker = false;
@@ -185,7 +184,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 }
 
             } else {
-
                 if (xCompletePart.size() > 0 && inQuePart.size() < 1) {
                     inQuePart.add(xCompletePart.get(0));
                     xCompletePart.remove(0);
@@ -198,8 +196,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     inQuePart.remove(0);
                     dt.addPropertyChangeListener(this);
                     dt.startDworker();
-                    //System.out.println("Spawning new thread --- ");
-
                 }
 
                 if (workerThreadCount < 1) {
@@ -221,27 +217,21 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
             }
         }
-
-        //System.err.println("controller exit");
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 
         rpart = (Part) evt.getNewValue();
-        //update part data
-        //DaoSqlite db = new DaoSqlite();
-        //db.updatePart(download.getId(), rpart);
         switch (download.getType()) {
 
             case Download.RESUMABLE:
-
                 if (rpart.getCurrentSize() < rpart.getSize()) {
                     errorCount++;
-                    //server only acceppt single connection
+                    //if server only accept single connection -> continue as long we have single conn active
                     if (workerDownloading && errorCount >= download.getRetry() * download.getConnections()) {
                         retryCount = 0;
-                        download.setConnections(1);
+                        //download.setConnections(1);
                     } else {
                         retryCount++;
                     }
@@ -256,7 +246,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 break;
 
             case Download.DYNAMIC:
-
                 //part size is 0 retry till max count
                 if (rpart.getCurrentSize() < 1) {
                     //remove old file
@@ -297,9 +286,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
         }
 
         decThreacount();
-
-        //System.err.println("Downloading : " + downloading);
-        //System.err.println("complete : " + completeParts);
     }
 
     class DownloadWorker implements Runnable {
@@ -408,6 +394,9 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     Thread.sleep(2000);
                     download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                         + connection_id + " Connection Error - code : " + responsecode});
+                    System.err.println("Part " + part.getCurrentSize() + " : "+ part.getSize() +" > " + part.getStartByte()+ " > " + part.getEndByte());
+                    System.err.println(part.isCompleted());
+                    
                     propChangeSupport.firePropertyChange("error", "error :" + responsecode, part);
 
                 }
@@ -442,9 +431,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 }
 
             }
-
-            //propChangeSupport.firePropertyChange("");
-            //System.err.println("thread exit");
+        
         }
 
     }

@@ -64,7 +64,7 @@ public class DownloadManager extends JFrame
     private Setting setting;
     private String clipedUrl;
     private java.util.List<Download> downloads;
-
+    private java.util.Timer scheduler;
     private DownloadManager me;
 
     public DownloadManager() {
@@ -174,7 +174,7 @@ public class DownloadManager extends JFrame
         checkDB();
         toolbar.setScale();
         //SettingDaoSqlite dbx = new SettingDaoSqlite();
-        //this.refreshTable();
+        //this.scheduler_start();
         //ClipboardTextListener xxx = new ClipboardTextListener();
     }
 
@@ -216,14 +216,14 @@ public class DownloadManager extends JFrame
             partok = db.isTableExists("downloadpart");
             if (settingok && dataok && partok) {
                 showInfo("Tables Initialized", "JDM", JOptionPane.INFORMATION_MESSAGE);
-                setupDownloads();
+                setupDownloadmanager();
             } else {
                 showInfo("Error Initializing Tables\nJDM will Exit", "JDM Error", JOptionPane.ERROR_MESSAGE);
                 System.exit(0);
             }
 
         } else if (settingok && dataok) {
-            setupDownloads();
+            setupDownloadmanager();
         }
     }
 
@@ -235,32 +235,7 @@ public class DownloadManager extends JFrame
         System.out.println("javadm.ui.DownloadManager.newDataTable()");
     }
 
-    private void scheduler() {
-        for (Download download : downloads) {
-            //System.out.println("javadm.ui.DownloadManager.scheduler() : " + download.getName());
-            try {
-                if (!download.isComplete() && !download.isRunning() && download.isScheduled()
-                        && Download.formatter.parse(download.getScheduleStart()).compareTo(new Date()) < 0) {
-                    System.out.println("Scheduler run : " + download.getName());
-                    download.startDownload();
-                }
-            } catch (Exception ex) {
-
-            }
-
-            try {
-                if (!download.isComplete() && download.isRunning() && download.isScheduled()
-                        && Download.formatter.parse(download.getScheduleStop()).compareTo(new Date()) < 0) {
-                    System.out.println("scheduler stop: " + download.getName());
-                    download.stopDownload();
-                }
-            } catch (Exception ex) {
-            }
-
-        }
-    }
-
-    public void setupDownloads() {
+    public void setupDownloadmanager() {
         DaoSqlite db = new DaoSqlite();
         downloads = db.getAllDownload();
         for (Download download : downloads) {
@@ -276,9 +251,11 @@ public class DownloadManager extends JFrame
         if (setting.getMonitorMode() > 0) {
             startClipListner();
         }
+        if(setting.isSchedulerEnable()){
+            scheduler_start();
+        }
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
-            // boolean alldownloadsStoped = true;
 
             @Override
             //stopping running download beforw closing
@@ -289,9 +266,6 @@ public class DownloadManager extends JFrame
                 SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
                     @Override
                     protected String doInBackground() throws InterruptedException {
-                        /**
-                         * stopping downloads
-                         */
                         boolean alldownloadsStoped = false;
                         while (!alldownloadsStoped) {
                             //System.out.println("javadm.ui.StopAndExit.<init>()");
@@ -302,10 +276,8 @@ public class DownloadManager extends JFrame
                                     download.stopDownload();
                                 }
                             }
-
                         }
                         return "done";
-
                     }
 
                     @Override
@@ -324,30 +296,57 @@ public class DownloadManager extends JFrame
                 } catch (Exception e1) {
                     e1.printStackTrace();
                 }
-
             }
         }
         );
-        refreshTable();
 
     }
 
     /**
      * refresh download table by timer
      */
-    public void refreshTable() {
-        java.util.Timer t = new java.util.Timer();
-        TimerTask tt;
-        tt = new TimerTask() {
+    public void scheduler_start() {
+        try{
+            scheduler.cancel();
+        }catch(Exception ex){}
+        
+        scheduler = new java.util.Timer();
+        TimerTask scheduledTask = new TimerTask() {
             @Override
             public void run() {
-                //updateUI();
-                //model.fireTableRowsUpdated(0, model.getRowCount() - 1);
-                //toolbar.refreshToolBar();
-                scheduler();
+                for (Download download : downloads) {
+                    try {
+                        if (!download.isComplete() && !download.isRunning() && download.isScheduled()
+                                && Download.formatter.parse(download.getScheduleStart()).compareTo(new Date()) < 0) {
+                            System.out.println("Scheduler run : " + download.getName());
+                            download.startDownload();
+                        }
+                    } catch (Exception ex) {
+
+                    }
+
+                    try {
+                        if (download.isScheduled() && download.isRunning()
+                                && Download.formatter.parse(download.getScheduleStop()).compareTo(new Date()) < 0) {
+                            System.out.println("scheduler stop: " + download.getName());
+                            download.stopDownload();
+                        }
+                    } catch (Exception ex) {
+                    }
+
+                }
             }
         };
-        t.scheduleAtFixedRate(tt, 0, 1000);
+        scheduler.scheduleAtFixedRate(scheduledTask, 0, 1000);
+    }
+
+    public void scheduler_stop() {
+
+        try {
+            scheduler.cancel();
+        } catch (Exception e) {
+        }
+
     }
 
     /**
@@ -542,7 +541,7 @@ public class DownloadManager extends JFrame
             javax.swing.SwingUtilities.invokeLater(() -> {
                 DownloadManager frame = new DownloadManager();
                 frame.showMe();
-                //frame.refreshTable();
+                //frame.scheduler_start();
 
             });
 
