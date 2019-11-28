@@ -36,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javadm.ui.DownloadControl;
 
 /**
@@ -137,14 +139,18 @@ public class Download {
     public void setScheduleStop(String scheduleStop) {
         this.scheduleStop = scheduleStop;
     }
-    private int xxx=0;
+  
+    double ratex = 0;
 
     public synchronized String getDownloadRate() {
+
+        if (!running) {
+            return "0 KB/s";
+        }
         //System.err.println(rate);
         current_data_time = new Date().getTime();
 
         if (current_data_time - last_data_time > 1000) {
-            double ratex;
             long xdone = this.doneSize;
             ratex = (double) (xdone - last_data_size) / ((double) (current_data_time - last_data_time) / 1000);
             //System.err.println(xdone);
@@ -156,28 +162,24 @@ public class Download {
             //xxx++;
 
             //System.err.println(ratex);
-            //System.err.println("------------------");
-
-            if (ratex > 0) {
-
-                xxx = (int) ratex;
-            }
+            //System.err.println("------------------");      
         }
 
-        if (xxx < 1) {
-            return "-";
-        } else if (xxx <= 1e+3) {
-            return (int)xxx + " Bps";
-        } else if (xxx <= 1e+6) {
-            return (int)(xxx / 1e+3) + " KBps";
-        } else if (xxx <= 1e+9) {
-            return (int)(xxx / 1e+6) + " MBps";
-        } else if (xxx <= 1e+12) {
-            return (int)(xxx / 1e+9) + " GBps";
+        if (ratex < 1) {
+            return "0 KB/s";
+        } else if (ratex <= 1e+3) {
+            return (int) ratex + " B/s";
+        } else if (ratex <= 1e+6) {
+            return (int) (ratex / 1e+3) + " KB/s";
+        } else if (ratex <= 1e+9) {
+            return (int) (ratex / 1e+6) + " MB/s";
+        } else if (ratex <= 1e+12) {
+            return (int) (ratex / 1e+9) + " GB/s";
 
         } else {
-            return "-";
+            return "Unknown";
         }
+
     }
 
     public synchronized boolean isNeedupdate() {
@@ -266,7 +268,7 @@ public class Download {
      *
      * @param errorMessage
      */
-    public synchronized void addLogMsg(String[] errorMessage) {
+    public  void addLogMsg(String[] errorMessage) {
         this.logMsgs.add(errorMessage);
         propChangeSupport.firePropertyChange("addErrorMessage", "errorMessage", "update");
     }
@@ -410,13 +412,24 @@ public class Download {
         int append = 1;
         String tempname = getName();
         while (true) {
-            File tmpfile = new File(getDirectory() + "/" + getName());
+            File tmpfile = new File(getDirectory() + "/" + tempname);
+            System.err.println(tempname);
             if (tmpfile.exists()) {
-                addLogMsg(new String[]{Download.WARNING, "File with same name exist - " + getName()});
-                setName(tempname + "-" + append);
-                addLogMsg(new String[]{Download.WARNING, "renaming file to - " + getName()});
+                //System.err.println("exist");
+                addLogMsg(new String[]{Download.WARNING, "File with same name exist - " + tempname});
+                //System.err.println("add message");
+                tempname = tempname + "-" + append;
+                addLogMsg(new String[]{Download.WARNING, "renaming file to - " + tempname});
+                //System.err.println("add message 2");
                 append++;
+                //System.err.println("append : " + append);
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+                }
             } else {
+                this.setName(tempname);
                 break;
             }
         }
