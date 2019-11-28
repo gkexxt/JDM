@@ -65,7 +65,11 @@ public class DownloadManager extends JFrame
     private String clipedUrl;
     private java.util.List<Download> downloads;
 
+    private DownloadManager me;
+
     public DownloadManager() {
+
+        me = this;
 
     }
 
@@ -231,9 +235,9 @@ public class DownloadManager extends JFrame
         System.out.println("javadm.ui.DownloadManager.newDataTable()");
     }
 
-    private void scheduller() {
+    private void scheduler() {
         for (Download download : downloads) {
-            //System.out.println("javadm.ui.DownloadManager.scheduller() : " + download.getName());
+            //System.out.println("javadm.ui.DownloadManager.scheduler() : " + download.getName());
             try {
                 if (!download.isComplete() && !download.isRunning() && download.isScheduled()
                         && Download.formatter.parse(download.getScheduleStart()).compareTo(new Date()) < 0) {
@@ -241,14 +245,12 @@ public class DownloadManager extends JFrame
                     download.startDownload();
                 }
             } catch (Exception ex) {
-                
+
             }
-            
-            
 
             try {
-                if ( !download.isComplete() && download.isRunning() && download.isScheduled()
-                        &&  Download.formatter.parse(download.getScheduleStop()).compareTo(new Date()) < 0) {
+                if (!download.isComplete() && download.isRunning() && download.isScheduled()
+                        && Download.formatter.parse(download.getScheduleStop()).compareTo(new Date()) < 0) {
                     System.out.println("scheduler stop: " + download.getName());
                     download.stopDownload();
                 }
@@ -276,27 +278,56 @@ public class DownloadManager extends JFrame
         }
 
         this.addWindowListener(new java.awt.event.WindowAdapter() {
-            boolean alldownloadsStoped = true;
+            // boolean alldownloadsStoped = true;
 
             @Override
             //stopping running download beforw closing
             public void windowClosing(java.awt.event.WindowEvent windowEvent) {
-                while (true) {
-                    alldownloadsStoped = true;
-                    for (Download download : downloads) {
-                        if (download.isRunning() || download.isNeedupdate()) {
-                            alldownloadsStoped = false;
-                            download.stopDownload();
+                StopAndExit spe = new StopAndExit(me, true);
+                //SwingUtilities.invokeAndWait();
+
+                SwingWorker<String, Void> worker = new SwingWorker<String, Void>() {
+                    @Override
+                    protected String doInBackground() throws InterruptedException {
+                        /**
+                         * stopping downloads
+                         */
+                        boolean alldownloadsStoped = false;
+                        while (!alldownloadsStoped) {
+                            //System.out.println("javadm.ui.StopAndExit.<init>()");
+                            alldownloadsStoped = true;
+                            for (Download download : downloads) {
+                                if (download.isRunning() || download.isNeedupdate()) {
+                                    alldownloadsStoped = false;
+                                    download.stopDownload();
+                                }
+                            }
+
                         }
-                    }
-                    if (alldownloadsStoped) {
-                        System.exit(0);
+                        return "done";
+
                     }
 
+                    @Override
+                    protected void done() {
+                        spe.dispose();
+                    }
+                };
+
+                worker.execute();
+                spe.setVisible(true);
+                try {
+                    if (worker.get().equals("done")) {
+                        System.out.println(".windowClosing()");
+                        System.exit(0);
+                    }
+                } catch (Exception e1) {
+                    e1.printStackTrace();
                 }
 
             }
-        });
+        }
+        );
         refreshTable();
 
     }
@@ -313,7 +344,7 @@ public class DownloadManager extends JFrame
                 //updateUI();
                 //model.fireTableRowsUpdated(0, model.getRowCount() - 1);
                 //toolbar.refreshToolBar();
-                scheduller();
+                scheduler();
             }
         };
         t.scheduleAtFixedRate(tt, 0, 1000);

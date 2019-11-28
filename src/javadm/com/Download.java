@@ -286,13 +286,13 @@ public class Download {
     }
 
     public void startDownload() {
-        if (!isComplete()) {
+        if (!isComplete()) {            
+            this.running = true;
             this.downloadControl.setLblControl(true);
             this.downloadControl.setRowlocked(true);
             setState(Download.STDOWNLOADING);
             new Downloader(this).startDownloader();
             this.needupdate = true;
-            this.running = true;
             propChangeSupport.firePropertyChange("running", false, true);
         } else {
             addLogMsg(new String[]{Download.ERROR, "Download already completed"});

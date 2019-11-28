@@ -351,10 +351,10 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     conn.setRequestProperty("Range", "bytes=" + byteRange);
                     //System.out.println("bytes=" + byteRange);
                     conn.setConnectTimeout(5000);
-                    conn.setReadTimeout(60000);
+                    conn.setReadTimeout(10000);
                 } else {
                     conn.setConnectTimeout(10000);
-                    conn.setReadTimeout(180000);
+                    conn.setReadTimeout(60000);
                 }
                 conn.setRequestProperty("User-Agent", download.getUserAgent());
                 // connect to server

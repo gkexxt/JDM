@@ -48,6 +48,7 @@ public class SettingMenu extends javax.swing.JDialog {
         txtDirectory.setText(setting.getDirectory());
         cbAutostart.setSelected(setting.isAutoStart());
         spConnCount.setValue(setting.getConnectionCount());
+        cbScheduler.setSelected(setting.isSchedulerEnable());
         switch (setting.getMonitorMode()) {
             case 1:
                 rbCBmon.setSelected(true);
