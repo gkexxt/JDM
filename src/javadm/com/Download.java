@@ -36,8 +36,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javadm.ui.DownloadControl;
 
 /**
@@ -48,7 +46,7 @@ import javadm.ui.DownloadControl;
 public class Download {
 
     private String userAgent;
-    private final List<String[]> logMsgs;
+    private volatile ArrayList<String[]> logMsgs;
     //Download states
     public static final String STCOMPLETE = "Complete";
     public static final String STERROR = "Error";
@@ -71,7 +69,6 @@ public class Download {
     private boolean scheduled = false;
     private String scheduleStart = "";
     private String scheduleStop = "";
-    private int xxxx = 0;
     private volatile boolean needupdate = false;
     public byte type = UNKNOWN;
     private int id;
@@ -84,12 +81,9 @@ public class Download {
     private String lastDate;
     private String completeDate;
     private String state;
-    private volatile double rate = 0;
     private long last_data_time = 0;
     private long current_data_time = 0;
     private long last_data_size = 0;
-    private volatile String downloadRate;
-
     private int connections = 1; //min
     private boolean complete;
     private int retry = 3;
@@ -98,13 +92,13 @@ public class Download {
     private final PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
     private List<Part> parts;
-    List<Double> myList = new ArrayList<>();
+    private int rate = 0;
 
     public Download() {
-        this.logMsgs = new ArrayList();
+        this.logMsgs = new ArrayList<>();
         this.downloadControl = new DownloadControl();// instace of control
         parts = new ArrayList<>();
-        //this.scheduleStart = formatter.format(new Date());
+        
     }
 
     public String getState() {
@@ -139,47 +133,37 @@ public class Download {
     public void setScheduleStop(String scheduleStop) {
         this.scheduleStop = scheduleStop;
     }
-  
-    double ratex = 0;
 
     public synchronized String getDownloadRate() {
-
-        if (!running) {
-            return "0 KB/s";
-        }
         //System.err.println(rate);
+
+        if (!this.isRunning()) {
+            return "0 B/s";
+        }
+
         current_data_time = new Date().getTime();
 
         if (current_data_time - last_data_time > 1000) {
+            double rateDouble;
             long xdone = this.doneSize;
-            ratex = (double) (xdone - last_data_size) / ((double) (current_data_time - last_data_time) / 1000);
-            //System.err.println(xdone);
-            //System.err.println(last_data_size);
-            //System.err.println(last_data_time);
-            //System.err.println(current_data_time);
+            rateDouble = (double) (xdone - last_data_size)
+                    / ((double) (current_data_time - last_data_time) / 1000);
             last_data_size = xdone;
             last_data_time = current_data_time;
-            //xxx++;
-
-            //System.err.println(ratex);
-            //System.err.println("------------------");      
+            rate = (int) rateDouble;
         }
 
-        if (ratex < 1) {
-            return "0 KB/s";
-        } else if (ratex <= 1e+3) {
-            return (int) ratex + " B/s";
-        } else if (ratex <= 1e+6) {
-            return (int) (ratex / 1e+3) + " KB/s";
-        } else if (ratex <= 1e+9) {
-            return (int) (ratex / 1e+6) + " MB/s";
-        } else if (ratex <= 1e+12) {
-            return (int) (ratex / 1e+9) + " GB/s";
-
+        if (rate <= 1e+3) {
+            return (int) rate + " B/s";
+        } else if (rate <= 1e+6) {
+            return (int) (rate / 1e+3) + " KB/s";
+        } else if (rate <= 1e+9) {
+            return (int) (rate / 1e+6) + " MB/s";
+        } else if (rate <= 1e+12) {
+            return (int) (rate / 1e+9) + " GB/s";
         } else {
-            return "Unknown";
+            return (int) (rate / 1e+12) + " TB/s";
         }
-
     }
 
     public synchronized boolean isNeedupdate() {
@@ -268,7 +252,7 @@ public class Download {
      *
      * @param errorMessage
      */
-    public  void addLogMsg(String[] errorMessage) {
+    public synchronized void addLogMsg(String[] errorMessage) {
         this.logMsgs.add(errorMessage);
         propChangeSupport.firePropertyChange("addErrorMessage", "errorMessage", "update");
     }
@@ -369,8 +353,6 @@ public class Download {
     }
 
     public void updateDownload() {
-        System.out.println(xxxx);
-        xxxx++;
 
         //check if all part is complete
         boolean allPartComplete = true;
@@ -397,39 +379,28 @@ public class Download {
             setCompleteDate(now().toString());
             db.deleteParts(this.getId());
             buildfile();
+            db.updateDownload(this);
 
         }
 
-        db.updateDownload(this);
         this.downloadControl.setLblControl(false);
         this.downloadControl.setRowlocked(false);
         needupdate = false;
+    
+}
 
-    }
-
-    private boolean buildfile() {
+private boolean buildfile() {
         //check if file exist anf rename to something else
         int append = 1;
         String tempname = getName();
         while (true) {
-            File tmpfile = new File(getDirectory() + "/" + tempname);
-            System.err.println(tempname);
+            File tmpfile = new File(getDirectory() + "/" + getName());
             if (tmpfile.exists()) {
-                //System.err.println("exist");
-                addLogMsg(new String[]{Download.WARNING, "File with same name exist - " + tempname});
-                //System.err.println("add message");
-                tempname = tempname + "-" + append;
-                addLogMsg(new String[]{Download.WARNING, "renaming file to - " + tempname});
-                //System.err.println("add message 2");
+                addLogMsg(new String[]{Download.WARNING, "File with same name exist - " + getName()});
+                setName(tempname + "-" + append);
+                addLogMsg(new String[]{Download.WARNING, "renaming file to - " + getName()});
                 append++;
-                //System.err.println("append : " + append);
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
-                }
             } else {
-                this.setName(tempname);
                 break;
             }
         }
