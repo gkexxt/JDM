@@ -38,7 +38,7 @@ public class Part {
     private long size;
     private String partFileName;
     private boolean completed;
-    public static long partSize = 500000; //default 5Mb
+    public static long partSize = 1000000; //default 5Mb
     private int id;
 
     public int getId() {

@@ -527,7 +527,7 @@ public class DownloadManager extends JFrame
              */
             String osname = System.getProperty("os.name").toLowerCase();
             if (osname.contains("linux")) {
-                UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+                UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
             } else if (System.getProperty("os.name").contains("window")) {
                 UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
             } else {

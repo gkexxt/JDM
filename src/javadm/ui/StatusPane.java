@@ -226,6 +226,7 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
             pprogress.setStringPainted(true);
             plist.add(pprogress);
             progressView.add(pprogress);
+            progressView.add(Box.createRigidArea(new Dimension(0, 7)));
         }
 
         this.repaint();
