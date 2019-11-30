@@ -54,7 +54,7 @@ public class SchedulerMenu extends javax.swing.JDialog {
         initComponents();
 
         try {
-            spStart.setValue(Download.formatter.parse(download.getScheduleStart()));
+            spStart.setValue(Download.FORMATTER.parse(download.getScheduleStart()));
             cbStart.setEnabled(true);
             cbStart.setSelected(true);
 
@@ -63,7 +63,7 @@ public class SchedulerMenu extends javax.swing.JDialog {
         }
 
         try {
-            spStop.setValue(Download.formatter.parse(download.getScheduleStop()));
+            spStop.setValue(Download.FORMATTER.parse(download.getScheduleStop()));
             cbStop.setEnabled(true);
             cbStop.setSelected(true);
         } catch (Exception ex) {
@@ -235,12 +235,12 @@ public class SchedulerMenu extends javax.swing.JDialog {
         // TODO add your handling code here:
 
         if (cbStart.isSelected()) {
-            download.setScheduleStart(Download.formatter.format((Date) spStart.getValue()));
+            download.setScheduleStart(Download.FORMATTER.format((Date) spStart.getValue()));
         } else {
             download.setScheduleStart(null);
         }
         if (cbStop.isSelected()) {
-            download.setScheduleStop(Download.formatter.format((Date) spStop.getValue()));
+            download.setScheduleStop(Download.FORMATTER.format((Date) spStop.getValue()));
         } else {
             download.setScheduleStop(null);
         }

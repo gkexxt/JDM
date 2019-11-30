@@ -98,12 +98,13 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         //if part is not initialized
         if (download.getType() == Download.UNKNOWN) {
+            System.out.println("javadm.com.Downloader init part");
 
             String accept_ranges = "";
             try {
 
                 URL urlTemp;
-
+                
                 urlTemp = new URL(download.getUrl());
                 HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
                 conn.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server

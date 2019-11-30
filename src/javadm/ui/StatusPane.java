@@ -30,66 +30,81 @@ package javadm.ui;
  */
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import javax.swing.JTabbedPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import java.awt.GridLayout;
-import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 import javadm.com.Download;
+import javadm.com.Part;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.border.LineBorder;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 
-public class StatusPane extends JPanel {
+public class StatusPane extends JPanel implements TableModelListener, PropertyChangeListener {
 
-    private final DownloadManager dm;
     private final JTable errorView = new JTable();
-    private JLabel progressView = new JLabel();
-    private String downloadInstance = "";
-    private final DefaultTableModel errmodel;
+    private JProgressBar mainbar = new JProgressBar();
+    private JPanel progressView = new JPanel();
+    private Download sDownload;
+    ArrayList<JProgressBar> plist = new ArrayList<>();
+    JScrollPane logpane;
+    typeRenderor typernderer = new typeRenderor();
+    msgRenderer msgrenderer = new msgRenderer();
 
-    private int last_line = 0;
-
-    public StatusPane(DownloadManager downloadManager) {
-
+    public StatusPane() {
         super(new GridLayout(1, 1));
-        this.dm = downloadManager;
-
-        //currentSelected = new Download();
-        //errorView.setForeground(Color.RED);
-        //errorView.setEditable(false);;
-        //create tabbedpane
         JTabbedPane tabbedPane = new JTabbedPane();
-        tabbedPane.addTab("Info", new JScrollPane(errorView));
-        tabbedPane.setMnemonicAt(0, KeyEvent.VK_1);
+        tabbedPane.addTab("Info", logpane = new JScrollPane(errorView));
+
+        progressView.setLayout(new BoxLayout(progressView, BoxLayout.PAGE_AXIS));
 
         tabbedPane.addTab("Progress", new JScrollPane(progressView));
-        tabbedPane.setMnemonicAt(1, KeyEvent.VK_2);
-
         //Add the tabbed pane to this panel.
         this.add(tabbedPane);
 
         //The following line enables to use scrolling tabs.
         tabbedPane.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
 
-        errmodel = new DefaultTableModel() {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        errorView.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-        errmodel.addColumn("Type");
-        errmodel.addColumn("Message");
-        errorView.setModel(errmodel);
         errorView.setVisible(true);
-        typeRenderor typernderer = new typeRenderor();
-        msgRenderer msgrenderer = new msgRenderer();
-        errorView.getColumn("Type").setCellRenderer(typernderer);
-        errorView.getColumn("Message").setCellRenderer(msgrenderer);
-        errorView.getColumn("Type").setPreferredWidth(90);
-        errorView.getColumn("Message").setPreferredWidth(1000);
+
+    }
+
+    public void setsDownload(Download download) {
+        if (sDownload != null) {
+            this.sDownload.removePropertyChangeListener(this);
+        }
+        if (download != null) {
+            this.sDownload = download;
+            this.sDownload.addPropertyChangeListener(this);
+            updateErrorView(this.sDownload);
+            setupProgressView(this.sDownload);
+        }
+    }
+
+    @Override
+    public void tableChanged(TableModelEvent e) {
+        SwingUtilities.invokeLater(() -> {
+            logpane.getVerticalScrollBar().setValue(logpane.getVerticalScrollBar().getMaximum());
+        });
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        SwingUtilities.invokeLater(() -> {
+            updateProgressView();
+        });
 
     }
 
@@ -126,44 +141,83 @@ public class StatusPane extends JPanel {
 
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
             Component c = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             c.setBackground(Color.lightGray);
             return c;
-
         }
     }
 
-    public void updateErrorView() {
+    public void updateErrorView(Download download) {
+        errorView.getModel().removeTableModelListener(this);
+        errorView.setModel(download.getLogmodel());
+        errorView.getModel().addTableModelListener(this);
+        errorView.getColumn("Type").setCellRenderer(typernderer);
+        errorView.getColumn("Message").setCellRenderer(msgrenderer);
+        errorView.getColumn("Type").setPreferredWidth(90);
+        errorView.getColumn("Message").setPreferredWidth(1000);
 
-        //List <String[]> error_log = dm.getSelectedDownload().getLogMsgs();
-        if (dm.getSelectedDownload() == null) {
-            this.setVisible(false);
-            return;
+    }
+
+    public void updateProgressView() {
+        if (sDownload.getParts().size() != plist.size()) {
+            setupProgressView(sDownload);
         }
 
-        if (dm.getSelectedDownload().getLogMsgs().size() < 1) {
-            downloadInstance = dm.getSelectedDownload().toString();
-            errmodel.setRowCount(0);
-            return;
-        }
+        var xxx = ((double) sDownload.getDoneSize() / sDownload.getFileSize()) * 100.00;
+        mainbar.setValue((int) xxx);
+        mainbar.setString((int) xxx + "%");
 
-        if (!dm.getSelectedDownload().toString().equals(downloadInstance)) {
-            System.out.println("change");
-            errmodel.setRowCount(0);
-            downloadInstance = dm.getSelectedDownload().toString();
-            for (String[] msg : dm.getSelectedDownload().getLogMsgs()) {
-                errmodel.addRow(msg);
+        if (plist.size() > 0) {
+            for (int i = 0; i < sDownload.getParts().size(); i++) {
+                Part part = sDownload.getParts().get(i);
+                xxx = ((double) part.getCurrentSize() / part.getSize()) * 100.00;
+                plist.get(i).setValue((int) xxx);
+                plist.get(i).setString((int) xxx + "%");
             }
-            last_line = dm.getSelectedDownload().getLogMsgs().size();
-
-        } else if (dm.getSelectedDownload().toString().equals(downloadInstance) && dm.getSelectedDownload().getLogMsgs().size() != last_line) {
-
-            last_line = dm.getSelectedDownload().getLogMsgs().size();
-            errmodel.addRow(dm.getSelectedDownload().getLogMsgs().get(last_line - 1));
-
         }
-//
+
+    }
+
+    public void setupProgressView(Download download) {
+        
+        if (download == null) {
+            this.setVisible(false);
+            progressView.removeAll();
+            plist.clear();
+            return;
+        }
+
+        progressView.removeAll();
+        plist.clear();
+
+        progressView.add(Box.createRigidArea(new Dimension(0, 10)));
+        progressView.add(new JLabel("Overall Progress"));
+        //Font fx = new Font("Arial",14,Font.PLAIN) ;
+        mainbar.setFont(new Font(mainbar.getFont().getName(), Font.PLAIN, 17));
+        mainbar.setStringPainted(true);
+        var xxx = ((double) sDownload.getDoneSize() / sDownload.getFileSize()) * 100.00;
+        mainbar.setString((int) xxx + "%");
+        mainbar.setValue((int) xxx);
+        mainbar.setBorder(new LineBorder(Color.GREEN, 1));
+        progressView.add(mainbar);
+        progressView.add(Box.createRigidArea(new Dimension(0, 12)));
+
+        System.out.println("javadm.ui.StatusPane.setupProgressView()");
+
+        for (int i = 0; i < download.getParts().size(); i++) {
+            JProgressBar pprogress = new JProgressBar();
+
+            xxx = ((double) download.getParts().get(i).getCurrentSize() / download.getParts().get(i).getSize()) * 100.00;
+            progressView.add(new JLabel("Part : " + (i + 1)));
+            pprogress.setString((int) xxx + "%");
+            pprogress.setValue((int) xxx);
+            pprogress.setStringPainted(true);
+            plist.add(pprogress);
+            progressView.add(pprogress);
+        }
+
+        this.repaint();
+
     }
 
 }

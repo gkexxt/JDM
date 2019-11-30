@@ -154,7 +154,8 @@ public class DaoSqlite implements DaoAPI {
             PreparedStatement ps = connection.prepareStatement("UPDATE "
                     + "downloaddata SET name=?, url=?, directory=?, fsize=?, "
                     + "dnsize=?, crtdate=?, lstdate=?, cmpdate=?, type=?, "
-                    + "user_agent=?, complete=?, connection=?, state=?, s_start=?, s_stop=?, scheduled=? WHERE id=?");
+                    + "user_agent=?, complete=?, connection=?, "
+                    + "state=?, s_start=?, s_stop=?, scheduled=? WHERE id=?");
             ps.setString(1, download.getName());
             ps.setString(2, download.getUrl());
             ps.setString(3, download.getDirectory());
@@ -163,7 +164,7 @@ public class DaoSqlite implements DaoAPI {
             ps.setString(6, download.getCreatedDate());
             ps.setString(7, download.getLastDate());
             ps.setString(8, download.getCompleteDate());
-            ps.setByte(9, download.getType());
+            ps.setInt(9, download.getType());
             ps.setString(10, download.getUserAgent());
             ps.setBoolean(11, download.isComplete());
             ps.setInt(12, download.getConnections());

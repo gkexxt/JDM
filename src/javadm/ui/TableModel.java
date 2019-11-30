@@ -35,7 +35,7 @@ import javax.swing.JProgressBar;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class TableModel extends RowTableModel<Download> implements PropertyChangeListener {
+public class TableModel extends RowTableModel<Download> {
 
     //private static int  xxx = 0;
     private static final String[] COLUMN_NAMES
@@ -153,9 +153,6 @@ public class TableModel extends RowTableModel<Download> implements PropertyChang
 
     }
 
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-        fireTableRowsUpdated(0, this.getRowCount());
-    }
+
 
 }

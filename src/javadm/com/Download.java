@@ -37,6 +37,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javadm.ui.DownloadControl;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * collection of data + controls
@@ -46,7 +47,6 @@ import javadm.ui.DownloadControl;
 public class Download {
 
     private String userAgent;
-    private volatile ArrayList<String[]> logMsgs;
     //Download states
     public static final String STCOMPLETE = "Complete";
     public static final String STERROR = "Error";
@@ -59,8 +59,7 @@ public class Download {
     public static final String WARNING = "Warning";
     public static final String DEBUG = "Debug";
     public static final String INFO = "Info";
-    public static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    public static final SimpleDateFormat formatter = new SimpleDateFormat(DATE_FORMAT);
+    public static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     //download types
     public static final byte RESUMABLE = 1;
     public static final byte DYNAMIC = -1;
@@ -93,12 +92,21 @@ public class Download {
             = new PropertyChangeSupport(this);
     private List<Part> parts;
     private int rate = 0;
+    private final DefaultTableModel logmodel;
 
     public Download() {
-        this.logMsgs = new ArrayList<>();
         this.downloadControl = new DownloadControl();// instace of control
         parts = new ArrayList<>();
-        
+        logmodel = new DefaultTableModel() {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        logmodel.addColumn("Time");
+        logmodel.addColumn("Type");
+        logmodel.addColumn("Message");
+
     }
 
     public String getState() {
@@ -186,6 +194,10 @@ public class Download {
         return type;
     }
 
+    public DefaultTableModel getLogmodel() {
+        return logmodel;
+    }
+
     public void setType(byte type) {
         this.type = type;
 
@@ -244,17 +256,13 @@ public class Download {
 
     }
 
-    public List<String[]> getLogMsgs() {
-        return logMsgs;
-    }
-
     /**
      *
      * @param errorMessage
      */
     public synchronized void addLogMsg(String[] errorMessage) {
-        this.logMsgs.add(errorMessage);
-        propChangeSupport.firePropertyChange("addErrorMessage", "errorMessage", "update");
+        String[] msgx = new String[]{FORMATTER.format(new Date()), errorMessage[0], errorMessage[1]};
+        logmodel.addRow(msgx);
     }
 
     /**
@@ -377,20 +385,26 @@ public class Download {
             setComplete(true);
             setState(Download.STCOMPLETE);
             setCompleteDate(now().toString());
-            db.deleteParts(this.getId());
-            buildfile();
-            db.updateDownload(this);
+            //db.deleteParts(this.getId());
+            try {
+                buildfile();
+            } catch (Exception ex) {
+                addLogMsg(new String[]{ERROR, "Error build file :" + getName()});
+                setComplete(false);
+            }
 
         }
 
+        db.updateDownload(this);
         this.downloadControl.setLblControl(false);
         this.downloadControl.setRowlocked(false);
         needupdate = false;
-    
-}
 
-private boolean buildfile() {
+    }
+
+    private boolean buildfile() {
         //check if file exist anf rename to something else
+
         int append = 1;
         String tempname = getName();
         while (true) {

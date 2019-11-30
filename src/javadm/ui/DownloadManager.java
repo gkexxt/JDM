@@ -54,7 +54,7 @@ public class DownloadManager extends JFrame
     //private final DataManager dm = new DataManager();//data manager handle items data
     private JSplitPane splitPaneHortizontal;
     private JSplitPane splitPaneVertical;
-    private final JList list = new JList(); //hold download items data
+    private final JList<String> list = new JList<>(); //hold download items data
     private DownloadTable table;
     private TableModel model;
     private JSplitPane mainsplitpane;
@@ -87,7 +87,7 @@ public class DownloadManager extends JFrame
      * Create the DownloadManager and show it.
      */
     public void showMe() {
-        DefaultListModel listModel = new DefaultListModel();
+        DefaultListModel<String> listModel = new DefaultListModel<>();
         String[] category = {"All", "Active", "Inactive", "Completed"};
         for (String item : category) {
             listModel.addElement(item);
@@ -105,7 +105,6 @@ public class DownloadManager extends JFrame
         toolbar = new ToolBar(this);
 
         //Vertical panels - downloadpane+StatusPane
-        statusPane = new StatusPane(this);
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         //table.setRowSelectionInterval(0, 0);
         table.setOpaque(false);
@@ -114,6 +113,7 @@ public class DownloadManager extends JFrame
 
         splitPaneHortizontal = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
                 categoryPane, downloadPane);
+        statusPane = new StatusPane();
 
         splitPaneVertical = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
                 splitPaneHortizontal, statusPane);
@@ -143,7 +143,7 @@ public class DownloadManager extends JFrame
 
         table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
             toolbar.refreshToolBar();
-            statusPane.updateErrorView();
+            statusPane.setsDownload(getSelectedDownload());
         });
 
         //Create and set up the stage.
@@ -242,7 +242,6 @@ public class DownloadManager extends JFrame
             download.setParts(db.getParts(download.getId()));
             download.setProgress(0);
             model.addRow(download);
-            download.addPropertyChangeListener(model);
             download.addPropertyChangeListener(this);
         }
 
@@ -251,7 +250,7 @@ public class DownloadManager extends JFrame
         if (setting.getMonitorMode() > 0) {
             startClipListner();
         }
-        if(setting.isSchedulerEnable()){
+        if (setting.isSchedulerEnable()) {
             scheduler_start();
         }
 
@@ -306,18 +305,19 @@ public class DownloadManager extends JFrame
      * refresh download table by timer
      */
     public void scheduler_start() {
-        try{
+        try {
             scheduler.cancel();
-        }catch(Exception ex){}
-        
+        } catch (Exception ex) {
+        }
+
         scheduler = new java.util.Timer();
         TimerTask scheduledTask = new TimerTask() {
             @Override
             public void run() {
                 for (Download download : downloads) {
                     try {
-                        if (!download.isComplete() && !download.isRunning() && download.isScheduled()
-                                && Download.formatter.parse(download.getScheduleStart()).compareTo(new Date()) < 0) {
+                        if (download.isScheduled() && !download.isComplete() && !download.isRunning() 
+                                && Download.FORMATTER.parse(download.getScheduleStart()).compareTo(new Date()) < 0) {
                             System.out.println("Scheduler run : " + download.getName());
                             download.startDownload();
                         }
@@ -327,7 +327,7 @@ public class DownloadManager extends JFrame
 
                     try {
                         if (download.isScheduled() && download.isRunning()
-                                && Download.formatter.parse(download.getScheduleStop()).compareTo(new Date()) < 0) {
+                                && Download.FORMATTER.parse(download.getScheduleStop()).compareTo(new Date()) < 0) {
                             System.out.println("scheduler stop: " + download.getName());
                             download.stopDownload();
                         }
@@ -611,16 +611,18 @@ public class DownloadManager extends JFrame
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        model.fireTableRowsUpdated(0, model.getRowCount());
-        toolbar.refreshToolBar();
-        if (evt.getPropertyName().equals("addErrorMessage")) {
-            statusPane.updateErrorView();
-        } else if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0
-                && !evt.getNewValue().toString().equals(clipedUrl)) {
-            clipedUrl = evt.getNewValue().toString();
-            clipMonitorParse(evt.getNewValue().toString());
 
-        }
+        SwingUtilities.invokeLater(() -> {
+            model.fireTableRowsUpdated(0, model.getRowCount());
+            toolbar.refreshToolBar();
+            if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0
+                    && !evt.getNewValue().toString().equals(clipedUrl)) {
+                clipedUrl = evt.getNewValue().toString();
+                clipMonitorParse(evt.getNewValue().toString());
+                
+            }
+        });
+
     }
 
 }

@@ -206,6 +206,8 @@ public class ToolBar extends JPanel
     }
 
     public void refreshToolBar() {
+        
+        try{
         selectedDownload = dm.getSelectedDownload();
         if (selectedDownload == null) {
             btnRestart.setVisible(false);
@@ -240,6 +242,9 @@ public class ToolBar extends JPanel
         }
 
         btnGraph.setVisible(true);
+        }catch(Exception ex){
+            
+        }
     }
 
     protected JButton formatButton(String name, String toolTipText) {
