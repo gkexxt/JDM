@@ -30,12 +30,12 @@ import javax.swing.ImageIcon;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class MsgAlreadyRunning extends javax.swing.JFrame {
+public class AlreadyRunningMenu extends javax.swing.JFrame {
 
     /**
      * Creates new form MsgAlreadyRunning
      */
-    public MsgAlreadyRunning() {
+    public AlreadyRunningMenu() {
         initComponents();
     }
 
@@ -111,24 +111,25 @@ public class MsgAlreadyRunning extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(MsgAlreadyRunning.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(AlreadyRunningMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(MsgAlreadyRunning.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(AlreadyRunningMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(MsgAlreadyRunning.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(AlreadyRunningMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MsgAlreadyRunning.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(AlreadyRunningMenu.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(() -> {
-           new MsgAlreadyRunning().setVisible(true);
+           new AlreadyRunningMenu().setVisible(true);
         });
     }
 
     public void showMe() {
-        MsgAlreadyRunning msg = new MsgAlreadyRunning();
+        AlreadyRunningMenu msg = new AlreadyRunningMenu();
         msg.setVisible(true);
         URL imageURL = getClass().getResource("/jdm24.png");
         ImageIcon img = new ImageIcon(imageURL);

@@ -35,24 +35,17 @@ import javax.swing.JTable;
  * @author G.K #gkexxt@outlook.com
  */
 public class DownloadControl {
-
     Dimension x = new Dimension(10, 300);
     private final JLabel lblControl;
     private final JProgressBar progressbar;
-    private boolean rowlocked;
     private JTable table;
 
-    public boolean isRowlocked() {
-        return rowlocked;
-    }
+  
 
     public JTable getTable() {
         return table;
     }
 
-    public void setRowlocked(boolean rowlocked) {
-        this.rowlocked = rowlocked;
-    }
 
     public DownloadControl() {
 

@@ -31,7 +31,7 @@ import java.io.File;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileLock;
 import javadm.ui.DownloadManager;
-import javadm.ui.MsgAlreadyRunning;
+import javadm.ui.AlreadyRunningMenu;
 import javax.swing.SwingUtilities;
 
 public class App {
@@ -49,7 +49,7 @@ public class App {
                 dm.showMe();
             }else{
                 System.err.println("app instance is already running");
-                MsgAlreadyRunning msg = new MsgAlreadyRunning();
+                AlreadyRunningMenu msg = new AlreadyRunningMenu();
                 msg.showMe();
                 
             }            

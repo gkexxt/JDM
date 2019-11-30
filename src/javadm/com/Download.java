@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.URL;
 import java.nio.file.Files;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import static java.time.LocalDateTime.now;
 import java.util.ArrayList;
@@ -76,7 +77,7 @@ public class Download {
     private String directory = "";
     private long fileSize;
     private long doneSize;
-    private String createdDate = now().toString();
+    private String createdDate = FORMATTER.format(new Date());
     private String lastDate;
     private String completeDate;
     private String state;
@@ -93,6 +94,7 @@ public class Download {
     private List<Part> parts;
     private int rate = 0;
     private final DefaultTableModel logmodel;
+    private static final DecimalFormat DF = new DecimalFormat("0.00");
 
     public Download() {
         this.downloadControl = new DownloadControl();// instace of control
@@ -128,6 +130,18 @@ public class Download {
     public String getScheduleStart() {
 
         return scheduleStart;
+    }
+
+    public String getFormatedSize(long size) {
+        if (size < 1000) {
+            return size + " B";
+        } else if (size < 1000000) {
+            return DF.format(size / 1000.0) + " KB";
+        } else if (size < 1000000000) {
+            return DF.format(size / 1000000.0) + " MB";
+        } else {
+            return DF.format(size / 1000000000.0) + " GB";
+        }
     }
 
     public void setScheduleStart(String scheduleStart) {
@@ -331,7 +345,6 @@ public class Download {
         if (!isComplete()) {
             this.running = true;
             this.downloadControl.setLblControl(true);
-            this.downloadControl.setRowlocked(true);
             this.addLogMsg(new String[]{Download.INFO, "Download Started"});
             setState(Download.STDOWNLOADING);
             last_data_time = new Date().getTime();
@@ -347,7 +360,6 @@ public class Download {
     public void stopDownload() {
         if (!isComplete()) {
             this.downloadControl.setLblControl(false);
-            this.downloadControl.setRowlocked(false);
             this.addLogMsg(new String[]{Download.INFO, "Download Stopped"});
             setState(Download.STSTOPED);
             setScheduled(false);
@@ -397,8 +409,8 @@ public class Download {
 
         db.updateDownload(this);
         this.downloadControl.setLblControl(false);
-        this.downloadControl.setRowlocked(false);
         needupdate = false;
+        propChangeSupport.firePropertyChange("updateDownload", true, false);
 
     }
 

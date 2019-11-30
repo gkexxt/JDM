@@ -23,12 +23,9 @@
  */
 package javadm.ui;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import javadm.util.RowTableModel;
 import java.util.*;
 import javadm.com.Download;
-import javax.swing.*;
 import javax.swing.JProgressBar;
 
 /**
@@ -41,23 +38,20 @@ public class TableModel extends RowTableModel<Download> {
     private static final String[] COLUMN_NAMES
             = {
                 "Name",
-                "Date",
-                "rate",
-                "url",
-                "control",
-                "Progress",
-                "filesize",
-                "donesize",};
+                "Size",
+                "Complete",
+                "Speed",
+                "Added On",
+                "Control",
+                "Progress"};
 
     TableModel(DownloadManager mainframe) {
         super(Arrays.asList(COLUMN_NAMES));
         setRowClass(Download.class);
 
-        setColumnClass(4, Boolean.class);
+        setColumnClass(5, Boolean.class);
         //setColumnClass(2, JLabel.class);
-        setColumnClass(5, JProgressBar.class);
-        setColumnClass(6, String.class);
-        setColumnClass(7, String.class);
+        setColumnClass(6, JProgressBar.class);
         //setColumnEditable(0, false);
         //setColumnEditable(6, false);
         //setColumnClass(6, JProgressBar.class);
@@ -72,87 +66,45 @@ public class TableModel extends RowTableModel<Download> {
             case 0:
                 return downnload.getName();
             case 1:
-                return downnload.getCreatedDate();
+                return downnload.getFormatedSize(downnload.getFileSize());
             case 2:
-                return downnload.getDownloadRate();
+                return downnload.getFormatedSize(downnload.getDoneSize());
             case 3:
-                return downnload.getUrl();
+                return downnload.getDownloadRate();
             case 4:
-                return downnload.getDownloadControl().getLblControl();
+                return downnload.getCreatedDate();
             case 5:
-                return downnload.getDownloadControl().getProgressbar();
+                return downnload.getDownloadControl().getLblControl();
             case 6:
-                return downnload.getFileSize();
-            case 7:
-                return downnload.getDoneSize();
+                return downnload.getDownloadControl().getProgressbar();
             default:
                 return null;
         }
     }
 
     @Override
-    public boolean isCellEditable(int row, int column) {
-        if (column == 0 || column == 4 || column == 6) {
-            return true;
-        }
+    public boolean isCellEditable(int row, int column) {      
 
-        if (column == 5) {
-            return true;
-        }
-
-        if (this.modelData.get(row).getDownloadControl().isRowlocked()) {
-            return false;
-        }
-
-        return true;
+        return column == 5;
     }
 
     @Override
     public void setValueAt(Object value, int row, int column) {
         Download download = getRow(row);
-        try {
-            switch (column) {
-                case 0:
-                    download.setName(value.toString());
-                    break;
-                case 1:
-                    download.setCreatedDate(value.toString());
-                    break;
-                case 2:
-                    //download.setDirectory(value.toString());
-                    break;
-                case 3:
-                    download.setUrl(value.toString());
-                    break;
-                case 4:
-                    if (!download.isRunning()) {
-                        download.startDownload();
-                    } else {
-                        download.stopDownload();
-                    }
-                    //download.getDownloadtableui().setLblControl(download.isStart());
-                    //System.out.println("javadm.com.DownloadTableModel.setValueAt()");
-                    break;
-                case 6:
-
-                    download.setFileSize(Long.parseLong(value.toString()));
-                    break;
-                case 7:
-                    download.setDoneSize(Long.parseLong(value.toString()));
-
-                //break;
-                default:
-                    break;
-            }
-            //fireTableCellUpdated(row, column);
-            this.fireTableRowsUpdated(0, this.getRowCount());
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.getMessage() + "\n" + e.toString(), "InfoBox: "
-                    + "error update db", JOptionPane.INFORMATION_MESSAGE);
+        switch (column) {
+            case 5:
+                if (!download.isRunning()) {
+                    download.startDownload();
+                } else {
+                    download.stopDownload();
+                }
+                break;
+            default:
+                break;
         }
+        fireTableCellUpdated(row, column);
+        //this.fireTableRowsUpdated(0, this.getRowCount());
 
     }
-
-
 
 }

@@ -37,7 +37,7 @@ public class DownloadTable extends JTable {
     public DownloadTable(TableModel tm) {
         super(tm);
         this.tm = tm;
-        getColumn("control").setCellRenderer(new LabelRenderer());
+        getColumn("Control").setCellRenderer(new LabelRenderer());
         getColumn("Progress").setCellRenderer(new ProgresRenderer());
         this.setRowHeight(20);
 

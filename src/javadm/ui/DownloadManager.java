@@ -35,12 +35,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.net.URL;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimerTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javadm.com.Setting;
 import javadm.com.Download;
 import javadm.com.DaoSqlite;
@@ -143,7 +140,7 @@ public class DownloadManager extends JFrame
 
         table.getSelectionModel().addListSelectionListener((ListSelectionEvent event) -> {
             toolbar.refreshToolBar();
-            statusPane.setsDownload(getSelectedDownload());
+            statusPane.setDownload(getSelectedDownload());
         });
 
         //Create and set up the stage.
