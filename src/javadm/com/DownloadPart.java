@@ -31,15 +31,16 @@ public class DownloadPart {
 
     private long startByte;
     private long endByte;
-
- 
-
-    private long currentSize =0;
+    private long currentSize;
     private long size;
     private String partFileName;
     private boolean completed;
     public static long partSize = 1000000; //default 5Mb
     private int id;
+
+    public DownloadPart() {
+        this.currentSize = 0;
+    }
 
     public int getId() {
         return id;
