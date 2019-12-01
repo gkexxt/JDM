@@ -41,7 +41,7 @@ import java.util.TimerTask;
 import javadm.com.Setting;
 import javadm.com.Download;
 import javadm.com.DaoSqlite;
-import javadm.com.Part;
+import javadm.com.DownloadPart;
 import javax.swing.*;
 import javax.swing.event.*;
 
@@ -63,6 +63,7 @@ public class DownloadManager extends JFrame
     private java.util.List<Download> downloads;
     private java.util.Timer scheduler;
     private DownloadManager me;
+    DefaultListModel<String> listModel = new DefaultListModel<>();
 
     public DownloadManager() {
 
@@ -76,16 +77,71 @@ public class DownloadManager extends JFrame
         if (e.getValueIsAdjusting()) {
             return;
         }
+        table_update();
+    }
 
-        //dm.addlist("tttttt");
+    private void table_update() {
+
+        String selection = listModel.elementAt(list.getSelectedIndex());
+        model.removeTableModelListener(table);
+        table.removeAll();
+
+        switch (selection) {
+            case "All":
+                System.err.println(listModel.elementAt(list.getSelectedIndex()));
+                model.removeRowRange(0, model.getRowCount() - 1);
+                for (Download download : downloads) {
+                    System.err.println(download.getState());
+                    model.addRow(download);
+                }
+                break;
+            case "Active":
+                model.removeRowRange(0, model.getRowCount() - 1);
+                for (Download download : downloads) {
+                    if (download.getState().equals(Download.STDOWNLOADING)) {
+                        model.addRow(download);
+                    }
+                }
+                break;
+            case "Inactive":
+                model.removeRowRange(0, model.getRowCount() - 1);
+                for (Download download : downloads) {
+                    if (download.getState().equals(Download.STSTOPED)
+                            || download.getState().equals(Download.STERROR)
+                            || download.getState().equals(Download.STUNKNOWN)
+                            || download.getState().isEmpty() || download.getState().isBlank()) {
+                        model.addRow(download);
+                    }
+                }
+                break;
+            case "Completed":
+                model.removeRowRange(0, model.getRowCount() - 1);
+                for (Download download : downloads) {
+                    if (download.getState().equals(Download.STCOMPLETE)) {
+                        model.addRow(download);
+                    }
+                }
+                break;
+            case "Error":
+                model.removeRowRange(0, model.getRowCount() - 1);
+                for (Download download : downloads) {
+                    if (download.getState().equals(Download.STERROR)) {
+                        model.addRow(download);
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        model.addTableModelListener(table);
+        model.fireTableDataChanged();
     }
 
     /**
      * Create the DownloadManager and show it.
      */
     public void showMe() {
-        DefaultListModel<String> listModel = new DefaultListModel<>();
-        String[] category = {"All", "Active", "Inactive", "Completed"};
+        String[] category = {"All", "Active", "Inactive", "Completed", "Error"};
         for (String item : category) {
             listModel.addElement(item);
         }
@@ -313,7 +369,7 @@ public class DownloadManager extends JFrame
             public void run() {
                 for (Download download : downloads) {
                     try {
-                        if (download.isScheduled() && !download.isComplete() && !download.isRunning() 
+                        if (download.isScheduled() && !download.isComplete() && !download.isRunning()
                                 && Download.FORMATTER.parse(download.getScheduleStart()).compareTo(new Date()) < 0) {
                             System.out.println("Scheduler run : " + download.getName());
                             download.startDownload();
@@ -402,9 +458,7 @@ public class DownloadManager extends JFrame
                 downloads.remove(i);
             }
         }
-        model.removeTableModelListener(table);//remove table listner before delete from model
-        model.removeRows(table.getSelectedRow());
-        model.addTableModelListener(table);//add it back
+        table_update();
 
         //remove file
         if (trash) {
@@ -416,7 +470,7 @@ public class DownloadManager extends JFrame
         }
 
         //remove parts
-        for (Part part : download.getParts()) {
+        for (DownloadPart part : download.getParts()) {
             File file = new File(download.getDirectory() + "/" + part.getPartFileName());
             file.delete();
         }
@@ -461,7 +515,7 @@ public class DownloadManager extends JFrame
             }
         }
 
-        for (Part part : download.getParts()) {
+        for (DownloadPart part : download.getParts()) {
             File file = new File(download.getDirectory() + "/" + part.getPartFileName());
             file.delete();
         }
@@ -478,6 +532,7 @@ public class DownloadManager extends JFrame
         if (autoStart) {
             download.startDownload();
         }
+        table_update();
     }
 
     /**
@@ -497,6 +552,7 @@ public class DownloadManager extends JFrame
         if (autoStart) {
             download.startDownload();
         }
+        table_update();
     }
 
     /**
@@ -508,7 +564,7 @@ public class DownloadManager extends JFrame
         download.setName(download.getName().replaceAll("[^a-zA-Z0-9\\.\\-]", ""));
         DaoSqlite db = new DaoSqlite();
         db.updateDownload(download);
-        model.fireTableRowsUpdated(0, model.getRowCount());
+        table_update();
     }
 
     /**
@@ -611,12 +667,16 @@ public class DownloadManager extends JFrame
 
         SwingUtilities.invokeLater(() -> {
             model.fireTableRowsUpdated(0, model.getRowCount());
+
+            if (evt.getPropertyName().equals("state")) {
+                table_update();
+            }
             toolbar.refreshToolBar();
             if (evt.getPropertyName().equals("ClipboardUpdate") && setting.getMonitorMode() > 0
                     && !evt.getNewValue().toString().equals(clipedUrl)) {
                 clipedUrl = evt.getNewValue().toString();
                 clipMonitorParse(evt.getNewValue().toString());
-                
+
             }
         });
 

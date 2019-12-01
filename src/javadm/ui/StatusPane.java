@@ -40,7 +40,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import javadm.com.Download;
-import javadm.com.Part;
+import javadm.com.DownloadPart;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JProgressBar;
@@ -55,9 +55,9 @@ import javax.swing.table.DefaultTableCellRenderer;
 public class StatusPane extends JPanel implements TableModelListener, PropertyChangeListener {
 
     private final JTable errorView = new JTable();
-    private JProgressBar mainbar = new JProgressBar();
-    private JLabel mainlabel = new JLabel();
-    private JPanel progressView = new JPanel();
+    private final JProgressBar mainbar = new JProgressBar();
+    private final JLabel mainlabel = new JLabel();
+    private final JPanel progressView = new JPanel();
     private Download download;
     ArrayList<JProgressBar> plist = new ArrayList<>();
     ArrayList<JLabel> llist = new ArrayList<>();
@@ -83,6 +83,16 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
     }
 
     public void setDownload(Download download) {
+
+        if (download == null) {
+            this.setVisible(false);
+            progressView.removeAll();
+            plist.clear();
+            llist.clear();
+            errorView.getModel().removeTableModelListener(this);
+            
+            return;
+        }
         if (this.download != null) {
             this.download.removePropertyChangeListener(this);
         }
@@ -149,6 +159,7 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
     }
 
     public void updateErrorView(Download download) {
+
         errorView.getModel().removeTableModelListener(this);
         errorView.setModel(download.getLogmodel());
         errorView.getModel().addTableModelListener(this);
@@ -172,9 +183,9 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
 
         if (plist.size() > 0) {
             for (int i = 0; i < download.getParts().size(); i++) {
-                Part part = download.getParts().get(i);
+                DownloadPart part = download.getParts().get(i);
                 llist.get(i).setText("Part " + (i + 1) + " - "
-                    + download.getFormatedSize(part.getCurrentSize()) + " / " 
+                        + download.getFormatedSize(part.getCurrentSize()) + " / "
                         + download.getFormatedSize(part.getSize()));
                 xxx = ((double) part.getCurrentSize() / part.getSize()) * 100.00;
                 plist.get(i).setValue((int) xxx);
@@ -185,14 +196,6 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
     }
 
     public void setupProgressView(Download download) {
-
-        if (download == null) {
-            this.setVisible(false);
-            progressView.removeAll();
-            plist.clear();
-            llist.clear();
-            return;
-        }
 
         progressView.removeAll();
         plist.clear();
@@ -212,7 +215,7 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
         mainbar.setBorder(new LineBorder(Color.GREEN, 1));
         progressView.add(mainbar);
         progressView.add(Box.createRigidArea(new Dimension(0, 10)));
-        Part part;
+        DownloadPart part;
         for (int i = 0; i < download.getParts().size(); i++) {
             part = download.getParts().get(i);
             JProgressBar pprogress = new JProgressBar();

@@ -264,15 +264,15 @@ public class DaoSqlite implements DaoAPI {
         return false;
     }
 
-    public List<Part> getParts(int download_id) {
+    public List<DownloadPart> getParts(int download_id) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery("SELECT * FROM downloadpart where download_id = " + download_id);
-            List<Part> downloadParts = new ArrayList<Part>();
+            List<DownloadPart> downloadParts = new ArrayList<DownloadPart>();
             while (rs.next()) {
                 //Data download = extractDownloadFromResultSet(rs);
-                Part part = new Part();
+                DownloadPart part = new DownloadPart();
                 part.setId(download_id);
                 part.setPartFileName(rs.getString("name"));
                 part.setSize(rs.getLong("part_size"));
@@ -288,10 +288,10 @@ public class DaoSqlite implements DaoAPI {
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return new ArrayList<Part>();
+        return new ArrayList<DownloadPart>();
     }
 
-    public synchronized boolean updatePart(long download_id, Part part) {
+    public synchronized boolean updatePart(long download_id, DownloadPart part) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
             PreparedStatement ps = connection.prepareStatement("UPDATE downloadpart SET current_size=?, completed=? WHERE download_id=? AND name=?");
@@ -310,9 +310,9 @@ public class DaoSqlite implements DaoAPI {
         return false;
     }
 
-    public boolean insertParts(int download_id, List<Part> parts) {
+    public boolean insertParts(int download_id, List<DownloadPart> parts) {
         Connection connection = ConnectionFactory.getConnection(dbName);
-        for (Part part : parts) {
+        for (DownloadPart part : parts) {
 
             try {
                 PreparedStatement ps = connection.prepareStatement("INSERT INTO downloadpart VALUES (?, ?, ?,?,?,?,?)");;

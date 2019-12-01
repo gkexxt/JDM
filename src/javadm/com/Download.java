@@ -78,20 +78,22 @@ public class Download {
     private long fileSize;
     private long doneSize;
     private String createdDate = FORMATTER.format(new Date());
+    private long elapsed = 0;
     private String lastDate;
     private String completeDate;
-    private String state;
+    private String state = "";
     private long last_data_time = 0;
     private long current_data_time = 0;
     private long last_data_size = 0;
     private int connections = 1; //min
     private boolean complete;
+    private String group = "";
     private int retry = 3;
     private volatile boolean running;
     private DownloadControl downloadControl;
     private final PropertyChangeSupport propChangeSupport
             = new PropertyChangeSupport(this);
-    private List<Part> parts;
+    private List<DownloadPart> parts;
     private int rate = 0;
     private final DefaultTableModel logmodel;
     private static final DecimalFormat DF = new DecimalFormat("0.00");
@@ -111,12 +113,29 @@ public class Download {
 
     }
 
+    public long getElapsed() {
+        return elapsed;
+    }
+
+    public void setElapsed(long elapsed) {
+        this.elapsed = elapsed;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
     public String getState() {
         return state;
     }
 
     public void setState(String state) {
         this.state = state;
+        propChangeSupport.firePropertyChange("state", "x", "xx");
     }
 
     public boolean isScheduled() {
@@ -217,11 +236,11 @@ public class Download {
 
     }
 
-    public List<Part> getParts() {
+    public List<DownloadPart> getParts() {
         return parts;
     }
 
-    public void setParts(List<Part> parts) {
+    public void setParts(List<DownloadPart> parts) {
         this.parts = parts;
     }
 
@@ -232,7 +251,7 @@ public class Download {
                 return;
             case Download.DYNAMIC:
             case Download.NON_RESUMEABLE: {
-                Part part = new Part();
+                DownloadPart part = new DownloadPart();
                 part.setSize(this.getFileSize());
                 part.setPartFileName(this.getName() + "-" + this.getId() + 0);
                 part.setCurrentSize(0);
@@ -241,22 +260,22 @@ public class Download {
                 break;
             }
             case Download.RESUMABLE:
-                long x = this.getFileSize() / Part.partSize;
-                long last_length = this.getFileSize() - x * Part.partSize;
+                long x = this.getFileSize() / DownloadPart.partSize;
+                long last_length = this.getFileSize() - x * DownloadPart.partSize;
                 for (int i = 0; i < x; i++) {
-                    Part part = new Part();
-                    part.setStartByte(i * Part.partSize);
-                    part.setEndByte(i * Part.partSize + (Part.partSize - 1));
-                    part.setSize(Part.partSize);
+                    DownloadPart part = new DownloadPart();
+                    part.setStartByte(i * DownloadPart.partSize);
+                    part.setEndByte(i * DownloadPart.partSize + (DownloadPart.partSize - 1));
+                    part.setSize(DownloadPart.partSize);
                     part.setPartFileName(this.getName() + "-" + this.getId() + ".part" + i);
                     part.setId(i);
                     parts.add(part);
                 }
                 if (last_length > 0) {
-                    Part part = new Part();
-                    part.setStartByte(x * Part.partSize);
+                    DownloadPart part = new DownloadPart();
+                    part.setStartByte(x * DownloadPart.partSize);
                     part.setSize(last_length);
-                    part.setEndByte(x * Part.partSize + last_length - 1);
+                    part.setEndByte(x * DownloadPart.partSize + last_length - 1);
                     part.setPartFileName(this.getName() + "-" + this.getId() + ".part" + x);
                     part.setId((int) x);
                     parts.add(part);
@@ -346,7 +365,6 @@ public class Download {
             this.running = true;
             this.downloadControl.setLblControl(true);
             this.addLogMsg(new String[]{Download.INFO, "Download Started"});
-            setState(Download.STDOWNLOADING);
             last_data_time = new Date().getTime();
             new Downloader(this).startDownloader();
             this.needupdate = true;
@@ -358,25 +376,31 @@ public class Download {
     }
 
     public void stopDownload() {
-        if (!isComplete()) {
-            this.downloadControl.setLblControl(false);
-            this.addLogMsg(new String[]{Download.INFO, "Download Stopped"});
-            setState(Download.STSTOPED);
-            setScheduled(false);
-            this.running = false;
-            propChangeSupport.firePropertyChange("running", true, false);
-
-        } else {
-            addLogMsg(new String[]{Download.ERROR, "Download should not be started if already completed!! fuck it got bug"});
-        }
+        this.downloadControl.setLblControl(false);
+        this.addLogMsg(new String[]{Download.INFO, "Download Stopped"});
+        setScheduled(false);
+        this.running = false;
+        propChangeSupport.firePropertyChange("running", true, false);
 
     }
 
     public void updateDownload() {
+        if (this.getState().equals(STERROR)) {
+            DaoSqlite db = new DaoSqlite();
+            db.updateDownload(this);
+            this.downloadControl.setLblControl(false);
+            setScheduled(false);
+            this.running = false;
+            needupdate = false;
+            propChangeSupport.firePropertyChange("updateDownload", true, false);
+            return;
+        } else {
+            this.setState(Download.STSTOPED);
+        }
 
         //check if all part is complete
         boolean allPartComplete = true;
-        for (Part part : this.parts) {
+        for (DownloadPart part : this.parts) {
             System.err.println(part.getSize() + " : " + part.getCurrentSize());
             if (part.getCurrentSize() >= part.getSize() && part.getCurrentSize() > 0) {
                 part.setCompleted(true);
@@ -394,21 +418,20 @@ public class Download {
         });
 
         if (allPartComplete) {
-            setComplete(true);
-            setState(Download.STCOMPLETE);
-            setCompleteDate(now().toString());
-            //db.deleteParts(this.getId());
-            try {
-                buildfile();
-            } catch (Exception ex) {
-                addLogMsg(new String[]{ERROR, "Error build file :" + getName()});
-                setComplete(false);
+            if (buildfile()) {
+                setComplete(true);
+                setCompleteDate(now().toString());
+                this.setState(STCOMPLETE);
             }
 
+        } else {
+            this.setState(STERROR);
         }
 
         db.updateDownload(this);
         this.downloadControl.setLblControl(false);
+        setScheduled(false);
+        this.running = false;
         needupdate = false;
         propChangeSupport.firePropertyChange("updateDownload", true, false);
 
@@ -435,7 +458,7 @@ public class Download {
         try {
             raf = new RandomAccessFile(this.getDirectory() + "/" + this.getName(), "rw");
 
-            for (Part part : this.parts) {
+            for (DownloadPart part : this.parts) {
                 File file = new File(this.getDirectory() + "/" + part.getPartFileName());
                 byte[] fileContent = Files.readAllBytes(file.toPath());
                 raf.seek(raf.length());
@@ -443,6 +466,7 @@ public class Download {
                 file.delete();
 
             }
+
             return true;
         } catch (Exception ex) {
             this.addLogMsg(new String[]{Download.ERROR, ex.toString()});

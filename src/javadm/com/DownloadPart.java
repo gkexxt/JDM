@@ -27,7 +27,7 @@ package javadm.com;
  *
  * @author G.K #gkexxt@outlook.com
  */
-public class Part {
+public class DownloadPart {
 
     private long startByte;
     private long endByte;
@@ -59,7 +59,7 @@ public class Part {
     }
 
     public static void setPartSize(long partSize) {
-        Part.partSize = partSize;
+        DownloadPart.partSize = partSize;
     }
 
     public boolean isCompleted() {

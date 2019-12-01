@@ -32,6 +32,7 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -40,11 +41,11 @@ import java.util.List;
  */
 public class Downloader implements Runnable, PropertyChangeListener {
 
-    private List<Part> downloadParts;
-    private List<Part> xCompletePart;
-    private List<Part> inQuePart;
-    private List<Part> allxCompletePart;
-    private Part rpart = new Part();
+    private List<DownloadPart> downloadParts;
+    private List<DownloadPart> xCompletePart;
+    private List<DownloadPart> inQuePart;
+    private List<DownloadPart> allxCompletePart;
+    private DownloadPart rpart = new DownloadPart();
     Thread tDownloader;
     Download download;
     public static final long CONERR = -2;
@@ -92,8 +93,9 @@ public class Downloader implements Runnable, PropertyChangeListener {
         //check director exist.
         File tmpDir = new File(download.getDirectory());
         if (!(tmpDir.exists() && tmpDir.isDirectory())) {
+            download.setState(Download.STERROR);
             download.addLogMsg(new String[]{Download.ERROR, "Invalid Directory - " + download.getDirectory()});
-            download.stopDownload();
+            download.updateDownload();
         };
 
         //if part is not initialized
@@ -104,7 +106,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
             try {
 
                 URL urlTemp;
-                
+
                 urlTemp = new URL(download.getUrl());
                 HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
                 conn.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
@@ -141,8 +143,9 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
             } catch (Exception ex) {
                 download.setDownloadSize(Downloader.CONERR);
-                download.addLogMsg(new String[]{ex.getMessage(), ex.toString()});
-                download.stopDownload();
+                download.addLogMsg(new String[]{Download.ERROR, ex.toString()});
+                download.setState(Download.STERROR);
+                download.updateDownload();
                 return;//exut when error connecting
             }
 
@@ -159,7 +162,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         this.downloadParts = download.getParts();
 
-        for (Part part : this.downloadParts) {
+        for (DownloadPart part : this.downloadParts) {
             if (part.getCurrentSize() < part.getSize()) {
                 allxCompletePart.add(part);
                 xCompletePart.add(part);
@@ -168,19 +171,22 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         stopWorker = false;
         downloading = true;
-        System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
-
+        ///System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
+        download.setState(Download.STDOWNLOADING);
+        long start_time = new Date().getTime();
         while (true) {
 
             if (!downloading || !download.isRunning() || retryCount > download.getRetry() * download.getConnections() - 1) {
                 //System.out.println("javadm.com.DownloadWorker.downloader exit");
                 stopWorker = true;
                 if (getWorkerThreadCount() < 1) {
-                    download.stopDownload();
-                    download.updateDownload();
                     if (retryCount > download.getRetry() * download.getConnections() - 1) {
                         download.addLogMsg(new String[]{Download.ERROR, "Stopping download - too many gummy bears"});
+                        download.setState(Download.STERROR);
                     }
+                    download.setElapsed(download.getElapsed()+(new Date().getTime()-start_time));
+                    download.updateDownload();
+                    
                     break;
                 }
 
@@ -218,12 +224,15 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
             }
         }
+
+        System.err.println(download.isComplete());
+        System.err.println(download.getState());
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
 
-        rpart = (Part) evt.getNewValue();
+        rpart = (DownloadPart) evt.getNewValue();
         switch (download.getType()) {
 
             case Download.RESUMABLE:
@@ -297,10 +306,10 @@ public class Downloader implements Runnable, PropertyChangeListener {
         Thread tDworker;
         long done_size = 0;
         int BUFFER_SIZE = 4092;
-        private Part part;
+        private DownloadPart part;
         private int connection_id;
 
-        public DownloadWorker(Part part, int connection_id) {
+        public DownloadWorker(DownloadPart part, int connection_id) {
             this.part = part;
             this.connection_id = connection_id;
 
@@ -395,9 +404,9 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     Thread.sleep(2000);
                     download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                         + connection_id + " Connection Error - code : " + responsecode});
-                    System.err.println("Part " + part.getCurrentSize() + " : "+ part.getSize() +" > " + part.getStartByte()+ " > " + part.getEndByte());
+                    System.err.println("Part " + part.getCurrentSize() + " : " + part.getSize() + " > " + part.getStartByte() + " > " + part.getEndByte());
                     System.err.println(part.isCompleted());
-                    
+
                     propChangeSupport.firePropertyChange("error", "error :" + responsecode, part);
 
                 }
@@ -432,7 +441,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 }
 
             }
-        
+
         }
 
     }
