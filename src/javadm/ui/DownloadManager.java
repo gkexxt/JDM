@@ -525,6 +525,7 @@ public class DownloadManager extends JFrame
         download.setType(Download.UNKNOWN);
         download.setFileSize(0);
         download.setProgress(0);
+        download.setElapsed(0);
         download.setParts(new ArrayList<>());
         DaoSqlite db = new DaoSqlite();
         db.updateDownload(download);

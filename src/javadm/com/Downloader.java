@@ -173,9 +173,11 @@ public class Downloader implements Runnable, PropertyChangeListener {
         downloading = true;
         ///System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
         download.setState(Download.STDOWNLOADING);
-        long start_time = new Date().getTime();
-        while (true) {
-
+        long start_time = 0;
+        long finish_time =0;
+        while (true) {            
+            download.setElapsed(download.getElapsed()+ (finish_time - start_time));
+            start_time = System.currentTimeMillis();
             if (!downloading || !download.isRunning() || retryCount > download.getRetry() * download.getConnections() - 1) {
                 //System.out.println("javadm.com.DownloadWorker.downloader exit");
                 stopWorker = true;
@@ -184,7 +186,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
                         download.addLogMsg(new String[]{Download.ERROR, "Stopping download - too many gummy bears"});
                         download.setState(Download.STERROR);
                     }
-                    download.setElapsed(download.getElapsed()+(new Date().getTime()-start_time));
                     download.updateDownload();
                     
                     break;
@@ -223,6 +224,8 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 }
 
             }
+            
+            finish_time = System.currentTimeMillis();
         }
 
         System.err.println(download.isComplete());

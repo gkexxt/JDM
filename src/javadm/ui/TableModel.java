@@ -23,8 +23,10 @@
  */
 package javadm.ui;
 
+import java.text.SimpleDateFormat;
 import javadm.util.RowTableModel;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import javadm.com.Download;
 import javax.swing.JProgressBar;
 
@@ -43,7 +45,8 @@ public class TableModel extends RowTableModel<Download> {
                 "Speed",
                 "Added On",
                 "Control",
-                "Progress"};
+                "Progress",
+                "Elapsed"};
 
     TableModel(DownloadManager mainframe) {
         super(Arrays.asList(COLUMN_NAMES));
@@ -77,13 +80,21 @@ public class TableModel extends RowTableModel<Download> {
                 return downnload.getDownloadControl().getLblControl();
             case 6:
                 return downnload.getDownloadControl().getProgressbar();
+            case 7:
+                long millis = downnload.getElapsed();
+                return String.format("%02d:%02d:%02d",
+                        TimeUnit.MILLISECONDS.toHours(millis),
+                        TimeUnit.MILLISECONDS.toMinutes(millis)
+                        - TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(millis)), // The change is in this line
+                        TimeUnit.MILLISECONDS.toSeconds(millis)
+                        - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(millis)));
             default:
                 return null;
         }
     }
 
     @Override
-    public boolean isCellEditable(int row, int column) {      
+    public boolean isCellEditable(int row, int column) {
 
         return column == 5;
     }
