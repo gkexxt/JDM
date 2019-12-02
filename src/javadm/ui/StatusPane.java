@@ -90,7 +90,7 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
             plist.clear();
             llist.clear();
             errorView.getModel().removeTableModelListener(this);
-            
+
             return;
         }
         if (this.download != null) {
@@ -178,8 +178,14 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
                 + download.getFormatedSize(download.getDoneSize()) + " / "
                 + download.getFormatedSize(download.getDoneSize()));
         var xxx = ((double) download.getDoneSize() / download.getFileSize()) * 100.00;
+        
         mainbar.setValue((int) xxx);
-        mainbar.setString((int) xxx + "%");
+              if (download.getType() == Download.DYNAMIC && !download.isComplete()) {
+                    mainbar.setString("...");
+                } else {
+                   mainbar.setString((int) xxx + "%");
+                }
+        
 
         if (plist.size() > 0) {
             for (int i = 0; i < download.getParts().size(); i++) {
@@ -189,7 +195,11 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
                         + download.getFormatedSize(part.getSize()));
                 xxx = ((double) part.getCurrentSize() / part.getSize()) * 100.00;
                 plist.get(i).setValue((int) xxx);
-                plist.get(i).setString((int) xxx + "%");
+                if (download.getType() == Download.DYNAMIC && !download.isComplete()) {
+                    plist.get(i).setString("...");
+                } else {
+                    plist.get(i).setString((int) xxx + "%");
+                }
             }
         }
 
@@ -209,6 +219,7 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
         progressView.add(mainlabel);
         mainbar.setFont(new Font(mainbar.getFont().getName(), Font.PLAIN, 17));
         mainbar.setStringPainted(true);
+        mainbar.setMaximum(100);
         var progress = ((double) this.download.getDoneSize() / this.download.getFileSize()) * 100.00;
         mainbar.setString((int) progress + "%");
         mainbar.setValue((int) progress);
@@ -224,6 +235,7 @@ public class StatusPane extends JPanel implements TableModelListener, PropertyCh
             llist.add(plable);
             progressView.add(plable);
             progress = ((double) part.getCurrentSize() / part.getSize()) * 100.00;
+            pprogress.setMaximum(100);
             pprogress.setString((int) progress + "%");
             pprogress.setValue((int) progress);
             pprogress.setStringPainted(true);

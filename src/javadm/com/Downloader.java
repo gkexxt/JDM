@@ -53,6 +53,7 @@ public class Downloader implements Runnable {
 
     /**
      * Downloader thread to manage all the workers thread
+     *
      * @param download
      */
     public Downloader(Download download) {
@@ -97,7 +98,7 @@ public class Downloader implements Runnable {
         if (download.getType() == Download.UNKNOWN) {
             System.out.println("javadm.com.Downloader init part");
 
-            String accept_ranges ;
+            String accept_ranges;
             try {
 
                 URL urlTemp;
@@ -148,7 +149,7 @@ public class Downloader implements Runnable {
             } else if (accept_ranges == null && filesize > 0) {
                 download.setType(Download.NON_RESUMEABLE);
                 download.setFileSize(filesize);
-            } else if (filesize <1) {
+            } else if (filesize < 1) {
                 download.setType(Download.DYNAMIC);
                 download.setFileSize(-1);
             }
@@ -173,7 +174,8 @@ public class Downloader implements Runnable {
                     }
                 }
                 break;
-            case Download.NON_RESUMEABLE:case Download.DYNAMIC:
+            case Download.NON_RESUMEABLE:
+            case Download.DYNAMIC:
                 for (DownloadPart part : this.downloadParts) {
                     xCompletePart.add(part);
                 }
@@ -346,10 +348,14 @@ public class Downloader implements Runnable {
                     int numRead;
                     download.addLogMsg(new String[]{Download.INFO, "File : "
                         + part.getPartFileName() + " downloading"});
-                    
+
                     while (!stopWorker && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
                         partfile.write(data, 0, numRead);
+
                         part.setCurrentSize(part.getCurrentSize() + numRead);
+                        if (part.getCurrentSize()> part.getSize()) {
+                            part.setSize(part.getCurrentSize());
+                        }
 
                         try {
 

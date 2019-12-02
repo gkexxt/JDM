@@ -355,9 +355,9 @@ public class Download {
 
         if (getType() == Download.DYNAMIC) {
             this.setDoneSize(doneSize + buffersize);
-            this.setFileSize(fileSize+ buffersize);
+            this.setFileSize(doneSize);
             if (!isComplete()) {
-                this.downloadControl.getProgressbar().setString("Downloading...");
+                this.downloadControl.getProgressbar().setString("...");
             } else if (isComplete()) {
                this.downloadControl.getProgressbar().setValue(100);
             }
@@ -365,6 +365,9 @@ public class Download {
         } else if (getType() == RESUMABLE || getType() == NON_RESUMEABLE) {
 
             this.setDoneSize(doneSize + buffersize);
+            if (doneSize>fileSize) {
+                fileSize = doneSize;                
+            }
             int value = (int) (double) ((100.0 * doneSize)
                     / this.getFileSize());
             this.downloadControl.getProgressbar().setValue(value);

@@ -38,7 +38,7 @@ import java.util.List;
  */
 public class DaoSqlite implements DaoAPI {
 
-    private String dbName = "downloads";
+    private final String dbName = "downloads";
 
     private Download extractDownloadFromResultSet(ResultSet rs) throws SQLException {
         Download download = new Download();
@@ -293,11 +293,12 @@ public class DaoSqlite implements DaoAPI {
     public synchronized boolean updatePart(long download_id, DownloadPart part) {
         Connection connection = ConnectionFactory.getConnection(dbName);
         try {
-            PreparedStatement ps = connection.prepareStatement("UPDATE downloadpart SET current_size=?, completed=? WHERE download_id=? AND name=?");
-            ps.setLong(1, part.getCurrentSize());
-            ps.setBoolean(2, part.isCompleted());
-            ps.setLong(3, download_id);
-            ps.setString(4, part.getPartFileName());
+            PreparedStatement ps = connection.prepareStatement("UPDATE downloadpart SET part_size=?, current_size=?, completed=? WHERE download_id=? AND name=?");
+            ps.setLong(1, part.getSize());
+            ps.setLong(2, part.getCurrentSize());
+            ps.setBoolean(3, part.isCompleted());
+            ps.setLong(4, download_id);
+            ps.setString(5, part.getPartFileName());
             int i = ps.executeUpdate();
             if (i == 1) {
                 return true;
