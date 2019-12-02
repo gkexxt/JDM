@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import javadm.ui.DownloadControl;
 import javax.swing.table.DefaultTableModel;
 
@@ -60,8 +61,7 @@ public class Download {
     public static final String WARNING = "Warning";
     public static final String DEBUG = "Debug";
     public static final String INFO = "Info";
-    public static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    //download types
+    public static final SimpleDateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");    //download types
     public static final byte RESUMABLE = 1;
     public static final byte DYNAMIC = -1;
     public static final byte NON_RESUMEABLE = -2;
@@ -97,9 +97,11 @@ public class Download {
     private int rate = 0;
     private final DefaultTableModel logmodel;
     private static final DecimalFormat DF = new DecimalFormat("0.00");
+    private AtomicBoolean downloader_started;
 
     public Download() {
         this.downloadControl = new DownloadControl();// instace of control
+        downloader_started.set(false);
         parts = new ArrayList<>();
         logmodel = new DefaultTableModel() {
             @Override
@@ -112,6 +114,12 @@ public class Download {
         logmodel.addColumn("Message");
 
     }
+
+    public AtomicBoolean statusDownloaderStarted() {
+        return downloader_started;
+    }
+
+   
 
     public long getElapsed() {
         return elapsed;
