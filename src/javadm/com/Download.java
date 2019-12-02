@@ -118,8 +118,6 @@ public class Download {
         return downloader_started;
     }
 
-   
-
     public long getElapsed() {
         return elapsed;
     }
@@ -186,7 +184,9 @@ public class Download {
         //System.err.println(rate);
 
         if (!this.isRunning()) {
+            rate = 0;
             return "0 B/s";
+
         }
 
         current_data_time = new Date().getTime();
@@ -352,13 +352,23 @@ public class Download {
     }
 
     public synchronized void setProgress(long buffersize) {
-        try {
+
+        if (getType() == Download.DYNAMIC) {
+            this.setDoneSize(doneSize + buffersize);
+            this.setFileSize(fileSize+ buffersize);
+            if (!isComplete()) {
+                this.downloadControl.getProgressbar().setString("Downloading...");
+            } else if (isComplete()) {
+               this.downloadControl.getProgressbar().setValue(100);
+            }
+
+        } else if (getType() == RESUMABLE || getType() == NON_RESUMEABLE) {
+
             this.setDoneSize(doneSize + buffersize);
             int value = (int) (double) ((100.0 * doneSize)
                     / this.getFileSize());
             this.downloadControl.getProgressbar().setValue(value);
-        } catch (Exception ex) {
-            this.downloadControl.getProgressbar().setValue(0);
+
         }
         propChangeSupport.firePropertyChange("setProgress", "setProgress1", "setProgress2");
     }
