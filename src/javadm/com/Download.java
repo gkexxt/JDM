@@ -101,7 +101,6 @@ public class Download {
 
     public Download() {
         this.downloadControl = new DownloadControl();// instace of control
-        downloader_started.set(false);
         parts = new ArrayList<>();
         logmodel = new DefaultTableModel() {
             @Override

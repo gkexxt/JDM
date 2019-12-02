@@ -23,9 +23,6 @@
  */
 package javadm.com;
 
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.RandomAccessFile;
@@ -38,29 +35,24 @@ import java.util.List;
  *
  * @author gkalianan
  */
-public class Downloader implements Runnable, PropertyChangeListener {
+public class Downloader implements Runnable {
 
     private List<DownloadPart> downloadParts;
     private final List<DownloadPart> xCompletePart;
     private final List<DownloadPart> inQuePart;
     private final List<DownloadPart> allxCompletePart;
-    private DownloadPart rpart = new DownloadPart();
     Thread tDownloader;
     Download download;
     public static final long CONERR = -2;
     private volatile boolean stopWorker;
     private volatile boolean downloading = false;
     private int workerThreadCount = 0;
-    private int retryCount = 0;
     private int errorCount = 0;
-    private static int downloadercount = 0;
-    private volatile boolean workerDownloading = true;
+    private volatile boolean workerDone = true;
     private long filesize;
     private long filesize2;
 
     public Downloader(Download download) {
-        downloadercount++;
-        //System.err.println(downloadercount);
         this.download = download;
         this.inQuePart = new ArrayList<>();
         this.xCompletePart = new ArrayList<>();
@@ -112,26 +104,28 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 urlTemp = new URL(download.getUrl());
                 HttpURLConnection conn = (HttpURLConnection) urlTemp.openConnection();
                 conn.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
+                conn.setRequestMethod("HEAD");
                 conn.setConnectTimeout(60000);
                 conn.setReadTimeout(60000);
-                //System.err.println(download.getUrl());
+                System.err.println(download.getUrl());
                 conn.connect();
-
                 accept_ranges = conn.getHeaderField("Accept-Ranges");
-                download.setFileSize(conn.getContentLengthLong());
                 filesize = conn.getContentLengthLong();
+                System.err.println(conn.getRequestMethod());
                 conn.disconnect();
+                conn = null;
                 //shit server may return diffrent content-length on every connectionn
 
                 //open a second connection to check the file length again
                 urlTemp = new URL(download.getUrl());
                 HttpURLConnection conn2 = (HttpURLConnection) urlTemp.openConnection();
                 conn2.setRequestProperty("User-Agent", download.getUserAgent());            // connect to server
+                conn2.setRequestMethod("HEAD");
                 conn2.setConnectTimeout(60000);
                 conn2.setReadTimeout(60000);
                 conn2.connect();
                 filesize2 = conn2.getContentLengthLong();
-                conn.disconnect();
+                conn2.disconnect();
 
                 //server returning difrent file length make the download Download.DYNAMIC
                 if (filesize != filesize2) {
@@ -158,12 +152,21 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 download.setType(Download.DYNAMIC);
                 download.setFileSize(-1);
             }
+            
+            System.err.println("Type : "+download.getType());
+            System.err.println(download.getFileSize());
 
             download.initParts();
+            System.out.println("javadm.com.Downloader.run()");
             download.addLogMsg(new String[]{Download.INFO, "Initializing - New Download"});
+            System.out.println("javadm.com.Downloader.run()");
+            System.err.println(download.getParts().size());
+            for (DownloadPart part : download.getParts()) {
+                System.err.println(part.getPartFileName());
+                
+            }
         }
 
-        download.statusDownloaderStarted().set(true);
         this.downloadParts = download.getParts();
 
         switch (download.getType()) {
@@ -193,7 +196,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
         }
 
         stopWorker = false;
-        downloading = true;
         System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
         download.setState(Download.STDOWNLOADING);
         long start_time = 0;
@@ -203,12 +205,21 @@ public class Downloader implements Runnable, PropertyChangeListener {
         while (true) {
             download.setElapsed(download.getElapsed() + (finish_time - start_time));
             start_time = System.currentTimeMillis();
-            if (!downloading || !download.isRunning() || retryCount > download.getRetry() * download.getConnections() - 1) {
-                //System.out.println("javadm.com.DownloadWorker.downloader exit");
-                stopWorker = true;
 
-                if (getWorkerThreadCount() < 1) {
-                    if (retryCount > download.getRetry() * download.getConnections() - 1) {
+            if (!download.isRunning() || errorCount > download.getRetry() * download.getConnections() - 1) {
+                stopWorker = true;
+                workerDone = true;
+                for (DownloadWorker worker : worker_list) {
+                    if (!(worker.getState().equals(DownloadWorker.STERROR)
+                            || worker.getState().equals(DownloadWorker.STDONE)
+                            || worker.getState().equals(DownloadWorker.STCONNECTING))) {
+                        workerDone = false;
+                    }
+
+                }
+
+                if (workerDone) {
+                    if (errorCount > download.getRetry() * download.getConnections() - 1) {
                         download.addLogMsg(new String[]{Download.ERROR, "Stopping download - too many gummy bears"});
                         download.setState(Download.STERROR);
                     }
@@ -273,19 +284,9 @@ public class Downloader implements Runnable, PropertyChangeListener {
         static final String STDONE = "DONE";
         static final String STCONNECTING = "CONNECTING";
         static final String STDOWNLOADING = "DOWNLOADING";
-        static final String STSTART = "START";
         private String fname;
-        private String state;
-
-        public String getState() {
-            synchronized (this) {
-                return this.state;
-            }
-        }
-
-        public void setState(String state) {
-            this.state = state;
-        }
+        private String state="";
+        private boolean onerror;
 
         Thread tDworker;
         long done_size = 0;
@@ -296,13 +297,24 @@ public class Downloader implements Runnable, PropertyChangeListener {
         private final int connection_id;
         private volatile boolean worker_connected = false;
 
+        public DownloadWorker(DownloadPart part, int connection_id) {
+            this.onerror = false;
+            this.part = part;
+            this.connection_id = connection_id;
+        }
+
         public DownloadPart getPart() {
             return part;
         }
 
-        public DownloadWorker(DownloadPart part, int connection_id) {
-            this.part = part;
-            this.connection_id = connection_id;
+        public String getState() {
+            synchronized (this) {
+                return this.state;
+            }
+        }
+
+        public void setState(String state) {
+            this.state = state;
         }
 
         public boolean isWorker_connected() {
@@ -315,9 +327,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         public void startDworker() {
             tDworker = new Thread(this);
-            //System.out.println("javadm.com.DownloadWorker.Downloader.start()");
             tDworker.start();
-
         }
 
         @Override
@@ -343,11 +353,11 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 conn.setRequestProperty("User-Agent", download.getUserAgent());
 
                 conn.connect();
-                
 
                 int responsecode = conn.getResponseCode();
                 // Make sure the response code is in the 200 range.
                 if (responsecode / 100 == 2) {
+                    setState(STDOWNLOADING);
                     download.addLogMsg(new String[]{Download.INFO, "Connection "
                         + connection_id + " Established"});
                     //set part size
@@ -362,7 +372,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     int numRead;
                     download.addLogMsg(new String[]{Download.INFO, "File : "
                         + part.getPartFileName() + " downloading"});
-                    setState(STDOWNLOADING);
                     while (!stopWorker && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
                         raf.write(data, 0, numRead);
                         part.setCurrentSize(part.getCurrentSize() + numRead);
@@ -376,19 +385,16 @@ public class Downloader implements Runnable, PropertyChangeListener {
                         }
 
                     }
-                    setState(STDONE);
-                    download.addLogMsg(new String[]{Download.INFO,
-                        "File : " + part.getPartFileName() + " complete"});
 
                 } else {
-                    setState(STERROR);
+                    onerror = true;
                     Thread.sleep(2000);
                     download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                         + connection_id + " Connection Error - code : " + responsecode});
 
                 }
             } catch (Exception ex) {
-                setState(STERROR);
+                onerror = true;
                 download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                     + connection_id + " " + ex.toString()});
                 try {
@@ -402,7 +408,7 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     try {
                         raf.close();
                     } catch (Exception ex) {
-                        setState(STERROR);
+                        onerror = true;
                         download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                             + connection_id + " " + ex.toString()});
                     }
@@ -412,19 +418,29 @@ public class Downloader implements Runnable, PropertyChangeListener {
                     try {
                         in.close();
                     } catch (Exception ex) {
-                        setState(STERROR);
+                        onerror = true;
                         download.addLogMsg(new String[]{Download.ERROR, "Connection : "
                             + connection_id + " " + ex.toString()});
                     }
                 }
 
             }
-            DaoSqlite db = new DaoSqlite();
-            db.updatePart(download.getId(),part);
+
+            if (onerror) {
+                setState(STERROR);
+            } else {
+                DaoSqlite db = new DaoSqlite();
+                db.updatePart(download.getId(), getPart());
+                if (getPart().getCurrentSize() >= getPart().getSize()) {
+                    download.addLogMsg(new String[]{Download.INFO,
+                        "File : " + getPart().getPartFileName() + " complete"});
+                    setState(STDONE);
+                } else {
+                    setState(STERROR);
+                }
+            }
 
         }
-        
-        
 
     }
 
