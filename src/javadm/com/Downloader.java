@@ -39,10 +39,8 @@ public class Downloader implements Runnable {
 
     private List<DownloadPart> downloadParts;
     private final List<DownloadPart> xCompletePart;
-    private final List<DownloadPart> inQuePart;
-    private final List<DownloadPart> allxCompletePart;
-    Thread tDownloader;
-    Download download;
+    private Thread tDownloader;
+    private final Download download;
     public static final long CONERR = -2;
     private volatile boolean stopWorker;
     private volatile boolean downloading = false;
@@ -52,11 +50,13 @@ public class Downloader implements Runnable {
     private long filesize;
     private long filesize2;
 
+    /**
+     * Downloader thread to manage all the workers thread
+     * @param download
+     */
     public Downloader(Download download) {
         this.download = download;
-        this.inQuePart = new ArrayList<>();
         this.xCompletePart = new ArrayList<>();
-        this.allxCompletePart = new ArrayList<>();
     }
 
     public int getWorkerThreadCount() {
@@ -96,7 +96,7 @@ public class Downloader implements Runnable {
         if (download.getType() == Download.UNKNOWN) {
             System.out.println("javadm.com.Downloader init part");
 
-            String accept_ranges = "";
+            String accept_ranges ;
             try {
 
                 URL urlTemp;
@@ -152,8 +152,8 @@ public class Downloader implements Runnable {
                 download.setType(Download.DYNAMIC);
                 download.setFileSize(-1);
             }
-            
-            System.err.println("Type : "+download.getType());
+
+            System.err.println("Type : " + download.getType());
             System.err.println(download.getFileSize());
 
             download.initParts();
@@ -161,10 +161,6 @@ public class Downloader implements Runnable {
             download.addLogMsg(new String[]{Download.INFO, "Initializing - New Download"});
             System.out.println("javadm.com.Downloader.run()");
             System.err.println(download.getParts().size());
-            for (DownloadPart part : download.getParts()) {
-                System.err.println(part.getPartFileName());
-                
-            }
         }
 
         this.downloadParts = download.getParts();
@@ -173,20 +169,17 @@ public class Downloader implements Runnable {
             case Download.RESUMABLE:
                 for (DownloadPart part : this.downloadParts) {
                     if (part.getCurrentSize() < part.getSize()) {
-                        allxCompletePart.add(part);
                         xCompletePart.add(part);
                     }
                 }
                 break;
             case Download.NON_RESUMEABLE:
                 for (DownloadPart part : this.downloadParts) {
-                    allxCompletePart.add(part);
                     xCompletePart.add(part);
                 }
                 break;
             case Download.DYNAMIC:
                 for (DownloadPart part : this.downloadParts) {
-                    allxCompletePart.add(part);
                     xCompletePart.add(part);
                 }
                 break;
@@ -196,7 +189,6 @@ public class Downloader implements Runnable {
         }
 
         stopWorker = false;
-        System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
         download.setState(Download.STDOWNLOADING);
         long start_time = 0;
         long finish_time = 0;
@@ -231,6 +223,7 @@ public class Downloader implements Runnable {
 
                 if (worker_list.size() < download.getConnections() && xCompletePart.size() > 0) {
                     DownloadWorker worker = new DownloadWorker(xCompletePart.get(0), worker_list.size());
+                    xCompletePart.remove(0);
                     worker_list.add(worker);
                     worker.startDworker();
                 }
@@ -285,7 +278,7 @@ public class Downloader implements Runnable {
         static final String STCONNECTING = "CONNECTING";
         static final String STDOWNLOADING = "DOWNLOADING";
         private String fname;
-        private String state="";
+        private String state = "";
         private boolean onerror;
 
         Thread tDworker;
@@ -344,14 +337,12 @@ public class Downloader implements Runnable {
                     long rstartbyte = part.getStartByte() + part.getCurrentSize();
                     String byteRange = rstartbyte + "-" + part.getEndByte();
                     conn.setRequestProperty("Range", "bytes=" + byteRange);
-                    conn.setConnectTimeout(5000);
-                    conn.setReadTimeout(10000);
-                } else {
-                    conn.setConnectTimeout(10000);
-                    conn.setReadTimeout(60000);
+                    System.err.println(byteRange);
                 }
-                conn.setRequestProperty("User-Agent", download.getUserAgent());
+                conn.setConnectTimeout(30000);//some server take long time for initial connection
+                conn.setReadTimeout(5000);
 
+                conn.setRequestProperty("User-Agent", download.getUserAgent());
                 conn.connect();
 
                 int responsecode = conn.getResponseCode();
