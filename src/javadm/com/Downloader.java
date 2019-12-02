@@ -158,11 +158,11 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 download.setType(Download.DYNAMIC);
                 download.setFileSize(-1);
             }
-            
+
             download.initParts();
             download.addLogMsg(new String[]{Download.INFO, "Initializing - New Download"});
         }
-        
+
         download.statusDownloaderStarted().set(true);
         this.downloadParts = download.getParts();
 
@@ -192,20 +192,21 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 return;
         }
 
-
         stopWorker = false;
         downloading = true;
         System.out.println("javadm.com.Downloader.run() -- part length  " + allxCompletePart.size());
         download.setState(Download.STDOWNLOADING);
         long start_time = 0;
         long finish_time = 0;
-        DownloadWorker worker_list[] = new DownloadWorker[15];
+        List<DownloadWorker> worker_list = new ArrayList<>();
+
         while (true) {
             download.setElapsed(download.getElapsed() + (finish_time - start_time));
             start_time = System.currentTimeMillis();
             if (!downloading || !download.isRunning() || retryCount > download.getRetry() * download.getConnections() - 1) {
                 //System.out.println("javadm.com.DownloadWorker.downloader exit");
                 stopWorker = true;
+
                 if (getWorkerThreadCount() < 1) {
                     if (retryCount > download.getRetry() * download.getConnections() - 1) {
                         download.addLogMsg(new String[]{Download.ERROR, "Stopping download - too many gummy bears"});
@@ -216,31 +217,41 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 }
 
             } else {
-                if (xCompletePart.size() > 0 && inQuePart.size() < 1) {
-                    inQuePart.add(xCompletePart.get(0));
-                    xCompletePart.remove(0);
+
+                if (worker_list.size() < download.getConnections() && xCompletePart.size() > 0) {
+                    DownloadWorker worker = new DownloadWorker(xCompletePart.get(0), worker_list.size());
+                    worker_list.add(worker);
+                    worker.startDworker();
                 }
 
-                if (workerThreadCount < download.getConnections() && inQuePart.size() > 0) {
-                    //System.out.println("Spawning new thread");
-                    
-                    DownloadWorker dt = new DownloadWorker(inQuePart.get(0), workerThreadCount);
-                    worker_list[workerThreadCount] = dt;
-                    workerThreadCount = workerThreadCount + 1;
-                    inQuePart.remove(0);
-                    dt.addPropertyChangeListener(this);
-                    dt.startDworker();
-                }
-
-                if (workerThreadCount < 1) {
-                    boolean completeParts = true;
-                    for (int i = 0; i < allxCompletePart.size(); i++) {
-                        if (!allxCompletePart.get(i).isCompleted()) {
-                            completeParts = false;
-                        }
+                for (int i = 0; i < worker_list.size(); i++) {
+                    DownloadWorker worker = worker_list.get(i);
+                    switch (worker.getState()) {
+                        case DownloadWorker.STDONE:
+                            worker_list.remove(i);
+                            break;
+                        case DownloadWorker.STERROR:
+                            xCompletePart.add(worker.getPart());
+                            worker_list.remove(i);
+                            errorCount++;
+                            break;
+                        case DownloadWorker.STDOWNLOADING:
+                            //if server only allow single connection per-download
+                            if (errorCount > download.getRetry() * download.getConnections()-2) {
+                                errorCount = 0;
+                                download.setConnections(1);
+                            }
+                            break;
+                        default:
+                            break;
                     }
-                    //flag exit downloader
-                    downloading = !completeParts;
+
+                }
+                
+                //download complete
+                if (worker_list.size() < 1 && xCompletePart.size() < 1) {
+                    download.updateDownload();
+                    break;
                 }
 
                 try {
@@ -254,94 +265,43 @@ public class Downloader implements Runnable, PropertyChangeListener {
             finish_time = System.currentTimeMillis();
         }
 
-        System.err.println(download.isComplete());
-        System.err.println(download.getState());
-    }
-
-    @Override
-    public void propertyChange(PropertyChangeEvent evt) {
-
-        rpart = (DownloadPart) evt.getNewValue();
-        switch (download.getType()) {
-
-            case Download.RESUMABLE:
-                if (rpart.getCurrentSize() < rpart.getSize()) {
-                    errorCount++;
-                    //if server only accept single connection -> continue as long we have single conn active
-                    if (workerDownloading && errorCount >= download.getRetry() * download.getConnections()) {
-                        retryCount = 0;
-                        //download.setConnections(1);
-                    } else {
-                        retryCount++;
-                    }
-                    inQuePart.add(rpart);
-                } else {
-                    rpart.setCompleted(true);
-                    retryCount = 0;
-                    //check if all parts are completed if true flag exit downloader
-
-                }
-
-                break;
-
-            case Download.DYNAMIC:
-                //part size is 0 retry till max count
-                if (rpart.getCurrentSize() < 1) {
-                    //remove old file
-                    try {
-                        File file = new File(download.getDirectory() + "/" + rpart.getPartFileName());
-                        file.delete();
-                    } catch (Exception ex) {
-                    }
-                    rpart.setCurrentSize(0); //redownload the file
-                    inQuePart.add(rpart);
-                    retryCount++;
-                } else {
-                    rpart.setCompleted(true);
-                    downloading = false;
-                }
-
-                break;
-
-            case Download.NON_RESUMEABLE:
-                //download error file size is smaller
-                if (rpart.getCurrentSize() < rpart.getSize()) {
-                    //remove old file                   
-                    try {
-                        File file = new File(download.getDirectory() + "/" + rpart.getPartFileName());
-                        file.delete();
-                    } catch (Exception ex) {
-                    }
-                    rpart.setCurrentSize(0); //redownload the file
-                    inQuePart.add(rpart);
-                    retryCount++;
-                } else {
-                    rpart.setCompleted(true);
-                    downloading = false;
-                }
-
-                break;
-
-        }
-
-        decThreacount();
     }
 
     class DownloadWorker implements Runnable {
 
-        private final PropertyChangeSupport propChangeSupport
-                = new PropertyChangeSupport(this);
+        static final String STERROR = "ERROR";
+        static final String STDONE = "DONE";
+        static final String STCONNECTING = "CONNECTING";
+        static final String STDOWNLOADING = "DOWNLOADING";
         private String fname;
+        private String state;
+
+        public String getState() {
+            synchronized (this) {
+                return this.state;
+            }
+        }
+
+        public void setState(String state) {
+            this.state = state;
+        }
+
         Thread tDworker;
         long done_size = 0;
+
         int BUFFER_SIZE = 4092;
         private final DownloadPart part;
+
         private final int connection_id;
         private volatile boolean worker_connected = false;
+
+        public DownloadPart getPart() {
+            return part;
+        }
+
         public DownloadWorker(DownloadPart part, int connection_id) {
             this.part = part;
             this.connection_id = connection_id;
-
         }
 
         public boolean isWorker_connected() {
@@ -350,14 +310,6 @@ public class Downloader implements Runnable, PropertyChangeListener {
 
         public void setWorker_connected(boolean worker_connected) {
             this.worker_connected = worker_connected;
-        }
-
-        public void addPropertyChangeListener(PropertyChangeListener listener) {
-            propChangeSupport.addPropertyChangeListener(listener);
-        }
-
-        public void removePropertyChangeListener(PropertyChangeListener listener) {
-            propChangeSupport.removePropertyChangeListener(listener);
         }
 
         public void startDworker() {
@@ -394,10 +346,9 @@ public class Downloader implements Runnable, PropertyChangeListener {
                 //System.out.println("javadm.com.DownloadWorker.Downloader.run() + before connect ");
 
                 conn.connect();
-                
-                
+
                 worker_connected = true;
-                
+
                 int responsecode = conn.getResponseCode();
                 //System.err.println("Response code : " + responsecode);
                 // Make sure the response code is in the 200 range.
