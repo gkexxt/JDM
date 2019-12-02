@@ -38,6 +38,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 import javadm.com.Setting;
 import javadm.com.Download;
 import javadm.com.DaoSqlite;
@@ -85,53 +86,45 @@ public class DownloadManager extends JFrame
         String selection = listModel.elementAt(list.getSelectedIndex());
         model.removeTableModelListener(table);
         table.removeAll();
+        model.removeRowRange(0, model.getRowCount() - 1);
 
-        switch (selection) {
-            case "All":
-                //System.err.println(listModel.elementAt(list.getSelectedIndex()));
-                model.removeRowRange(0, model.getRowCount() - 1);
-                for (Download download : downloads) {
-                    //System.err.println(download.getState());
+        for (Download download : downloads) {
+            switch (selection) {
+
+                case "All":
                     model.addRow(download);
-                }
-                break;
-            case "Active":
-                model.removeRowRange(0, model.getRowCount() - 1);
-                for (Download download : downloads) {
+                    break;
+
+                case "Active":
                     if (download.getState().equals(Download.STDOWNLOADING)) {
                         model.addRow(download);
                     }
-                }
-                break;
-            case "Inactive":
-                model.removeRowRange(0, model.getRowCount() - 1);
-                for (Download download : downloads) {
+                    break;
+
+                case "Inactive":
                     if (download.getState().equals(Download.STSTOPED)
                             || download.getState().equals(Download.STERROR)
                             || download.getState().equals(Download.STUNKNOWN)
                             || download.getState().isEmpty() || download.getState().isBlank()) {
                         model.addRow(download);
                     }
-                }
-                break;
-            case "Completed":
-                model.removeRowRange(0, model.getRowCount() - 1);
-                for (Download download : downloads) {
+                    break;
+
+                case "Completed":
                     if (download.getState().equals(Download.STCOMPLETE)) {
                         model.addRow(download);
                     }
-                }
-                break;
-            case "Error":
-                model.removeRowRange(0, model.getRowCount() - 1);
-                for (Download download : downloads) {
+                    break;
+                    
+                case "Error":
                     if (download.getState().equals(Download.STERROR)) {
                         model.addRow(download);
                     }
-                }
-                break;
-            default:
-                break;
+                    break;
+                    
+                default:
+                    break;
+            }
         }
         model.addTableModelListener(table);
         model.fireTableDataChanged();
@@ -345,8 +338,7 @@ public class DownloadManager extends JFrame
                         System.out.println(".windowClosing()");
                         System.exit(0);
                     }
-                } catch (Exception e1) {
-                    e1.printStackTrace();
+                } catch (InterruptedException | ExecutionException e1) {
                 }
             }
         }
