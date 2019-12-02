@@ -25,6 +25,7 @@ package javadm.com;
 
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -113,7 +114,6 @@ public class Downloader implements Runnable {
                 filesize = conn.getContentLengthLong();
                 System.err.println(conn.getRequestMethod());
                 conn.disconnect();
-                conn = null;
                 //shit server may return diffrent content-length on every connectionn
 
                 //open a second connection to check the file length again
@@ -134,7 +134,7 @@ public class Downloader implements Runnable {
 
                 }
 
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 download.setDownloadSize(Downloader.CONERR);
                 download.addLogMsg(new String[]{Download.ERROR, ex.toString()});
                 download.setState(Download.STERROR);
@@ -148,7 +148,7 @@ public class Downloader implements Runnable {
             } else if (accept_ranges == null && filesize > 0) {
                 download.setType(Download.NON_RESUMEABLE);
                 download.setFileSize(filesize);
-            } else if (filesize < 0) {
+            } else if (filesize <1) {
                 download.setType(Download.DYNAMIC);
                 download.setFileSize(-1);
             }
@@ -173,12 +173,7 @@ public class Downloader implements Runnable {
                     }
                 }
                 break;
-            case Download.NON_RESUMEABLE:
-                for (DownloadPart part : this.downloadParts) {
-                    xCompletePart.add(part);
-                }
-                break;
-            case Download.DYNAMIC:
+            case Download.NON_RESUMEABLE:case Download.DYNAMIC:
                 for (DownloadPart part : this.downloadParts) {
                     xCompletePart.add(part);
                 }
@@ -280,15 +275,11 @@ public class Downloader implements Runnable {
         private String fname;
         private String state = "";
         private boolean onerror;
-
-        Thread tDworker;
-        long done_size = 0;
-
-        int BUFFER_SIZE = 4092;
+        private Thread tDworker;
+        private final int BUFFER_SIZE = 4092;
         private final DownloadPart part;
 
         private final int connection_id;
-        private volatile boolean worker_connected = false;
 
         public DownloadWorker(DownloadPart part, int connection_id) {
             this.onerror = false;
@@ -310,14 +301,6 @@ public class Downloader implements Runnable {
             this.state = state;
         }
 
-        public boolean isWorker_connected() {
-            return worker_connected;
-        }
-
-        public void setWorker_connected(boolean worker_connected) {
-            this.worker_connected = worker_connected;
-        }
-
         public void startDworker() {
             tDworker = new Thread(this);
             tDworker.start();
@@ -326,22 +309,23 @@ public class Downloader implements Runnable {
         @Override
         public void run() {
             BufferedInputStream in = null;
-            RandomAccessFile raf = null;
+            RandomAccessFile partfile = null;
             try {
                 // open Http connection to URL
                 setState(STCONNECTING);
                 URL url = new URL(download.getUrl());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-
+                //set range if resumable download
                 if (download.getType() == Download.RESUMABLE) {
                     long rstartbyte = part.getStartByte() + part.getCurrentSize();
                     String byteRange = rstartbyte + "-" + part.getEndByte();
                     conn.setRequestProperty("Range", "bytes=" + byteRange);
                     System.err.println(byteRange);
                 }
-                conn.setConnectTimeout(30000);//some server take long time for initial connection
+                //some server take long time for initial connection
+                conn.setConnectTimeout(30000);
                 conn.setReadTimeout(5000);
-
+                //set user agent
                 conn.setRequestProperty("User-Agent", download.getUserAgent());
                 conn.connect();
 
@@ -351,20 +335,20 @@ public class Downloader implements Runnable {
                     setState(STDOWNLOADING);
                     download.addLogMsg(new String[]{Download.INFO, "Connection "
                         + connection_id + " Established"});
-                    //set part size
                     // get the input stream
                     in = new BufferedInputStream(conn.getInputStream());
 
-                    // open the output file and seek to the stopWorker location
+                    // open the output file and seek to the last location
                     fname = download.getDirectory() + "/" + part.getPartFileName();
-                    raf = new RandomAccessFile(fname, "rw");
-                    raf.seek(part.getCurrentSize());
+                    partfile = new RandomAccessFile(fname, "rw");
+                    partfile.seek(part.getCurrentSize());
                     byte data[] = new byte[BUFFER_SIZE];
                     int numRead;
                     download.addLogMsg(new String[]{Download.INFO, "File : "
                         + part.getPartFileName() + " downloading"});
+                    
                     while (!stopWorker && ((numRead = in.read(data, 0, BUFFER_SIZE)) != -1)) {
-                        raf.write(data, 0, numRead);
+                        partfile.write(data, 0, numRead);
                         part.setCurrentSize(part.getCurrentSize() + numRead);
 
                         try {
@@ -395,9 +379,9 @@ public class Downloader implements Runnable {
 
             } finally {
 
-                if (raf != null) {
+                if (partfile != null) {
                     try {
-                        raf.close();
+                        partfile.close();
                     } catch (Exception ex) {
                         onerror = true;
                         download.addLogMsg(new String[]{Download.ERROR, "Connection : "

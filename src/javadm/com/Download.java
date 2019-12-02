@@ -475,7 +475,7 @@ public class Download {
             }
 
             return true;
-        } catch (Exception ex) {
+        } catch (IOException ex) {
             this.addLogMsg(new String[]{Download.ERROR, ex.toString()});
         }
         try {

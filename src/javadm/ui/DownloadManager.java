@@ -88,10 +88,10 @@ public class DownloadManager extends JFrame
 
         switch (selection) {
             case "All":
-                System.err.println(listModel.elementAt(list.getSelectedIndex()));
+                //System.err.println(listModel.elementAt(list.getSelectedIndex()));
                 model.removeRowRange(0, model.getRowCount() - 1);
                 for (Download download : downloads) {
-                    System.err.println(download.getState());
+                    //System.err.println(download.getState());
                     model.addRow(download);
                 }
                 break;
