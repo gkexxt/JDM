@@ -31,6 +31,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -170,7 +172,7 @@ public class DaoSqlite implements DaoAPI {
             ps.setString(13, download.getState());
             ps.setString(14, download.getScheduleStart());
             ps.setString(15, download.getScheduleStop());
-            
+
             ps.setBoolean(16, download.isScheduled());
             ps.setInt(17, download.getId());
 
@@ -237,6 +239,28 @@ public class DaoSqlite implements DaoAPI {
             ps.setBoolean(6, setting.isSchedulerEnable());
             ps.setInt(7, 1);
             System.err.println(ps.toString());
+            int i = ps.executeUpdate();
+            if (i == 1) {
+                return true;
+            }
+        } catch (SQLException ex) {
+            System.err.println(ex.getMessage());
+            ex.printStackTrace();
+        }
+        return false;
+    }
+    
+        public boolean createSetting(Setting setting) {
+        Connection connection = ConnectionFactory.getConnection(dbName);
+        try {
+            PreparedStatement ps = connection.prepareStatement("INSERT INTO setting VALUES (?,?, ?, ?, ?, ?, ?)");
+            ps.setInt(1, 1);
+            ps.setString(2, setting.getDirectory());
+            ps.setInt(3, setting.getConnectionCount());
+            ps.setInt(4, setting.getMonitorMode());
+            ps.setBoolean(5, setting.isAutoStart());
+            ps.setString(6, setting.getUserAgent());
+            ps.setBoolean(7, setting.isSchedulerEnable());
             int i = ps.executeUpdate();
             if (i == 1) {
                 return true;
@@ -351,6 +375,63 @@ public class DaoSqlite implements DaoAPI {
             ex.printStackTrace();
         }
         return false;
+    }
+
+    public void createNewDownloadTables() {
+
+        try {
+            String sql = "CREATE TABLE IF NOT EXISTS `downloaddata` ("
+                    + "`id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,"
+                    + "`name`	TEXT,"
+                    + "`url`	TEXT,"
+                    + "`directory`	TEXT,"
+                    + "`fsize`	INTEGER,"
+                    + "`dnsize`	INTEGER,"
+                    + "`crtdate`	TEXT,"
+                    + "`lstdate`	TEXT,"
+                    + "`cmpdate`	NUMERIC,"
+                    + "`type`	INTEGER NOT NULL DEFAULT 0,"
+                    + "`user_agent`	TEXT,"
+                    + "`complete`	TEXT,"
+                    + "`connection`	INTEGER DEFAULT 1,"
+                    + "`state`	TEXT DEFAULT 'Unknown',"
+                    + "`s_start`	TEXT,"
+                    + "`s_stop`	TEXT,"
+                    + "`scheduled`	TEXT );";
+
+            Connection connection = ConnectionFactory.getConnection(dbName);
+            Statement stmt = connection.createStatement();
+            stmt.execute(sql);
+
+            sql = "CREATE TABLE IF NOT EXISTS `downloadpart` (\n"
+                    + "	`download_id`	INTEGER NOT NULL,\n"
+                    + "	`name`	TEXT NOT NULL,\n"
+                    + "	`part_size`	INTEGER NOT NULL,\n"
+                    + "	`current_size`	INTEGER NOT NULL,\n"
+                    + "	`start_byte`	INTEGER,\n"
+                    + "	`end_byte`	INTEGER,\n"
+                    + "	`completed`	TEXT\n"
+                    + ");";
+            stmt.execute(sql);
+
+            sql = "CREATE TABLE IF NOT EXISTS `setting` (\n"
+                    + "	`id`	INT NOT NULL UNIQUE,\n"
+                    + "	`directory`	STRING NOT NULL,\n"
+                    + "	`conncount`	INT NOT NULL DEFAULT (1),\n"
+                    + "	`monmode`	INT DEFAULT (0),\n"
+                    + "	`automode`	BOOLEAN NOT NULL DEFAULT (0),\n"
+                    + "	`user_agent`	TEXT,\n"
+                    + "	`scheduler`	CHAR NOT NULL DEFAULT '0',\n"
+                    + "	PRIMARY KEY(`id`)\n"
+                    + ");";
+
+            stmt.execute(sql);            
+          
+            
+        } catch (SQLException ex) {
+            Logger.getLogger(DaoSqlite.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
 }

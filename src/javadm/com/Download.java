@@ -260,7 +260,7 @@ public class Download {
             case Download.NON_RESUMEABLE: {
                 DownloadPart part = new DownloadPart();
                 part.setSize(this.getFileSize());
-                part.setPartFileName(this.getName() + "-" + this.getId() + 0);
+                part.setPartFileName(this.getName() + "-" + this.getId() +".part" + 0);
                 part.setCurrentSize(0);
                 part.setId(0);
                 parts.add(part);
@@ -360,6 +360,7 @@ public class Download {
                 this.downloadControl.getProgressbar().setString("...");
             } else if (isComplete()) {
                this.downloadControl.getProgressbar().setValue(100);
+               this.downloadControl.getProgressbar().setString("100%");
             }
 
         } else if (getType() == RESUMABLE || getType() == NON_RESUMEABLE) {
@@ -453,6 +454,7 @@ public class Download {
         setScheduled(false);
         this.running = false;
         needupdate = false;
+        setProgress(0);
         propChangeSupport.firePropertyChange("updateDownload", true, false);
 
     }

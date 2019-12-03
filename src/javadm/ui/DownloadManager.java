@@ -115,13 +115,13 @@ public class DownloadManager extends JFrame
                         model.addRow(download);
                     }
                     break;
-                    
+
                 case "Error":
                     if (download.getState().equals(Download.STERROR)) {
                         model.addRow(download);
                     }
                     break;
-                    
+
                 default:
                     break;
             }
@@ -231,31 +231,22 @@ public class DownloadManager extends JFrame
         boolean partok = db.isTableExists("downloadpart");
         if (!dataok || !settingok || !partok) {
 
-            if (!dataok) {
-                if (showChoice("Initialize new Data Table?\nClicking No will exit the app",
-                        "Data Table Error", JOptionPane.ERROR_MESSAGE) < 1) {
-                    newDataTable();
-                } else {
-                    System.exit(0);
-                }
-            }
-            if (!settingok) {
-                if (showChoice("Initalize new Setting Table?\nClicking No will exit the app",
-                        "Setting Table Error", JOptionPane.ERROR_MESSAGE) < 1) {
-                    newSettingTable();
-                } else {
-                    System.exit(0);
-                }
+            if (showChoice("Initialize new Download Table?\nClicking No will exit the app",
+                    "Data Table Error", JOptionPane.ERROR_MESSAGE) < 1) {
+                db.createNewDownloadTables();
+            } else {
+                System.exit(0);
             }
 
-            if (!partok) {
-                if (showChoice("Initalize new Part Table?\nClicking No will exit the app",
-                        "Setting Table Error", JOptionPane.ERROR_MESSAGE) < 1) {
-                    newSettingTable();
-                } else {
-                    System.exit(0);
-                }
-            }
+            Setting setting_new = new Setting();
+            setting_new.setAutoStart(false);
+            setting_new.setConnectionCount(1);
+            setting_new.setDirectory(System.getProperty("user.dir"));
+            setting_new.setMonitorMode(0);
+            setting_new.setSchedulerEnable(false);
+            setting_new.setUserAgent(Setting.DEF_UA);
+            db.createSetting(setting_new);
+
             //here after tables are repaired
             settingok = db.isTableExists("setting");
             dataok = db.isTableExists("downloaddata");
@@ -268,17 +259,9 @@ public class DownloadManager extends JFrame
                 System.exit(0);
             }
 
-        } else if (settingok && dataok) {
+        } else {
             setupDownloadmanager();
         }
-    }
-
-    private void newSettingTable() {
-        System.out.println("javadm.ui.DownloadManager.newSettingTable()");
-    }
-
-    private void newDataTable() {
-        System.out.println("javadm.ui.DownloadManager.newDataTable()");
     }
 
     public void setupDownloadmanager() {
