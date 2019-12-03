@@ -252,7 +252,7 @@ public class DownloadManager extends JFrame
             dataok = db.isTableExists("downloaddata");
             partok = db.isTableExists("downloadpart");
             if (settingok && dataok && partok) {
-                showInfo("Tables Initialized", "JDM", JOptionPane.INFORMATION_MESSAGE);
+                showInfo("Tables Initialized", "JDM - New Tables", JOptionPane.INFORMATION_MESSAGE);
                 setupDownloadmanager();
             } else {
                 showInfo("Error Initializing Tables\nJDM will Exit", "JDM Error", JOptionPane.ERROR_MESSAGE);

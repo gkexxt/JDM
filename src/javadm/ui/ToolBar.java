@@ -167,9 +167,9 @@ public class ToolBar extends JPanel
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    Desktop.getDesktop().browse(new URI("http://www.example.com"));
+                    Desktop.getDesktop().browse(new URI("https://github.com/gkexxt/JDM"));
                 } catch (Exception ex) {
-                    dm.showInfo(ex.getMessage() + "\n" + "Please vist : http://www.example.com", "Online Help", JOptionPane.INFORMATION_MESSAGE);
+                    dm.showInfo(ex.getMessage() + "\n" + "Please vist : https://github.com/gkexxt/JDM", "Online Help", JOptionPane.INFORMATION_MESSAGE);
                 }
 
             }
